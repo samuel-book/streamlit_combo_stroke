@@ -10,17 +10,53 @@ import streamlit as st
 
 # import streamlit_lifetime_stroke.pages.2_Interactive_demo
 import sys
+st.write(sys.path)
+
+
+from pathlib import Path
+
+
+# app1 = Path('./streamlit_lifetime_stroke/')
+# app1_pages = Path.joinpath(app1, 'pages')
+# app1_utils = Path.joinpath(app1, 'utilities_lifetime')
+# app1_demo = Path.joinpath(app1_pages, '2_Interactive_demo.py')
+
+# # sys.path.append(str(app1))
+# # sys.path.append(str(app1_pages))
+# # sys.path.append(str(app1_utils))
+# # # sys.path.append(app1_demo)
+# # sys.path.append('./streamlit_lifetime_stroke/')
+# # sys.path.append('./streamlit_lifetime_stroke/pages/')
+# # sys.path.append('./streamlit_lifetime_stroke/utilities/')
 # st.write(sys.path)
 
-sys.path.append('./streamlit_lifetime_stroke/')
-sys.path.append('./streamlit_lifetime_stroke/pages/')
-sys.path.append('./streamlit_lifetime_stroke/utilities/')
-# st.write(sys.path)
-
-# Change current working directory 
+# Change current working directory
 # import os
 # os.chdir('./streamlit_lifetime_stroke/')
 
 # import streamlit_lifetime_stroke.pages.2_Interactive_demo
+
 import importlib
-foo = importlib.import_module('./pages/2_Interactive_demo.py', package='2_Interactive_demo.py')
+# lifetime_module = importlib.import_module(
+    # # str(app1_demo),
+    # '/pages/2_Interactive_demo.py', #2_Interactive_demo',
+    # # '.streamlit_lifetime_stroke.pages.2_Interactive_demo',
+    # package='2_Interactive_demo'
+    # # package='lifetime_module'
+    # )
+# lifetime_module = importlib.import_module(
+#     # str(app1_demo),
+#     './streamlit_lifetime_stroke/pages/', #2_Interactive_demo',
+#     # '.streamlit_lifetime_stroke.pages.2_Interactive_demo',
+#     package='2_Interactive_demo.py'
+#     # package='lifetime_module'
+#     )
+utilities_lifetime = importlib.import_module('streamlit_lifetime_stroke.utilities_lifetime')
+utilities_lifetime.fixed_params = importlib.import_module('streamlit_lifetime_stroke.utilities_lifetime.fixed_params')
+# st.write(utilities_lifetime.fixed_params.colours_excel)
+# from utilities_lifetime.fixed_params import colours_excel
+# st.write(colours_excel)
+
+lifetime_module = importlib.import_module('streamlit_lifetime_stroke.pages.2_Interactive_demo', package='2_Interactive_demo.py')
+
+lifetime_module.main()
