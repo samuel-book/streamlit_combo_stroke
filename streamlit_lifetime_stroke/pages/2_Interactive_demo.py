@@ -13,15 +13,18 @@ named container_(something).py.
 # ----- Imports -----
 import streamlit as st
 
+# Add an extra bit to the path if we need to.
+# Try importing something as though we're running this from the same
+# directory as the landing page.
 try:
-    from utilities_lifetime.fixed_params import \
-        page_setup, perc_care_home_over70, perc_care_home_not_over70
+    from utilities_lifetime.fixed_params import page_setup
 except ModuleNotFoundError:
+    # If the import fails, add the landing page directory to path.
+    # Assume that the script is being run from the directory above
+    # the landing page directory, which is called
+    # streamlit_lifetime_stroke.
     import sys
     sys.path.append('./streamlit_lifetime_stroke/')
-    from utilities_lifetime.fixed_params import \
-        page_setup, perc_care_home_over70, perc_care_home_not_over70
-# st.write('ok', perc_care_home_over70)
 
 # Constants and custom functions:
 from utilities_lifetime.fixed_params import \
