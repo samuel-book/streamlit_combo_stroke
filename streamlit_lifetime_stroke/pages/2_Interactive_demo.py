@@ -21,26 +21,23 @@ except ModuleNotFoundError:
     sys.path.append('./streamlit_lifetime_stroke/')
     from utilities_lifetime.fixed_params import \
         page_setup, perc_care_home_over70, perc_care_home_not_over70
-st.write('ok', perc_care_home_over70)
+# st.write('ok', perc_care_home_over70)
 
-# # Constants and custom functions:
-# from utilities_lifetime.fixed_params import \
-#     page_setup, perc_care_home_over70, perc_care_home_not_over70
-# # from utilities_lifetime.inputs import write_text_from_file
-# # Container scripts (which will be called after the calculations):
-# import utilities_lifetime.container_inputs
-# import utilities_lifetime.container_mortality
-# import utilities_lifetime.container_qalys
-# import utilities_lifetime.container_resources
-# import utilities_lifetime.container_costeffectiveness
-# # The home of the main calculation functions:
-# import utilities_lifetime.main_calculations
+# Constants and custom functions:
+from utilities_lifetime.fixed_params import \
+    page_setup, perc_care_home_over70, perc_care_home_not_over70
+# from utilities_lifetime.inputs import write_text_from_file
+# Container scripts (which will be called after the calculations):
+import utilities_lifetime.container_inputs
+import utilities_lifetime.container_mortality
+import utilities_lifetime.container_qalys
+import utilities_lifetime.container_resources
+import utilities_lifetime.container_costeffectiveness
+# The home of the main calculation functions:
+import utilities_lifetime.main_calculations
 
 
 def main():
-
-    st.write(utilities_lifetime.fixed_params.colours_excel)
-
     # ###########################
     # ##### START OF SCRIPT #####
     # ###########################

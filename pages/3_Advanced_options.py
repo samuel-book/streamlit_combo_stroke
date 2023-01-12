@@ -10,7 +10,7 @@ import streamlit as st
 
 # import streamlit_lifetime_stroke.pages.2_Interactive_demo
 import sys
-st.write(sys.path)
+# st.write(sys.path)
 
 
 from pathlib import Path
@@ -52,7 +52,7 @@ import importlib
 #     # package='lifetime_module'
 #     )
 utilities_lifetime = importlib.import_module('streamlit_lifetime_stroke.utilities_lifetime')
-utilities_lifetime.fixed_params = importlib.import_module('streamlit_lifetime_stroke.utilities_lifetime.fixed_params')
+# utilities_lifetime.fixed_params = importlib.import_module('streamlit_lifetime_stroke.utilities_lifetime.fixed_params')
 # st.write(utilities_lifetime.fixed_params.colours_excel)
 # from utilities_lifetime.fixed_params import colours_excel
 # st.write(colours_excel)
