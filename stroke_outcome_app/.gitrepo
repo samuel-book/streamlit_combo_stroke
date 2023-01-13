@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:samuel-book/stroke_outcome_app.git
 	branch = main
-	commit = bc3e8819a95b366231c4cf0e44e0814d4130f359
-	parent = 496d3e9950ee03959fab3b7f90080ee7c1c36b2e
+	commit = 4bf7a440ccc7baddd1ef3106e3f4a9c0f9bc573b
+	parent = 266272e9e7f57abf78c4d9c622f7614f192217d3
 	method = merge
 	cmdver = 0.4.5
