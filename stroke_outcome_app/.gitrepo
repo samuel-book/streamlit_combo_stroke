@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:samuel-book/stroke_outcome_app.git
+	branch = main
+	commit = 98f8e8fa83970836a7bdc3b672640fa45ef2a9ec
+	parent = 336695aa7cb8630f60066bb6b51d567b6326fdad
+	method = merge
+	cmdver = 0.4.5

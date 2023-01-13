@@ -1,0 +1,17 @@
+# To be printed as markdown on the "Resources" page. 
+# ---------------------------------------------------------------------
+
+# Resources 
+
+## About the method 
+
+An online book containing all of the detail about the methods used in the stroke outcome modelling and their results is available [here](https://samuel-book.github.io/stroke_outcome/intro.html). 
+
+## About the app  
+
+The code behind this app is written in `python3` and the app itself is deployed using `streamlit`, which is a free service for hosting [python web apps](https://streamlit.io/). 
+
+## References
+
++ Wang, X. et al., 2020. Utility-Weighted Modified Rankin Scale Scores for the Assessment of Stroke Outcome. Stroke 51, 2411–2417. [https://doi.org/10.1161/STROKEAHA.119.028523](https://doi.org/10.1161/STROKEAHA.119.028523)
+
