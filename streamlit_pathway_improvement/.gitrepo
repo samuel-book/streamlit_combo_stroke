@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:samuel-book/streamlit_pathway_improvement.git
+	branch = main
+	commit = dd798e8886b10bae22abc396913792c8204a1e0d
+	parent = fe2b4b5c2bab598f66b986ace9d5e1513b02e7d6
+	method = merge
+	cmdver = 0.4.5
