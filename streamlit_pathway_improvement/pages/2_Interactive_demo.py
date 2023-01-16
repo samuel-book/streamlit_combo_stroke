@@ -44,7 +44,7 @@ st.markdown('# Pathway improvement')
 # ###########################
 
 df = pd.read_csv(
-    'utilities_data/scenario_results.csv',
+    'data_pathway/scenario_results.csv',
     # index_col=index_col,
     header='infer'
     )
