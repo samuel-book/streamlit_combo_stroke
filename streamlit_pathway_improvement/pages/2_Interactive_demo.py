@@ -24,6 +24,14 @@ except ModuleNotFoundError:
     import sys
     sys.path.append('./streamlit_pathway_improvement/')
 
+# For importing data:
+try:
+    stroke_teams_test = pd.read_csv('./data_pathway/scenario_results.csv')
+    dir = './'
+except FileNotFoundError:
+    dir = 'streamlit_pathway_improvement/'
+
+
 # Custom functions:
 from utilities_pathway.fixed_params import page_setup
 from utilities_pathway.inputs import \
@@ -44,7 +52,7 @@ st.markdown('# Pathway improvement')
 # ###########################
 
 df = pd.read_csv(
-    'data_pathway/scenario_results.csv',
+    dir + 'data_pathway/scenario_results.csv',
     # index_col=index_col,
     header='infer'
     )
