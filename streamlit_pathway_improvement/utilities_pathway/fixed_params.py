@@ -11,3 +11,7 @@ def page_setup():
         # layout='wide'
         )
     # n.b. this can be set separately for each separate page if you like.
+
+# How to label non-highlighted teams:
+plain_str = 'Non-benchmark team'
+bench_str = 'Benchmark team: \U00002605'

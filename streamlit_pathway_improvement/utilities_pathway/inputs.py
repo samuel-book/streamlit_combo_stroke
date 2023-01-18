@@ -1,5 +1,14 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+
+
+# For importing data:
+try:
+    stroke_teams_test = pd.read_csv('./data_pathway/scenario_results.csv')
+    dir = './'
+except FileNotFoundError:
+    dir = 'streamlit_pathway_improvement/'
 
 
 def write_text_from_file(filename, head_lines_to_skip=0):
@@ -20,20 +29,179 @@ def write_text_from_file(filename, head_lines_to_skip=0):
     st.markdown(f"""{text_to_print}""")
 
 
-def import_animal_data(filename, index_col=None, header='infer'):
+def import_stroke_data():
     """
-    Import an Animals dataframe from file.
 
-    This example is simple, but for a more complicated case
-    it can be easier to have a separate import function for each
-    data file type. For example, perhaps the data file contains
-    data for many different scenarios and we want to extract
-    the rows or columns for just one scenario.
+    --- Columns in the imported data: ---
+    Baseline_good_outcomes_(median)
+    Baseline_good_outcomes_per_1000_patients_(low_5%)
+    Baseline_good_outcomes_per_1000_patients_(high_95%)
+    Baseline_good_outcomes_per_1000_patients_(mean)
+    Baseline_good_outcomes_per_1000_patients_(stdev)
+    Baseline_good_outcomes_per_1000_patients_(95ci)
+    Percent_Thrombolysis_(median%)
+    Percent_Thrombolysis_(low_5%)
+    Percent_Thrombolysis_(high_95%)
+    Percent_Thrombolysis_(mean)
+    Percent_Thrombolysis_(stdev)
+    Percent_Thrombolysis_(95ci)
+    Additional_good_outcomes_per_1000_patients_(median)
+    Additional_good_outcomes_per_1000_patients_(low_5%)
+    Additional_good_outcomes_per_1000_patients_(high_95%)
+    Additional_good_outcomes_per_1000_patients_(mean)
+    Additional_good_outcomes_per_1000_patients_(stdev)
+    Additional_good_outcomes_per_1000_patients_(95ci)
+    Onset_to_needle_(mean)
+    calibration
+    scenario
+    stroke_team
     """
-    # Load mRS distributions from file:
     df = pd.read_csv(
-        filename,
-        index_col=index_col,
-        header=header)
+        dir + 'data_pathway/scenario_results.csv',
+        # index_col=index_col,
+        header='infer'
+        )
 
+    # Pull out the list of stroke teams:
+    stroke_team_list = sorted(set(df['stroke_team'].to_numpy()))
+
+    # Remove "same patient characteristics" scenario:
+    df = df[
+        df['scenario'].str.contains('same_patient_characteristics') == False
+        ]
+    # The final data contains these scenarios:
+    scenarios = [
+        'base',
+        'speed',
+        'onset',
+        'benchmark',
+        'speed_onset',
+        'speed_benchmark',
+        'onset_benchmark',
+        'speed_onset_benchmark',
+        # 'same_patient_characteristics'
+    ]
+
+    # Import benchmark info.
+    benchmark_df = import_benchmark_data()
+    # Make list of benchmark rank:
+    # (original data is sorted alphabetically by stroke team)
+    benchmark_rank_list = \
+        benchmark_df.sort_values('stroke_team')['Rank'].to_numpy()
+    # Convert this to a column for the dataframe:
+    benchmark_col = np.tile(benchmark_rank_list, len(scenarios))
+    # Add to the dataframe:
+    df['Benchmark_rank'] = benchmark_col
+
+
+    # Reduce this dataframe to just the important features:
+    key_features = [
+        'Baseline_good_outcomes_per_1000_patients_(mean)',
+        'Percent_Thrombolysis_(mean)',
+        'Additional_good_outcomes_per_1000_patients_(mean)',
+        'scenario',
+        'stroke_team',
+        'Benchmark_rank'
+    ]
+    df = df[key_features].copy()
+
+
+    # Add some new columns.
+    # Data for the new columns will be put in these lists.
+    # Initialise as all zero for the difference between base and base.
+    diff_perc_thromb = [0] * len(stroke_team_list)
+    diff_additional_good = [0] * len(stroke_team_list)
+    # Define some bits to stop the following lines being really long:
+    d = df['scenario'] == 'base'
+    p_str = 'Percent_Thrombolysis_(mean)'
+    a_str = 'Additional_good_outcomes_per_1000_patients_(mean)'
+    for scenario in scenarios[1:]:
+        # Find a shorter dataframe containing just this scenario:
+        df_here = df[df['scenario'] == scenario]
+        # Find lists of the differences from base:
+        diff_p = df_here[p_str].values - df[p_str][d].values
+        diff_a = df_here[a_str].values - df[a_str][d].values
+        # Add to the existing lists:
+        diff_perc_thromb = np.concatenate((diff_perc_thromb, diff_p))
+        diff_additional_good = np.concatenate((diff_additional_good, diff_a))
+    # Add these new columns to the dataframe:
+    df[p_str + '_diff'] = diff_perc_thromb
+    df[a_str + '_diff'] = diff_additional_good
+
+    return df, stroke_team_list, scenarios
+
+
+def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
+    # Add sorted base rank:
+    # Make a new "Index" column that ranks the teams alphabetically
+    # (or default input order). Each team gets the same index value
+    # across all of thes different scenarios.
+    index_original_col = np.tile(np.arange(n_teams), n_scenarios)
+    df['Index'] = index_original_col
+    # Sort the values by the mean percent of thrombolysis column
+    # in the "base" scenario.
+    # Extract the values for just this scenario:
+    df_base = df[df['scenario'] == scenario_for_rank].copy()
+    # Sort with largest value at the top:
+    df_sorted_rank = df_base.sort_values(
+        'Percent_Thrombolysis_(mean)', ascending=False)
+    # Add rank, largest value = 1, smallest = 132 (or number of teams).
+    df_sorted_rank['Rank'] = np.arange(1, n_teams + 1)
+    # Now re-sort back to the starting order...
+    df_sorted_rank = df_sorted_rank.sort_values('Index')
+    # ... and these are the ranks for all of the teams:
+    df_sorted_rank_index = df_sorted_rank['Rank'].values
+    # Copy this multiple times, one set for each scenario:
+    sorted_rank_col = np.tile(df_sorted_rank_index, n_scenarios)
+    # Add this column to the main data frame:
+
+    df['Sorted rank'] = sorted_rank_col
     return df
+
+
+def inputs_for_bar_chart(scenarios):
+    scenario = st.radio(
+        'Show difference due to:',
+        options=scenarios,
+        horizontal=True
+        )
+
+    scenario_for_rank = st.radio(
+        'Sort values by this:',
+        options=['Base probability', 'Final probability'],
+        horizontal=True
+        )
+
+    if scenario_for_rank == 'Base probability':
+        scenario_for_rank = 'base'
+    else:
+        scenario_for_rank = scenario
+    return scenario, scenario_for_rank
+
+
+def import_benchmark_data():
+    all_teams_and_probs = pd.read_csv(
+        dir + 'data_pathway/hospital_10k_thrombolysis.csv')
+    # Add an index row to rank the teams:
+    all_teams_and_probs['Rank'] = \
+        np.arange(1, len(all_teams_and_probs['stroke_team'])+1)
+    return all_teams_and_probs
+
+
+def highlighted_teams(stroke_teams_list):
+    try:
+        # If we've already selected highlighted teams using the
+        # clickable plotly graphs, then load that list:
+        existing_teams = st.session_state['highlighted_teams_with_click']
+    except KeyError:
+        # Make a dummy list so streamlit behaves as normal:
+        existing_teams = []
+
+    highlighted_teams_input = st.multiselect(
+        'Stroke teams to highlight:',
+        stroke_teams_list,
+        # help='Pick up to 9 before the colours repeat.',
+        key='highlighted_teams',
+        default=existing_teams
+    )
+    return highlighted_teams_input
