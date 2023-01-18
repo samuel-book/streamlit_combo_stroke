@@ -15,3 +15,17 @@ def page_setup():
 # How to label non-highlighted teams:
 plain_str = 'Non-benchmark team'
 bench_str = 'Benchmark team: \U00002605'
+
+scenarios_dict = {
+    'Base probability':'base',
+    'Speed':'speed',
+    'Onset':'onset',
+    'Benchmark':'benchmark',
+    'Speed + Onset':'speed_onset',
+    'Speed + Benchmark':'speed_benchmark',
+    'Onset + Benchmark':'onset_benchmark',
+    'Speed + Onset + Benchmark':'speed_onset_benchmark'
+    # 'same_patient_characteristics'
+}
+scenarios_dict2 = dict(zip(scenarios_dict.values(), scenarios_dict.keys()))
+scenarios = list(scenarios_dict.values())

@@ -10,6 +10,9 @@ try:
 except FileNotFoundError:
     dir = 'streamlit_pathway_improvement/'
 
+from utilities_pathway.fixed_params import \
+    plain_str, bench_str, scenarios, scenarios_dict
+
 
 def write_text_from_file(filename, head_lines_to_skip=0):
     """
@@ -29,7 +32,27 @@ def write_text_from_file(filename, head_lines_to_skip=0):
     st.markdown(f"""{text_to_print}""")
 
 
-def import_stroke_data():
+def import_lists_from_data():
+    """
+    """
+    df = pd.read_csv(
+        dir + 'data_pathway/scenario_results.csv',
+        # index_col=index_col,
+        header='infer'
+        )
+
+    # Pull out the list of stroke teams:
+    stroke_teams_list = sorted(set(df['stroke_team'].to_numpy()))
+
+    # # Remove "same patient characteristics" scenario:
+    # df = df[
+    #     df['scenario'].str.contains('same_patient_characteristics') == False
+    #     ]
+
+    return stroke_teams_list  #, scenarios
+
+
+def import_stroke_data(stroke_teams_list, scenarios, highlighted_teams_input):
     """
 
     --- Columns in the imported data: ---
@@ -62,25 +85,10 @@ def import_stroke_data():
         header='infer'
         )
 
-    # Pull out the list of stroke teams:
-    stroke_team_list = sorted(set(df['stroke_team'].to_numpy()))
-
     # Remove "same patient characteristics" scenario:
     df = df[
         df['scenario'].str.contains('same_patient_characteristics') == False
         ]
-    # The final data contains these scenarios:
-    scenarios = [
-        'base',
-        'speed',
-        'onset',
-        'benchmark',
-        'speed_onset',
-        'speed_benchmark',
-        'onset_benchmark',
-        'speed_onset_benchmark',
-        # 'same_patient_characteristics'
-    ]
 
     # Import benchmark info.
     benchmark_df = import_benchmark_data()
@@ -88,11 +96,39 @@ def import_stroke_data():
     # (original data is sorted alphabetically by stroke team)
     benchmark_rank_list = \
         benchmark_df.sort_values('stroke_team')['Rank'].to_numpy()
+    # Indices of benchmark data at the moment:
+    inds_benchmark = np.where(benchmark_rank_list <= 30)[0]
     # Convert this to a column for the dataframe:
     benchmark_col = np.tile(benchmark_rank_list, len(scenarios))
     # Add to the dataframe:
     df['Benchmark_rank'] = benchmark_col
 
+    # Update the "Highlighted teams" column:
+    # Label benchmarks:
+    # table[np.where(table[:, 7] <= 30), 6] = 'Benchmark'
+    highlighted_teams_list = np.array(
+        ['-' for team in stroke_teams_list], dtype=object)
+    # Combo highlighted and benchmark:
+    hb_teams_list = np.array(
+        [plain_str for team in stroke_teams_list], dtype=object)
+    hb_teams_list[inds_benchmark] = bench_str
+    # Put in selected Highlighteds (overwrites benchmarks):
+    hb_teams_input = [plain_str, bench_str]
+    for team in highlighted_teams_input:
+        ind_t = np.argwhere(np.array(stroke_teams_list) == team)[0][0]
+        # inds_highlighted.append(ind_t)
+        highlighted_teams_list[ind_t] = team
+        if ind_t in inds_benchmark:
+            team = team + ' \U00002605'
+        hb_teams_list[ind_t] = team
+        hb_teams_input.append(team)
+
+    # Add the short list of names to the session_state so we can
+    # retrieve it immediately when the script is re-run:
+    st.session_state['hb_teams_input'] = hb_teams_input
+    # Add the full list to the dataframe:
+    hb_teams_col = np.tile(hb_teams_list, len(scenarios))
+    df['HB_team'] = hb_teams_col
 
     # Reduce this dataframe to just the important features:
     key_features = [
@@ -101,16 +137,16 @@ def import_stroke_data():
         'Additional_good_outcomes_per_1000_patients_(mean)',
         'scenario',
         'stroke_team',
-        'Benchmark_rank'
+        'Benchmark_rank',
+        'HB_team'
     ]
     df = df[key_features].copy()
-
 
     # Add some new columns.
     # Data for the new columns will be put in these lists.
     # Initialise as all zero for the difference between base and base.
-    diff_perc_thromb = [0] * len(stroke_team_list)
-    diff_additional_good = [0] * len(stroke_team_list)
+    diff_perc_thromb = [0] * len(stroke_teams_list)
+    diff_additional_good = [0] * len(stroke_teams_list)
     # Define some bits to stop the following lines being really long:
     d = df['scenario'] == 'base'
     p_str = 'Percent_Thrombolysis_(mean)'
@@ -128,14 +164,21 @@ def import_stroke_data():
     df[p_str + '_diff'] = diff_perc_thromb
     df[a_str + '_diff'] = diff_additional_good
 
-    return df, stroke_team_list, scenarios
+
+    return df
 
 
 def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
+    col_to_sort = 'Percent_Thrombolysis_(mean)'
+    scenario_for_name = scenario_for_rank
+    if '!' in scenario_for_rank:
+        scenario_for_rank = '!'.join(scenario_for_rank.split('!')[:-1])
+        col_to_sort += '_diff'
+
     # Add sorted base rank:
     # Make a new "Index" column that ranks the teams alphabetically
     # (or default input order). Each team gets the same index value
-    # across all of thes different scenarios.
+    # across all of these different scenarios.
     index_original_col = np.tile(np.arange(n_teams), n_scenarios)
     df['Index'] = index_original_col
     # Sort the values by the mean percent of thrombolysis column
@@ -143,8 +186,7 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
     # Extract the values for just this scenario:
     df_base = df[df['scenario'] == scenario_for_rank].copy()
     # Sort with largest value at the top:
-    df_sorted_rank = df_base.sort_values(
-        'Percent_Thrombolysis_(mean)', ascending=False)
+    df_sorted_rank = df_base.sort_values(col_to_sort, ascending=False)
     # Add rank, largest value = 1, smallest = 132 (or number of teams).
     df_sorted_rank['Rank'] = np.arange(1, n_teams + 1)
     # Now re-sort back to the starting order...
@@ -155,27 +197,31 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
     sorted_rank_col = np.tile(df_sorted_rank_index, n_scenarios)
     # Add this column to the main data frame:
 
-    df['Sorted rank'] = sorted_rank_col
+    df['Sorted_rank!' + scenario_for_name] = sorted_rank_col
     return df
 
 
-def inputs_for_bar_chart(scenarios):
+def inputs_for_bar_chart():
+
     scenario = st.radio(
         'Show difference due to:',
-        options=scenarios,
+        options=scenarios_dict.keys(),
         horizontal=True
         )
+    scenario = scenarios_dict[scenario]
 
     scenario_for_rank = st.radio(
         'Sort values by this:',
-        options=['Base probability', 'Final probability'],
+        options=['Base probability', 'Final probability', f'Effect of scenario'],#{scenario}'],
         horizontal=True
         )
 
     if scenario_for_rank == 'Base probability':
         scenario_for_rank = 'base'
-    else:
+    elif scenario_for_rank == 'Final probability':
         scenario_for_rank = scenario
+    else:
+        scenario_for_rank = scenario + '!diff'
     return scenario, scenario_for_rank
 
 
