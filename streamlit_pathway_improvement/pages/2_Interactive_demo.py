@@ -53,6 +53,13 @@ def main():
     container_highlighted_input = st.container()
 
     tabs_results = st.tabs(['All teams', 'Highlighted teams'])
+    with tabs_results[0]:
+        container_hist = st.container()
+        container_violin = st.container()
+        container_sort_input = st.container()
+        container_bar = st.container()
+
+
 
 
     # ###########################
@@ -63,7 +70,7 @@ def main():
         import_lists_from_data()
 
     # User inputs:
-    with tabs_results[0]:
+    with container_sort_input:
         scenario, scenario_for_rank = utilities_pathway.inputs.\
             inputs_for_bar_chart()
 
@@ -72,7 +79,9 @@ def main():
         # with container_bar_chart:
         st.markdown(''.join([
             'To highlight stroke teams on the following charts, ',
-            'select them in this box or click on them in the charts.'
+            'select them in this box. ',
+            '__TO DO:__ make charts clickable.'
+            # ' or click on them in the charts.'
         ]))
         # Pick teams to highlight on the bar chart:
         highlighted_teams_input = utilities_pathway.inputs.\
@@ -105,7 +114,17 @@ def main():
     # ######### RESULTS #########
     # ###########################
 
-    with tabs_results[0]:
+    with container_hist:
+        # Histogram
+        utilities_pathway.plot_hist.plot_hist(
+            df,
+            ['base', scenario],
+            highlighted_teams_input,
+            highlighted_colours,
+            len(stroke_teams_list)
+        )
+
+    with container_bar:
         # Make a bar chart of the mean values:
         utilities_pathway.plot_bars.plot_bars_sorted_rank(
             df,
@@ -119,7 +138,7 @@ def main():
         for team in highlighted_teams_input:
             utilities_pathway.plot_bars.plot_bars_for_single_team(df, team)
 
-    with tabs_results[0]:
+    with container_violin:
         # Violin plot:
         utilities_pathway.plot_violins.plot_violins(
             df,
@@ -128,17 +147,6 @@ def main():
             highlighted_colours,
             len(stroke_teams_list)
             )
-
-    with tabs_results[0]:
-        # Histogram
-        utilities_pathway.plot_hist.plot_hist(
-            df,
-            ['base', scenario],
-            highlighted_teams_input,
-            highlighted_colours,
-            len(stroke_teams_list)
-        )
-
 
     # ----- The end! -----
 

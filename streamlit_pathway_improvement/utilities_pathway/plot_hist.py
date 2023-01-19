@@ -95,7 +95,23 @@ def plot_hist(
     fig.update_yaxes(range=[0, 33], row=1, col=2)
     fig.update_xaxes(range=[0, 34], row=1, col=2)
 
+    # Make hover text show all traces in one label:
     fig.update_layout(hovermode='x unified')
+    # Don't shorten the names of the traces:
+    fig.update_layout(hoverlabel=dict(namelength=-1))
 
+
+    # Reduce size of figure by adjusting margins:
+    fig.update_layout(
+        margin=dict(    
+            l=0,
+            r=0,
+            b=0,
+            t=40,
+            pad=0
+        ),
+        height=350
+        )
+        
     # Write to streamlit:
     st.plotly_chart(fig, use_container_width=True)
