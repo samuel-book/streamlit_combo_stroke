@@ -116,7 +116,6 @@ def main():
     with tabs_results[1]:
         # Bar chart for individual team:
         for team in highlighted_teams_input:
-            st.markdown('__Team '+team+'__')
             utilities_pathway.plot_bars.plot_bars_for_single_team(df, team)
 
     with tabs_results[0]:

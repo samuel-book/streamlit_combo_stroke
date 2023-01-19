@@ -17,7 +17,7 @@ plain_str = 'Non-benchmark team'
 bench_str = 'Benchmark team: \U00002605'
 
 scenarios_dict = {
-    'Base probability':'base',
+    'Base':'base',
     'Speed':'speed',
     'Onset':'onset',
     'Benchmark':'benchmark',
