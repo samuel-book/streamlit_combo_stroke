@@ -36,6 +36,7 @@ from utilities_pathway.fixed_params import \
 import utilities_pathway.inputs
 import utilities_pathway.plot_bars
 import utilities_pathway.plot_violins
+import utilities_pathway.plot_hist
 from utilities_pathway.plot_utils import \
     remove_old_colours_for_highlights, choose_colours_for_highlights
 
@@ -127,6 +128,16 @@ def main():
             highlighted_colours,
             len(stroke_teams_list)
             )
+
+    with tabs_results[0]:
+        # Histogram
+        utilities_pathway.plot_hist.plot_hist(
+            df,
+            ['base', scenario],
+            highlighted_teams_input,
+            highlighted_colours,
+            len(stroke_teams_list)
+        )
 
 
     # ----- The end! -----

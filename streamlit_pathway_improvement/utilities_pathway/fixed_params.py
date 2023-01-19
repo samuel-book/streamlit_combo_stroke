@@ -29,3 +29,11 @@ scenarios_dict = {
 }
 scenarios_dict2 = dict(zip(scenarios_dict.values(), scenarios_dict.keys()))
 scenarios = list(scenarios_dict.values())
+
+# Colours:
+# plotly_colours = px.colors.qualitative.Plotly
+# Colours as of 16th January 2023:
+plotly_colours = [
+    "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
+    "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"
+    ]

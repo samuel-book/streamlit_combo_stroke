@@ -203,22 +203,27 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
 
 def inputs_for_bar_chart():
 
-    scenario = st.radio(
-        'Show difference due to:',
-        options=scenarios_dict.keys(),
-        horizontal=True
-        )
+    with st.sidebar:
+        scenario = st.radio(
+            'Show difference due to:',
+            options=scenarios_dict.keys(),
+            # horizontal=True
+            )
     scenario = scenarios_dict[scenario]
 
     scenario_for_rank = st.radio(
         'Sort values by this:',
-        options=['Base probability', 'Final probability', f'Effect of scenario'],#{scenario}'],
+        options=[
+            'Base value',
+            'Final value',
+            f'Effect of scenario'
+            ],#{scenario}'],
         horizontal=True
         )
 
-    if scenario_for_rank == 'Base probability':
+    if scenario_for_rank == 'Base value':
         scenario_for_rank = 'base'
-    elif scenario_for_rank == 'Final probability':
+    elif scenario_for_rank == 'Final value':
         scenario_for_rank = scenario
     else:
         scenario_for_rank = scenario + '!diff'
