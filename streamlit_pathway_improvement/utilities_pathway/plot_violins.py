@@ -99,12 +99,13 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
             f'Increase with {s_label}',
             f'Decrease with {s_label}'
             ]
+        sizes = [6, 10, 10]
         for s in range(3):
             fig.add_trace(go.Scatter(
                 x=[-100],
                 y=[-100],
                 mode='markers',
-                marker=dict(color='white', symbol=symbols[s],
+                marker=dict(color='white', symbol=symbols[s], size=sizes[s],
                     line=dict(color='black', width=1.0)),
                 name=names[s],
                 legendgroup='1',
