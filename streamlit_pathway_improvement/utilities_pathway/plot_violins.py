@@ -243,7 +243,7 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
         '%{customdata[1]}: %{customdata[3]:.2f}%' +
         '<br>'
     )
-    if len(prob_labels) > 1:
+    if len(scenarios) > 1:
         ht2 += (
         '%{customdata[4]}: %{customdata[6]:.2f}%'
         )
