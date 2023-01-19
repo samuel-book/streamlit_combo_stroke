@@ -118,6 +118,7 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
         prob_labels=[]
         rank_scenarios=[]
         symbols = ['circle']
+        sizes = [6]  # Marker sizes
 
         for x, scenario in enumerate(scenarios):
 
@@ -147,6 +148,7 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
                     symbols.append('triangle-up')
                 else:
                     symbols.append('triangle-down')
+                sizes.append(10)
 
 
         # Scatter on first violin:
@@ -178,6 +180,7 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
             mode='markers+lines',
             marker=dict(color=highlighted_colours[hb_team],
                         symbol=symbols,
+                        size=sizes,
                         line=dict(color='black', width=1.0)),
             # showlegend=showlegend_scatter,
             legendgroup='2',
@@ -202,6 +205,7 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
                     mode='markers',
                     marker=dict(color=highlighted_colours[hb_team],
                                 symbol=symbols[s],
+                                size=sizes[s],
                                 line=dict(color='black', width=1.0)),
                     showlegend=False,
                     customdata=custom_data_here
