@@ -136,6 +136,531 @@ def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
     st.plotly_chart(fig, use_container_width=True)
 
 
+
+def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
+    # Use this string for labels:
+    scenario_str = scenarios_dict2[scenario]
+    # List of all the separate traces:
+    hb_teams_input = st.session_state['hb_teams_input']
+    highlighted_colours = st.session_state['highlighted_teams_colours']
+
+    # change_colour = 'rgba(255,255,255,0.8)'
+
+    fig = go.Figure()
+    for n, name in enumerate(hb_teams_input):
+        df = df_all[df_all['HB_team'] == name]
+
+        colour = highlighted_colours[name]
+
+        # Percentage thrombolysis use:
+        custom_data = np.stack((
+            # Name of the stroke team:
+            df['stroke_team'][df['scenario'] == 'base'],
+            # Effect of scenario:
+            # (round this now so we can use the +/- sign format later)
+            np.round(
+                df['Percent_Thrombolysis_(mean)_diff']\
+                    [df['scenario'] == scenario], 1),
+            # Base prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            # Final prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            ), axis=-1)
+
+
+        # Setup assuming scenario == 'base':
+        x_for_scatter = df['Sorted_rank!'+scenario_for_rank][df['scenario'] == 'base']
+        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        mode = 'markers'
+        symbols = 'circle'
+        leg_str_full = 'dummy'  # Is this needed?
+        size = 4
+
+        if scenario != 'base':
+            y_scenario = (
+                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+            )
+            # The differences are already in the dataframe:
+            y_diffs = (
+                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+            )
+
+            # Base symbols:
+            symbols = ['circle'] * len(x_for_scatter)
+            # Scenario symbols: 
+            symbols_scen = np.full(len(symbols), 'circle', dtype='U20')
+            symbols_scen[np.where(y_diffs >= 0)] = 'triangle-up'
+            symbols_scen[np.where(y_diffs < 0)] = 'triangle-down'
+            symbols = np.array([symbols, symbols_scen])
+
+            x_for_scatter = np.array([x_for_scatter, x_for_scatter])
+            y_for_scatter = np.array([y_for_scatter, y_scenario])
+
+            mode = 'markers+lines'
+
+
+            leg_str = scenario_str.replace('+ ', '+<br>')
+            leg_str_full = f'Difference due to<br>"{leg_str}"'
+
+
+        if scenario == 'base':
+            fig.add_trace(go.Scatter(
+                x=x_for_scatter,
+                y=y_for_scatter,
+                name=name,
+                mode=mode,
+                # width=1,
+                marker=dict(color=colour, symbol=symbols, size=size),
+                    # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+                customdata=custom_data
+            ))
+        else:
+            for t, team in enumerate(range(x_for_scatter.shape[1])):
+                showlegend = False if t > 0 else True
+
+                # st.write(custom_data)
+                custom_data_here = custom_data[t, :]
+                # st.text(custom_data_here)
+                custom_data_here = np.transpose(np.stack((custom_data_here, custom_data_here), axis=-1))
+                # st.text(custom_data_here)
+                # st.text(custom_data_here[:, 0])
+
+                fig.add_trace(go.Scatter(
+                    x=x_for_scatter[:, t],
+                    y=y_for_scatter[:, t],
+                    name=name,
+                    mode=mode,
+                    # width=1,
+                    marker=dict(color=colour, symbol=symbols[:, t], size=[4, 10]),
+                        # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+                    customdata=custom_data_here,
+                    showlegend=showlegend
+                ))
+
+
+
+    # Update hover label info *before* adding traces that have
+    # hoverinfo='skip', otherwise this step will overwrite them.
+    # Change the hover format
+    fig.update_layout(hovermode='closest')
+    # # Reduce hover distance to prevent multiple labels popping
+    # # up for each x:
+    # fig.update_layout(hoverdistance=1)
+    # ^ this isn't good enough - still get three labels
+
+    # Define the hover template:
+    if scenario == 'base':
+        # No change bars here.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+    else:
+        # Add messages to reflect the change bars.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            f'Effect of {scenario}: ' + '%{customdata[1]:+}%' +
+            '<br>' +
+            f'Final probability: ' + '%{customdata[3]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+
+    # Update the hover template only for the bars that aren't
+    # marking the changes, i.e. the bars that have the name
+    # in the legend that we defined earlier.
+    fig.for_each_trace(
+        lambda trace: trace.update(hovertemplate=ht)
+        # if trace.marker.color != change_colour
+        if trace.name != leg_str_full
+        else (),
+    )
+
+    fig.update_layout(
+        title=f'{scenario_str}',
+        xaxis_title=f'Rank sorted by {scenario_for_rank}',
+        yaxis_title='Percent Thrombolysis (mean)',
+        legend_title='Highlighted team'
+    )
+
+    # Format legend so newest teams appear at bottom:
+    fig.update_layout(legend=dict(traceorder='normal'))
+
+    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_xaxes(range=[
+        min(df_all['Sorted_rank!'+scenario_for_rank])-1,
+        max(df_all['Sorted_rank!'+scenario_for_rank])+1
+        ])
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+
+def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='all'):
+    # Use this string for labels:
+    scenario_str = scenarios_dict2[scenario]
+    # List of all the separate traces:
+    hb_teams_input = st.session_state['hb_teams_input']
+    highlighted_colours = st.session_state['highlighted_teams_colours']
+
+    # change_colour = 'rgba(255,255,255,0.8)'
+
+    fig = go.Figure()
+    for n, name in enumerate(hb_teams_input):
+        df = df_all[df_all['HB_team'] == name]
+
+        colour = highlighted_colours[name]
+
+        # Percentage thrombolysis use:
+        custom_data = np.stack((
+            # Name of the stroke team:
+            df['stroke_team'][df['scenario'] == 'base'],
+            # Effect of scenario:
+            # (round this now so we can use the +/- sign format later)
+            np.round(
+                df['Percent_Thrombolysis_(mean)_diff']\
+                    [df['scenario'] == scenario], 1),
+            # Base prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            # Final prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            ), axis=-1)
+
+
+        # Setup assuming scenario == 'base':
+        x_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        mode = 'markers'
+        symbols = 'circle'
+        leg_str_full = 'dummy'  # Is this needed?
+        size = 4
+
+        if scenario != 'base':
+            y_scenario = (
+                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+            )
+            # The differences are already in the dataframe:
+            y_diffs = (
+                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+            )
+
+            # Base symbols:
+            symbols = ['circle'] * len(x_for_scatter)
+            # Scenario symbols: 
+            symbols_scen = np.full(len(symbols), 'circle', dtype='U20')
+            symbols_scen[np.where(y_diffs >= 0)] = 'triangle-up'
+            symbols_scen[np.where(y_diffs < 0)] = 'triangle-down'
+            symbols = np.array([symbols, symbols_scen])
+
+            x_for_scatter = np.array([x_for_scatter, x_for_scatter])
+            y_for_scatter = np.array([y_for_scatter, y_scenario])
+
+            mode = 'markers+lines'
+
+
+            leg_str = scenario_str.replace('+ ', '+<br>')
+            leg_str_full = f'Difference due to<br>"{leg_str}"'
+
+
+        if scenario == 'base':
+            fig.add_trace(go.Scatter(
+                x=x_for_scatter,
+                y=y_for_scatter,
+                name=name,
+                mode=mode,
+                # width=1,
+                marker=dict(color=colour, symbol=symbols, size=size),
+                    # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+                customdata=custom_data
+            ))
+        else:
+            for t, team in enumerate(range(x_for_scatter.shape[1])):
+                showlegend = False if t > 0 else True
+
+                # st.write(custom_data)
+                custom_data_here = custom_data[t, :]
+                # st.text(custom_data_here)
+                custom_data_here = np.transpose(np.stack((custom_data_here, custom_data_here), axis=-1))
+                # st.text(custom_data_here)
+                # st.text(custom_data_here[:, 0])
+
+                fig.add_trace(go.Scatter(
+                    x=x_for_scatter[:, t],
+                    y=y_for_scatter[:, t],
+                    name=name,
+                    mode=mode,
+                    # width=1,
+                    marker=dict(color=colour, symbol=symbols[:, t], size=[4, 10]),
+                        # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+                    customdata=custom_data_here,
+                    showlegend=showlegend
+                ))
+
+
+
+    # Update hover label info *before* adding traces that have
+    # hoverinfo='skip', otherwise this step will overwrite them.
+    # Change the hover format
+    fig.update_layout(hovermode='closest')
+    # # Reduce hover distance to prevent multiple labels popping
+    # # up for each x:
+    # fig.update_layout(hoverdistance=1)
+    # ^ this isn't good enough - still get three labels
+
+    # Define the hover template:
+    if scenario == 'base':
+        # No change bars here.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+    else:
+        # Add messages to reflect the change bars.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            f'Effect of {scenario}: ' + '%{customdata[1]:+}%' +
+            '<br>' +
+            f'Final probability: ' + '%{customdata[3]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+
+    # Update the hover template only for the bars that aren't
+    # marking the changes, i.e. the bars that have the name
+    # in the legend that we defined earlier.
+    fig.for_each_trace(
+        lambda trace: trace.update(hovertemplate=ht)
+        # if trace.marker.color != change_colour
+        if trace.name != leg_str_full
+        else (),
+    )
+
+    fig.update_layout(
+        title=f'{scenario_str}',
+        xaxis_title='Thrombolysis use (%)',
+        yaxis_title='Thrombolysis use (%)',
+        legend_title='Highlighted team'
+    )
+
+    # Format legend so newest teams appear at bottom:
+    fig.update_layout(legend=dict(traceorder='normal'))
+
+    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_xaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05],
+                     constrain='domain')  # For aspect ratio.)
+
+    # Set aspect ratio:
+    fig.update_yaxes(
+        scaleanchor='x',
+        scaleratio=1.0,
+        constrain='domain'
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+
+def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
+    # Use this string for labels:
+    scenario_str = scenarios_dict2[scenario]
+    # List of all the separate traces:
+    hb_teams_input = st.session_state['hb_teams_input']
+    highlighted_colours = st.session_state['highlighted_teams_colours']
+
+    # change_colour = 'rgba(255,255,255,0.8)'
+
+    fig = go.Figure()
+    for n, name in enumerate(hb_teams_input):
+        df = df_all[df_all['HB_team'] == name]
+
+        colour = highlighted_colours[name]
+
+        # Percentage thrombolysis use:
+        custom_data = np.stack((
+            # Name of the stroke team:
+            df['stroke_team'][df['scenario'] == 'base'],
+            # Effect of scenario:
+            # (round this now so we can use the +/- sign format later)
+            np.round(
+                df['Percent_Thrombolysis_(mean)_diff']\
+                    [df['scenario'] == scenario], 1),
+            # Base prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            # Final prob:
+            # (round this now so we can use the +/- sign format later)
+            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            ), axis=-1)
+
+        # Setup assuming scenario == 'base':
+        x_for_scatter = df['Sorted_rank!'+scenario_for_rank][df['scenario'] == 'base']
+        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        mode = 'markers'
+        symbols = 'circle'
+        leg_str_full = 'dummy'  # Is this needed?
+        size = 4
+
+        # Add bar chart:
+
+        fig.add_trace(go.Bar(
+            x=x_for_scatter,
+            y=y_for_scatter,
+            name=name,
+            width=1,
+            marker=dict(color=colour),
+                # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+            customdata=custom_data
+        ))
+
+
+        if scenario != 'base':
+            y_scenario = (
+                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+            )
+            # The differences are already in the dataframe:
+            y_diffs = (
+                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+            )
+
+            # Base symbols:
+            symbols = ['line-ew-open'] * len(x_for_scatter)
+            # Scenario symbols: 
+            symbols_scen = np.full(len(symbols), 'circle', dtype='U20')
+            symbols_scen[np.where(y_diffs >= 0)] = 'triangle-up'
+            symbols_scen[np.where(y_diffs < 0)] = 'triangle-down'
+            symbols = np.array([symbols, symbols_scen])
+
+            x_for_scatter = np.array([x_for_scatter, x_for_scatter])
+            y_for_scatter = np.array([y_for_scatter, y_scenario])
+
+            mode = 'markers+lines'
+
+
+            leg_str = scenario_str.replace('+ ', '+<br>')
+            leg_str_full = f'Difference due to<br>"{leg_str}"'
+
+
+        if scenario == 'base':
+            fig.add_trace(go.Scatter(
+                x=x_for_scatter,
+                y=y_for_scatter,
+                name=name,
+                mode=mode,
+                # width=1,
+                marker=dict(color=colour, symbol=symbols, size=size),
+                    # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
+                customdata=custom_data
+            ))
+        else:
+            for t, team in enumerate(range(x_for_scatter.shape[1])):
+                # showlegend = False if t > 0 else True
+
+                # st.write(custom_data)
+                custom_data_here = custom_data[t, :]
+                # st.text(custom_data_here)
+                custom_data_here = np.transpose(np.stack((custom_data_here, custom_data_here), axis=-1))
+                # st.text(custom_data_here)
+                # st.text(custom_data_here[:, 0])
+
+                fig.add_trace(go.Scatter(
+                    x=x_for_scatter[:, t],
+                    y=y_for_scatter[:, t],
+                    name=name,
+                    mode=mode,
+                    # width=1,
+                    marker=dict(color=colour, symbol=symbols[:, t], size=[0, 10]),
+                        # line=dict(color=colour, width=0.2)),  #'rgba(0,0,0,0.5)'),
+                    line=dict(width=0.5),
+                    customdata=custom_data_here,
+                    showlegend=False
+                ))
+
+
+
+    # Update hover label info *before* adding traces that have
+    # hoverinfo='skip', otherwise this step will overwrite them.
+    # Change the hover format
+    fig.update_layout(hovermode='closest')
+    # # Reduce hover distance to prevent multiple labels popping
+    # # up for each x:
+    # fig.update_layout(hoverdistance=1)
+    # ^ this isn't good enough - still get three labels
+
+    # Define the hover template:
+    if scenario == 'base':
+        # No change bars here.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+    else:
+        # Add messages to reflect the change bars.
+        ht = (
+            '%{customdata[0]}' +
+            '<br>' +
+            'Base probability: %{customdata[2]:.1f}%' +
+            '<br>' +
+            f'Effect of {scenario}: ' + '%{customdata[1]:+}%' +
+            '<br>' +
+            f'Final probability: ' + '%{customdata[3]:.1f}%' +
+            '<br>' +
+            'Rank: %{x} of ' + f'{n_teams} teams'
+            '<extra></extra>'
+        )
+
+    # Update the hover template only for the bars that aren't
+    # marking the changes, i.e. the bars that have the name
+    # in the legend that we defined earlier.
+    fig.for_each_trace(
+        lambda trace: trace.update(hovertemplate=ht)
+        # if trace.marker.color != change_colour
+        if trace.name != leg_str_full
+        else (),
+    )
+
+    fig.update_layout(
+        title=f'{scenario_str}',
+        xaxis_title=f'Rank sorted by {scenario_for_rank}',
+        yaxis_title='Percent Thrombolysis (mean)',
+        legend_title='Highlighted team'
+    )
+
+    # Format legend so newest teams appear at bottom:
+    fig.update_layout(legend=dict(traceorder='normal'))
+
+    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_xaxes(range=[
+        min(df_all['Sorted_rank!'+scenario_for_rank])-1,
+        max(df_all['Sorted_rank!'+scenario_for_rank])+1
+        ])
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def plot_bars_for_single_team(df, team):
     # For y-limits:
     # Find max y values across all teams.

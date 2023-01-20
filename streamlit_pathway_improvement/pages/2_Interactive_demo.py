@@ -130,13 +130,43 @@ def main():
         )
 
     with container_bar:
-        # Make a bar chart of the mean values:
-        utilities_pathway.plot_bars.plot_bars_sorted_rank(
+        # st.write('Ranked bar chart:')
+        # st.write('(hard to see negative changes)')
+        # # Make a bar chart of the mean values:
+        # utilities_pathway.plot_bars.plot_bars_sorted_rank(
+        #     df,
+        #     scenario,
+        #     scenario_for_rank,
+        #     len(stroke_teams_list)
+        #     )
+
+        st.write('Non-ranked scatter:')
+        # Make a scatter chart of the mean values:
+        utilities_pathway.plot_bars.plot_scatter_base_vs_scenario(
             df,
             scenario,
             scenario_for_rank,
             len(stroke_teams_list)
             )
+
+        st.write('Ranked scatter:')
+        # Make a scatter chart of the mean values:
+        utilities_pathway.plot_bars.plot_scatter_sorted_rank(
+            df,
+            scenario,
+            scenario_for_rank,
+            len(stroke_teams_list)
+            )
+
+        st.write('Ranked bar:')
+        # Make a bar+scatter chart of the mean values:
+        utilities_pathway.plot_bars.plot_bar_scatter_sorted_rank(
+            df,
+            scenario,
+            scenario_for_rank,
+            len(stroke_teams_list)
+            )
+
 
     with tabs_results[1]:
         # Bar chart for individual team:
