@@ -204,15 +204,31 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
 def inputs_for_bar_chart():
 
     with st.sidebar:
-        scenario = st.radio(
-            'Show difference due to:',
-            options=scenarios_dict.keys(),
-            # horizontal=True
-            )
-    scenario = scenarios_dict[scenario]
+        st.markdown('# Inputs')
+        st.markdown('Show difference due to:')
+        scenarios_picked = []
+        if st.checkbox('Speed'):
+            scenarios_picked.append('Speed')
+        if st.checkbox('Onset'):
+            scenarios_picked.append('Onset')
+        if st.checkbox('Benchmark'):
+            scenarios_picked.append('Benchmark')
+
+    if len(scenarios_picked) == 0:
+        scenario = 'base'
+    else:
+        scenario = ''
+        if 'Speed' in scenarios_picked:
+            scenario += '_speed'
+        if 'Onset' in scenarios_picked:
+            scenario += '_onset'
+        if 'Benchmark' in scenarios_picked:
+            scenario += '_benchmark'
+        # Remove initial underscore:
+        scenario = scenario[1:]
 
     scenario_for_rank = st.radio(
-        'Sort values by this:',
+        'Sort ranked values by this:',
         options=[
             'Base value',
             'Final value',

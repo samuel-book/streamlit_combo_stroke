@@ -140,15 +140,6 @@ def main():
         #     len(stroke_teams_list)
         #     )
 
-        st.write('Non-ranked scatter:')
-        # Make a scatter chart of the mean values:
-        utilities_pathway.plot_bars.plot_scatter_base_vs_scenario(
-            df,
-            scenario,
-            scenario_for_rank,
-            len(stroke_teams_list)
-            )
-
         st.write('Ranked scatter:')
         # Make a scatter chart of the mean values:
         utilities_pathway.plot_bars.plot_scatter_sorted_rank(
@@ -161,6 +152,15 @@ def main():
         st.write('Ranked bar:')
         # Make a bar+scatter chart of the mean values:
         utilities_pathway.plot_bars.plot_bar_scatter_sorted_rank(
+            df,
+            scenario,
+            scenario_for_rank,
+            len(stroke_teams_list)
+            )
+
+        st.write('Non-ranked scatter:')
+        # Make a scatter chart of the mean values:
+        utilities_pathway.plot_bars.plot_scatter_base_vs_scenario(
             df,
             scenario,
             scenario_for_rank,

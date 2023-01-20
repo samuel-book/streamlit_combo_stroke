@@ -92,14 +92,14 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
 
     if len(highlighted_teams_input) > 0:
         # Add secret extra scatter points for a second legend:
-        symbols = ['circle', 'triangle-up', 'triangle-down']
+        symbols = ['circle', 'arrow-up', 'arrow-down']
         s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
         names = [
             'Base',
             f'Increase with {s_label}',
             f'Decrease with {s_label}'
             ]
-        sizes = [6, 10, 10]
+        sizes = [6, 8, 8]
         for s in range(3):
             fig.add_trace(go.Scatter(
                 x=[-100],
@@ -146,10 +146,10 @@ def plot_violins(df, scenarios, highlighted_teams_input=[], highlighted_colours=
 
             if x > 0:
                 if y_team > y_teams[0]:
-                    symbols.append('triangle-up')
+                    symbols.append('arrow-up')
                 else:
-                    symbols.append('triangle-down')
-                sizes.append(10)
+                    symbols.append('arrow-down')
+                sizes.append(8)
 
 
         # Scatter on first violin:
