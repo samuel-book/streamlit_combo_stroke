@@ -49,6 +49,11 @@ def main():
 
     # Title:
     st.markdown('# Pathway improvement')
+    st.warning(''.join([
+        ':warning: __Work in progress__ ',
+        'This app runs but still needs explanatory text, ',
+        'and not all of these test plots will be in the final version. '
+        ]))
 
     container_highlighted_input = st.container()
 

@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:samuel-book/streamlit_pathway_improvement.git
 	branch = main
-	commit = aec60d2fd26e2e86950e3f84a221b8d5e2657fb0
+	commit = 5c34f284e018f5a50bff407c4457cc2185c67286
 	parent = d9976b07cff71664b88f06088b2873ad9a5aafd2
 	method = merge
 	cmdver = 0.4.5
