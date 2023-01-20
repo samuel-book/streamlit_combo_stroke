@@ -1,7 +1,6 @@
 # To be printed as markdown on the landing page. 
 # ---------------------------------------------------------------------
 
-# Streamlit app template
 
 ## Summary
 
