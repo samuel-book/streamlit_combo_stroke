@@ -4,6 +4,7 @@ import numpy as np
 from plotly.subplots import make_subplots
 
 from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours
+from utilities_pathway.plot_utils import scatter_highlighted_teams
 
 def plot_hist(
         df, scenarios, highlighted_teams_input=[], highlighted_colours={}, n_teams='all'
@@ -24,6 +25,7 @@ def plot_hist(
             s_label = ' +<br>'.join(s_label.split('+'))
         scenarios_str_list.append(s_label)
 
+    hist_colours = ['grey', plotly_colours[0]]
 
     subplot_titles = [
         'Thrombolysis use (%)',
@@ -50,15 +52,16 @@ def plot_hist(
                     size=1),
                 autobinx=False,
                 marker=dict(
-                    color=plotly_colours[s],
+                    color=hist_colours[s],
                     opacity=0.5,
                     line=dict(
                         width=1.0,
-                        color=plotly_colours[s]
+                        color=hist_colours[s]
                         )
                     ),
                 name=scenarios_str_list[s],
-                showlegend=showlegend
+                showlegend=showlegend,
+                legendgroup='2',
             ),
             row=1, col=col)
 
@@ -66,6 +69,12 @@ def plot_hist(
         # fig.update_traces(opacity=0.5, row=1, col=col)
         fig.update_yaxes(title='Number of hospitals', row=1, col=col)
 
+        scenario_str = scenarios_dict2[scenario]
+        add_to_legends = [True, False]
+        scatter_highlighted_teams(
+            fig, df, scenarios, highlighted_teams_input, highlighted_colours,
+            scenario_str, middle=0, horizontal=True, y_gap=2, y_max=30, val_str=x_data_strs[c],
+            row=1, col=col, add_to_legend=add_to_legends[c], showlegend_scatter=add_to_legends[c])
 
     # Make both histograms share an x-axis
     # (otherwise default is like two sets of bar charts)
@@ -76,11 +85,11 @@ def plot_hist(
     # Move legend to within the axis area to disguise the fact
     # it changes width depending on which labels it contains.
     fig.update_layout(legend=dict(
-        # orientation='v', #'h',
+        # orientation='h', #'h',
         yanchor='top',
         y=1,
         xanchor='right',
-        x=1.25
+        x=1.5
     ))
 
 
@@ -96,7 +105,7 @@ def plot_hist(
     fig.update_xaxes(range=[0, 34], row=1, col=2)
 
     # Make hover text show all traces in one label:
-    fig.update_layout(hovermode='x unified')
+    fig.update_layout(hovermode='closest') # 'x unified')
     # Don't shorten the names of the traces:
     fig.update_layout(hoverlabel=dict(namelength=-1))
 

@@ -5,7 +5,12 @@ from plotly.subplots import make_subplots
 
 from utilities_pathway.fixed_params import scenarios, scenarios_dict2
 
-def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
+def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all', y_str='Percent_Thrombolysis_(mean)'):
+    if y_str == 'Percent_Thrombolysis_(mean)':
+        y_label = 'Thrombolysis use (%)'
+    else:
+        y_label = 'Additional good outcomes<br>per 1000 admissions'
+
     # Use this string for labels:
     scenario_str = scenarios_dict2[scenario]
     # List of all the separate traces:
@@ -27,16 +32,16 @@ def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
             # Effect of scenario:
             # (round this now so we can use the +/- sign format later)
             np.round(
-                df['Percent_Thrombolysis_(mean)_diff']\
+                df[y_str + '_diff']\
                     [df['scenario'] == scenario], 1),
             # Final prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            df[y_str][df['scenario'] == scenario],
             ), axis=-1)
 
         fig.add_trace(go.Bar(
             x=df['Sorted_rank!'+scenario_for_rank][df['scenario'] == 'base'],
-            y=df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            y=df[y_str][df['scenario'] == 'base'],
             name=name,
             width=1,
             marker=dict(color=colour),
@@ -47,12 +52,12 @@ def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
 
         if scenario != 'base':
             # y_diffs = (
-            #     df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario].values -
-            #     df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'].values
+            #     df[y_str][df['scenario'] == scenario].values -
+            #     df[y_str][df['scenario'] == 'base'].values
             # )
             # The differences are already in the dataframe:
             y_diffs = (
-                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+                df[y_str + '_diff'][df['scenario'] == scenario]
             )
 
             show_leggy = False if n > 0 else True
@@ -120,14 +125,14 @@ def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
     fig.update_layout(
         title=f'{scenario_str}',
         xaxis_title=f'Rank sorted by {scenario_for_rank}',
-        yaxis_title='Percent Thrombolysis (mean)',
+        yaxis_title=y_label,
         legend_title='Highlighted team'
     )
 
     # Format legend so newest teams appear at bottom:
     fig.update_layout(legend=dict(traceorder='normal'))
 
-    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_yaxes(range=[0, max(df_all[y_str])*1.05])
     fig.update_xaxes(range=[
         min(df_all['Sorted_rank!'+scenario_for_rank])-1,
         max(df_all['Sorted_rank!'+scenario_for_rank])+1
@@ -137,7 +142,12 @@ def plot_bars_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
 
 
 
-def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
+def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all', y_str='Percent_Thrombolysis_(mean)'):
+    if y_str == 'Percent_Thrombolysis_(mean)':
+        y_label = 'Thrombolysis use (%)'
+    else:
+        y_label = 'Additional good outcomes<br>per 1000 admissions'
+
     # Use this string for labels:
     scenario_str = scenarios_dict2[scenario]
     # List of all the separate traces:
@@ -159,14 +169,14 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all')
             # Effect of scenario:
             # (round this now so we can use the +/- sign format later)
             np.round(
-                df['Percent_Thrombolysis_(mean)_diff']\
+                df[y_str + '_diff']\
                     [df['scenario'] == scenario], 1),
             # Base prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            df[y_str][df['scenario'] == 'base'],
             # Final prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            df[y_str][df['scenario'] == scenario],
             # Base rank:
             df['Sorted_rank!base'][df['scenario'] == 'base'],
             # Final rank:
@@ -176,7 +186,7 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all')
 
         # Setup assuming scenario == 'base':
         x_for_scatter = df['Sorted_rank!'+scenario_for_rank][df['scenario'] == 'base']
-        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        y_for_scatter = df[y_str][df['scenario'] == 'base']
         mode = 'markers'
         symbols = 'circle'
         leg_str_full = 'dummy'  # Is this needed?
@@ -184,11 +194,11 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all')
 
         if scenario != 'base':
             y_scenario = (
-                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+                df[y_str][df['scenario'] == scenario]
             )
             # The differences are already in the dataframe:
             y_diffs = (
-                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+                df[y_str + '_diff'][df['scenario'] == scenario]
             )
 
             # Base symbols:
@@ -295,14 +305,14 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all')
     fig.update_layout(
         title=f'{scenario_str}',
         xaxis_title=f'Rank sorted by {scenario_for_rank}',
-        yaxis_title='Percent Thrombolysis (mean)',
+        yaxis_title=y_label,
         legend_title='Highlighted team'
     )
 
     # Format legend so newest teams appear at bottom:
     fig.update_layout(legend=dict(traceorder='normal'))
 
-    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_yaxes(range=[0, max(df_all[y_str])*1.05])
     fig.update_xaxes(range=[
         min(df_all['Sorted_rank!'+scenario_for_rank])-1,
         max(df_all['Sorted_rank!'+scenario_for_rank])+1
@@ -312,7 +322,12 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all')
 
 
 
-def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='all'):
+def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='all', y_str='Percent_Thrombolysis_(mean)'):
+    if y_str == 'Percent_Thrombolysis_(mean)':
+        y_label = 'Thrombolysis use (%)'
+    else:
+        y_label = 'Additional good outcomes<br>per 1000 admissions'
+
     # Use this string for labels:
     scenario_str = scenarios_dict2[scenario]
     # List of all the separate traces:
@@ -334,14 +349,14 @@ def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='
             # Effect of scenario:
             # (round this now so we can use the +/- sign format later)
             np.round(
-                df['Percent_Thrombolysis_(mean)_diff']\
+                df[y_str + '_diff']\
                     [df['scenario'] == scenario], 1),
             # Base prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            df[y_str][df['scenario'] == 'base'],
             # Final prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            df[y_str][df['scenario'] == scenario],
             # Base rank:
             df['Sorted_rank!base'][df['scenario'] == 'base'],
             # Final rank:
@@ -350,8 +365,8 @@ def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='
 
 
         # Setup assuming scenario == 'base':
-        x_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
-        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        x_for_scatter = df[y_str][df['scenario'] == 'base']
+        y_for_scatter = df[y_str][df['scenario'] == 'base']
         mode = 'markers'
         symbols = 'circle'
         leg_str_full = 'dummy'  # Is this needed?
@@ -359,11 +374,11 @@ def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='
 
         if scenario != 'base':
             y_scenario = (
-                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+                df[y_str][df['scenario'] == scenario]
             )
             # The differences are already in the dataframe:
             y_diffs = (
-                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+                df[y_str + '_diff'][df['scenario'] == scenario]
             )
 
             # Base symbols:
@@ -469,16 +484,16 @@ def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='
 
     fig.update_layout(
         title=f'{scenario_str}',
-        xaxis_title='Thrombolysis use (%)',
-        yaxis_title='Thrombolysis use (%)',
+        xaxis_title=y_label,
+        yaxis_title=y_label,
         legend_title='Highlighted team'
     )
 
     # Format legend so newest teams appear at bottom:
     fig.update_layout(legend=dict(traceorder='normal'))
 
-    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
-    fig.update_xaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05],
+    fig.update_yaxes(range=[0, max(df_all[y_str])*1.05])
+    fig.update_xaxes(range=[0, max(df_all[y_str])*1.05],
                      constrain='domain')  # For aspect ratio.)
 
     # Set aspect ratio:
@@ -492,7 +507,11 @@ def plot_scatter_base_vs_scenario(df_all, scenario, scenario_for_rank, n_teams='
 
 
 
-def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all'):
+def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all', y_str='Percent_Thrombolysis_(mean)'):
+    if y_str == 'Percent_Thrombolysis_(mean)':
+        y_label = 'Thrombolysis use (%)'
+    else:
+        y_label = 'Additional good outcomes<br>per 1000 admissions'
     # Use this string for labels:
     scenario_str = scenarios_dict2[scenario]
     # List of all the separate traces:
@@ -514,14 +533,14 @@ def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='a
             # Effect of scenario:
             # (round this now so we can use the +/- sign format later)
             np.round(
-                df['Percent_Thrombolysis_(mean)_diff']\
+                df[y_str + '_diff']\
                     [df['scenario'] == scenario], 1),
             # Base prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base'],
+            df[y_str][df['scenario'] == 'base'],
             # Final prob:
             # (round this now so we can use the +/- sign format later)
-            df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario],
+            df[y_str][df['scenario'] == scenario],
             # Base rank:
             df['Sorted_rank!base'][df['scenario'] == 'base'],
             # Final rank:
@@ -530,7 +549,7 @@ def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='a
 
         # Setup assuming scenario == 'base':
         x_for_scatter = df['Sorted_rank!'+scenario_for_rank][df['scenario'] == 'base']
-        y_for_scatter = df['Percent_Thrombolysis_(mean)'][df['scenario'] == 'base']
+        y_for_scatter = df[y_str][df['scenario'] == 'base']
         mode = 'markers'
         symbols = 'circle'
         leg_str_full = 'dummy'  # Is this needed?
@@ -551,11 +570,11 @@ def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='a
 
         if scenario != 'base':
             y_scenario = (
-                df['Percent_Thrombolysis_(mean)'][df['scenario'] == scenario]
+                df[y_str][df['scenario'] == scenario]
             )
             # The differences are already in the dataframe:
             y_diffs = (
-                df['Percent_Thrombolysis_(mean)_diff'][df['scenario'] == scenario]
+                df[y_str + '_diff'][df['scenario'] == scenario]
             )
 
             # Base symbols:
@@ -651,14 +670,14 @@ def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='a
     fig.update_layout(
         title=f'{scenario_str}',
         xaxis_title=f'Rank sorted by {scenario_for_rank}',
-        yaxis_title='Percent Thrombolysis (mean)',
+        yaxis_title=y_label,
         legend_title='Highlighted team'
     )
 
     # Format legend so newest teams appear at bottom:
     fig.update_layout(legend=dict(traceorder='normal'))
 
-    fig.update_yaxes(range=[0, max(df_all['Percent_Thrombolysis_(mean)'])*1.05])
+    fig.update_yaxes(range=[0, max(df_all[y_str])*1.05])
     fig.update_xaxes(range=[
         min(df_all['Sorted_rank!'+scenario_for_rank])-1,
         max(df_all['Sorted_rank!'+scenario_for_rank])+1
@@ -668,11 +687,18 @@ def plot_bar_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='a
 
 
 def plot_bars_for_single_team(df, team):
+
+    t_str = 'Percent_Thrombolysis_(mean)'
+    t_label = 'Thrombolysis use (%)'
+
+    o_str = 'Additional_good_outcomes_per_1000_patients_(mean)'
+    o_label = 'Additional good outcomes<br>per 1000 admissions'
+
     # For y-limits:
     # Find max y values across all teams.
-    max_percent_thrombolysis_mean = max(df['Percent_Thrombolysis_(mean)'])
+    max_percent_thrombolysis_mean = max(df[t_str])
     min_percent_thrombolysis_mean = 0
-    max_additional_good_mean = max(df['Additional_good_outcomes_per_1000_patients_(mean)'])
+    max_additional_good_mean = max(df[o_str])
     min_additional_good_mean = 0
 
     scenarios_str_list = []
@@ -689,20 +715,20 @@ def plot_bars_for_single_team(df, team):
     # Pick out just the data for the chosen team:
     df_here = df[df['stroke_team'] == team]
     # Pick out base values:
-    base_percent_thromb_here = df_here['Percent_Thrombolysis_(mean)'][df_here['scenario'] == 'base'].values[0]
-    base_additional_good_here = df_here['Additional_good_outcomes_per_1000_patients_(mean)'][df_here['scenario'] == 'base'].values[0]
+    base_percent_thromb_here = df_here[t_str][df_here['scenario'] == 'base'].values[0]
+    base_additional_good_here = df_here[o_str][df_here['scenario'] == 'base'].values[0]
 
 
     subplot_titles = [
-        'Thrombolysis use (%)',
-        'Additional good outcomes<br>per 1000 admissions'
+        t_label,
+        o_label
     ]
     fig = make_subplots(rows=1, cols=2, subplot_titles=subplot_titles)
 
     fig.update_layout(title='<b>Team ' + team)  # <b> for bold
 
     # --- Percentage thrombolysis use ---
-    diff_vals_mean = np.round(df_here['Percent_Thrombolysis_(mean)_diff'].values, 1)[1:]
+    diff_vals_mean = np.round(df_here[t_str + '_diff'].values, 1)[1:]
     sign_list_mean = np.full(diff_vals_mean.shape, '+')
     sign_list_mean[np.where(diff_vals_mean < 0)[0]] = '-'
     bar_text_mean = []
@@ -713,11 +739,11 @@ def plot_bars_for_single_team(df, team):
 
     custom_data_mean = np.stack((
         # Difference between this scenario and base:
-        np.round(df_here['Percent_Thrombolysis_(mean)_diff'], 1),
+        np.round(df_here[t_str + '_diff'], 1),
         # Base value:
         np.full(
             df_here['scenario'].values.shape, 
-            df_here['Percent_Thrombolysis_(mean)']\
+            df_here[t_str]\
                 [df_here['scenario'] == 'base']
             ),
         # Text for top of bars:
@@ -726,14 +752,13 @@ def plot_bars_for_single_team(df, team):
 
     fig.add_trace(go.Bar(
         x=df_here['scenario'],
-        # y=df_here['Percent_Thrombolysis_(mean)'],
-        y=df_here['Percent_Thrombolysis_(mean)'],
+        y=df_here[t_str],
         customdata=custom_data_mean,
         showlegend=False
     ),
         row=1, col=1)
 
-    fig.update_yaxes(title='Thrombolysis use (%)', row=1, col=1)
+    fig.update_yaxes(title=t_label, row=1, col=1)
 
     fig.update_yaxes(range=[
         min_percent_thrombolysis_mean*1.1,
@@ -743,7 +768,7 @@ def plot_bars_for_single_team(df, team):
 
 
     # --- Additional good outcomes ---
-    diff_vals_add = np.round(df_here['Additional_good_outcomes_per_1000_patients_(mean)_diff'].values, 1)[1:]
+    diff_vals_add = np.round(df_here[o_str + '_diff'].values, 1)[1:]
     sign_list_add = np.full(diff_vals_add.shape, '+')
     sign_list_add[np.where(diff_vals_add < 0)[0]] = '-'
     bar_text_add = []
@@ -754,11 +779,11 @@ def plot_bars_for_single_team(df, team):
 
     custom_data_add = np.stack((
         # Difference between this scenario and base:
-        np.round(df_here['Additional_good_outcomes_per_1000_patients_(mean)_diff'], 1),
+        np.round(df_here[o_str + '_diff'], 1),
         # Base value:
         np.full(
             df_here['scenario'].values.shape,
-            df_here['Additional_good_outcomes_per_1000_patients_(mean)']\
+            df_here[o_str]\
                 [df_here['scenario'] == 'base']
             ),
         # Text for top of bars:
@@ -767,14 +792,14 @@ def plot_bars_for_single_team(df, team):
 
     fig.add_trace(go.Bar(
         x=df_here['scenario'],
-        # y=df_here['Additional_good_outcomes_per_1000_patients_(mean)'],
-        y=df_here['Additional_good_outcomes_per_1000_patients_(mean)'],
+        # y=df_here[o_str],
+        y=df_here[o_str],
         # marker=dict(color='red'),
         customdata=custom_data_add,
         showlegend=False
     ), row=1, col=2)
 
-    fig.update_yaxes(title='Additional good outcomes', row=1, col=2)
+    fig.update_yaxes(title=o_label.split('<br>')[0], row=1, col=2)
 
     # Update y-axis limits with breathing room for labels above bars.
     fig.update_yaxes(range=[

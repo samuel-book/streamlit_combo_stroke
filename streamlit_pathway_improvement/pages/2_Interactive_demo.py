@@ -129,43 +129,56 @@ def main():
             len(stroke_teams_list)
         )
 
-    with container_bar:
-        # st.write('Ranked bar chart:')
-        # st.write('(hard to see negative changes)')
-        # # Make a bar chart of the mean values:
-        # utilities_pathway.plot_bars.plot_bars_sorted_rank(
-        #     df,
-        #     scenario,
-        #     scenario_for_rank,
-        #     len(stroke_teams_list)
-        #     )
 
-        st.write('Ranked scatter:')
-        # Make a scatter chart of the mean values:
-        utilities_pathway.plot_bars.plot_scatter_sorted_rank(
-            df,
-            scenario,
-            scenario_for_rank,
-            len(stroke_teams_list)
-            )
+    y_strs = [
+        'Percent_Thrombolysis_(mean)',
+        'Additional_good_outcomes_per_1000_patients_(mean)'
+        ]
+    for y_str in y_strs:
+        bars = True
+        if bars is True:
+            with container_bar:
+                st.markdown('## ' + y_str)
+                st.write('Rank is sorted by thrombolysis rate only')
+                # st.write('Ranked bar chart:')
+                # st.write('(hard to see negative changes)')
+                # # Make a bar chart of the mean values:
+                # utilities_pathway.plot_bars.plot_bars_sorted_rank(
+                #     df,
+                #     scenario,
+                #     scenario_for_rank,
+                #     len(stroke_teams_list)
+                #     )
 
-        st.write('Ranked bar:')
-        # Make a bar+scatter chart of the mean values:
-        utilities_pathway.plot_bars.plot_bar_scatter_sorted_rank(
-            df,
-            scenario,
-            scenario_for_rank,
-            len(stroke_teams_list)
-            )
+                st.write('Ranked scatter:')
+                # Make a scatter chart of the mean values:
+                utilities_pathway.plot_bars.plot_scatter_sorted_rank(
+                    df,
+                    scenario,
+                    scenario_for_rank,
+                    len(stroke_teams_list),
+                    y_str=y_str
+                    )
 
-        st.write('Non-ranked scatter:')
-        # Make a scatter chart of the mean values:
-        utilities_pathway.plot_bars.plot_scatter_base_vs_scenario(
-            df,
-            scenario,
-            scenario_for_rank,
-            len(stroke_teams_list)
-            )
+                st.write('Ranked bar:')
+                # Make a bar+scatter chart of the mean values:
+                utilities_pathway.plot_bars.plot_bar_scatter_sorted_rank(
+                    df,
+                    scenario,
+                    scenario_for_rank,
+                    len(stroke_teams_list),
+                    y_str=y_str
+                    )
+
+                st.write('Non-ranked scatter:')
+                # Make a scatter chart of the mean values:
+                utilities_pathway.plot_bars.plot_scatter_base_vs_scenario(
+                    df,
+                    scenario,
+                    scenario_for_rank,
+                    len(stroke_teams_list),
+                    y_str=y_str
+                    )
 
 
     with tabs_results[1]:
@@ -182,6 +195,16 @@ def main():
             highlighted_colours,
             len(stroke_teams_list)
             )
+    
+
+        # st.write('No easy way to convert y-axis to count values:')
+        # utilities_pathway.plot_violins.plot_violins_half(
+        #     df,
+        #     ['base', scenario],
+        #     highlighted_teams_input,
+        #     highlighted_colours,
+        #     len(stroke_teams_list)
+        #     )
 
     # ----- The end! -----
 

@@ -2,6 +2,7 @@
 Helper functions for plotting.
 """
 import plotly.express as px
+import plotly.graph_objects as go
 import matplotlib
 import numpy as np
 import streamlit as st
@@ -75,3 +76,180 @@ def choose_colours_for_highlights(highlighted_teams_list):
 
     # Save the new colour dictionary to the session state:
     st.session_state['highlighted_teams_colours'] = highlighted_teams_colours
+
+
+def find_offsets_for_scatter(n_points, y_gap=0.05, y_max=0.2, positive=False):
+    """For scattering points on violin"""
+    # Where to scatter the team markers:
+    y_offsets_scatter = []  # [0.0]
+    while len(y_offsets_scatter) < n_points:
+        y_extra = np.arange(y_gap, y_max, y_gap)
+        if positive is False:
+            # Mix in the same values, but negative.
+            y_extra = np.stack((
+                y_extra, -y_extra
+            )).T.flatten()
+        y_offsets_scatter = np.append(y_offsets_scatter, y_extra)
+        y_gap = 0.5 * y_gap
+    return y_offsets_scatter
+
+
+def scatter_highlighted_teams(
+        fig,
+        df,
+        scenarios,
+        highlighted_teams_input,
+        highlighted_colours,
+        scenario_str,
+        middle=0,
+        horizontal=True,
+        positive=True,
+        y_gap=0.05,
+        y_max=0.2,
+        val_str='Percent_Thrombolysis_(mean)',
+        row=None,
+        col=None,
+        add_to_legend=True,
+        showlegend_scatter=True
+        ):
+
+    if horizontal is True:
+        marker_increase = 'arrow-right'
+        marker_decrease = 'arrow-left'
+    else:
+        marker_increase = 'arrow-up'
+        marker_decrease = 'arrow-down'
+
+    # Where to put highlighted teams:
+    y_offsets_scatter = find_offsets_for_scatter(len(highlighted_teams_input), y_gap, y_max, positive)
+
+    if add_to_legend is True:
+        # Add secret extra scatter points for a second legend:
+        symbols = ['circle', marker_increase, marker_decrease]
+        s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
+        names = [
+            'Base',
+            f'Increase with {s_label}',
+            f'Decrease with {s_label}'
+            ]
+        sizes = [6, 8, 8]
+        for s in range(3):
+            fig.add_trace(go.Scatter(
+                x=[-100],
+                y=[-100],
+                mode='markers',
+                marker=dict(color='white', symbol=symbols[s], size=sizes[s],
+                    line=dict(color='black', width=1.0)),
+                name=names[s],
+                legendgroup='1',
+                hoverinfo='skip',
+                visible='legendonly'
+            ), row=row, col=col)
+
+        fig.update_layout(legend_tracegroupgap=50)
+
+    for t, team in enumerate(highlighted_teams_input):
+        vals_teams = []
+        prob_labels=[]
+        rank_scenarios=[]
+        symbols = ['circle']
+        sizes = [6]  # Marker sizes
+
+        for z, scenario in enumerate(scenarios):
+
+            df_scenario = df[df['scenario'] == scenario]
+            # Add scatter markers for highlighted teams
+            # showlegend_scatter = False if x > 0 else True
+            if scenario == 'base':
+                prob_label = 'Base'
+            else:
+                prob_label = scenario_str  # + ' '
+            prob_labels.append(prob_label)
+
+            # Find HB name for this team:
+            hb_team = df_scenario['HB_team']\
+                [df_scenario['stroke_team'] == team].values[0]
+            # Find sorted rank for this team in this scenario:
+            rank_scenario = df_scenario['Sorted_rank!'+scenario]\
+                [df_scenario['stroke_team'] == team].values[0]
+            rank_scenarios.append(rank_scenario)
+
+            val_team = df_scenario[val_str]\
+                [df_scenario['stroke_team'] == team].values
+            vals_teams.append(val_team[0])
+
+            if z > 0:
+                if val_team > vals_teams[0]:
+                    symbols.append(marker_increase)
+                else:
+                    symbols.append(marker_decrease)
+                sizes.append(8)
+
+
+        # Scatter on first violin:
+
+        if len(prob_labels) > 1:
+            custom_data = np.stack((
+                [hb_team]*2,
+                [prob_labels[0]]*2,
+                [rank_scenarios[0]]*2,
+                [vals_teams[0]]*2,
+                [prob_labels[1]]*2,
+                [rank_scenarios[1]]*2,
+                [vals_teams[1]]*2
+            ), axis=-1)
+        else:
+            custom_data = np.stack((
+                [hb_team]*2,
+                [prob_labels[0]]*2,
+                [rank_scenarios[0]]*2,
+                [vals_teams[0]]*2
+            ), axis=-1)
+
+        # x_teams = np.arange(len(scenarios)) + x_offsets_scatter[t]
+        offs_teams = np.full(len(vals_teams), middle) + y_offsets_scatter[t]
+
+        if horizontal is True:
+            x_teams = vals_teams
+            y_teams = offs_teams
+        else:
+            x_teams = offs_teams
+            y_teams = vals_teams
+
+        fig.add_trace(go.Scatter(
+            x=x_teams,
+            y=y_teams,
+            name=hb_team,
+            mode='markers+lines',
+            marker=dict(color=highlighted_colours[hb_team],
+                        symbol=symbols,
+                        size=sizes,
+                        line=dict(color='black', width=1.0)),
+            showlegend=showlegend_scatter,
+            legendgroup='2',
+            customdata=custom_data
+        ), row=row, col=col)
+
+        # Second violin:
+        # y_teams = np.arange(len(scenarios)) + y_offsets_scatter[t]
+        # for s, scenario in enumerate(scenarios):
+        #     if s > 0:
+        #         custom_data_here = np.stack(
+        #             np.transpose([
+        #                 custom_data[s, :],
+        #                 custom_data[s, :]
+        #                 ]),
+        #             axis=-1)
+        #         # Scatter on second violin:
+        #         fig.add_trace(go.Scatter(
+        #             y=[y_teams[s]],
+        #             x=[x_teams[s]],
+        #             name='extra',  # hb_team,
+        #             mode='markers',
+        #             marker=dict(color=highlighted_colours[hb_team],
+        #                         symbol=symbols[s],
+        #                         size=sizes[s],
+        #                         line=dict(color='black', width=1.0)),
+        #             showlegend=False,
+        #             customdata=custom_data_here
+        #         ))
