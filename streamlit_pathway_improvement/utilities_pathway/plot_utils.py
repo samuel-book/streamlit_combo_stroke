@@ -132,7 +132,7 @@ def scatter_highlighted_teams(
             f'Increase with {s_label}',
             f'Decrease with {s_label}'
             ]
-        sizes = [6, 8, 8]
+        sizes = [4, 8, 8]
         for s in range(3):
             fig.add_trace(go.Scatter(
                 x=[-100],
@@ -153,7 +153,7 @@ def scatter_highlighted_teams(
         prob_labels=[]
         rank_scenarios=[]
         symbols = ['circle']
-        sizes = [6]  # Marker sizes
+        sizes = [4]  # Marker sizes
 
         for z, scenario in enumerate(scenarios):
 
@@ -196,7 +196,9 @@ def scatter_highlighted_teams(
                 [vals_teams[0]]*2,
                 [prob_labels[1]]*2,
                 [rank_scenarios[1]]*2,
-                [vals_teams[1]]*2
+                [vals_teams[1]]*2,
+                [vals_teams[1] - vals_teams[0]]*2,
+                ['%' if 'Percent' in val_str else '']*2
             ), axis=-1)
         else:
             custom_data = np.stack((

@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import numpy as np
 from plotly.subplots import make_subplots
 
-from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours
+from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours, bench_str, plain_str
 from utilities_pathway.plot_utils import scatter_highlighted_teams
 
 def plot_hist(
@@ -81,7 +81,7 @@ def plot_hist(
     fig.update_layout(barmode='overlay')
 
     # Legend:
-    fig.update_layout(legend_title='Scenario')
+    # fig.update_layout(legend_title='Scenario')
     # Move legend to within the axis area to disguise the fact
     # it changes width depending on which labels it contains.
     fig.update_layout(legend=dict(
@@ -108,7 +108,47 @@ def plot_hist(
     fig.update_layout(hovermode='closest') # 'x unified')
     # Don't shorten the names of the traces:
     fig.update_layout(hoverlabel=dict(namelength=-1))
+    # Set hover template for scatter points:
+    if len(scenarios) > 1:
+        ht_scatter = (
+            'Team %{customdata[0]}' +
+            '<br>' +
+            'Base value: %{customdata[3]:.2f}%{customdata[8]}' +
+            '<br>' +
+            'Effect of %{customdata[4]}: %{customdata[7]:.2f}%{customdata[8]}' +
+            '<br>' +
+            '%{customdata[4]} value: %{customdata[6]}%{customdata[8]}' +
+            '<extra></extra>'
+        )
+    else:
+        # If we're only showing the base scenario,
+        # don't include any information about the change due to
+        # the (non-existent) chosen scenario.
+        ht_scatter = (
+            'Team %{customdata[0]}' +
+            '<br>' +
+            'Base value: %{customdata[3]:.2f}' +
+            '<extra></extra>'
+        )
+    # Update the hover template only for the bars that aren't
+    # marking the changes, i.e. the bars that have the name
+    # in the legend that we defined earlier.
+    fig.for_each_trace(
+        lambda trace: trace.update(hovertemplate=ht_scatter)
+        # if trace.marker.color != change_colour
+        if trace.name not in scenarios_str_list
+        else (),
+    )
 
+
+    # custom_data = np.stack((
+    #     [hb_team]*2,
+    #     [prob_labels[0]]*2,
+    #     [rank_scenarios[0]]*2,
+    #     [vals_teams[0]]*2,
+    #     [prob_labels[1]]*2,
+    #     [rank_scenarios[1]]*2,
+    #     [vals_teams[1]]*2
 
     # Reduce size of figure by adjusting margins:
     fig.update_layout(
