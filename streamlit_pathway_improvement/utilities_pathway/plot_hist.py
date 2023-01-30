@@ -38,6 +38,7 @@ def plot_hist(
         'Percent_Thrombolysis_(mean)',
         'Additional_good_outcomes_per_1000_patients_(mean)'
         ]
+    all_symbol_inds_used = []
     for c, col in enumerate(cols):
         showlegend = False if c > 0 else True
         for s, scenario in enumerate(scenarios):
@@ -71,10 +72,47 @@ def plot_hist(
 
         scenario_str = scenarios_dict2[scenario]
         add_to_legends = [True, False]
-        scatter_highlighted_teams(
+        symbols_legend, symbol_inds_used = scatter_highlighted_teams(
             fig, df, scenarios, highlighted_teams_input, highlighted_colours,
             scenario_str, middle=0, horizontal=True, y_gap=2, y_max=30, val_str=x_data_strs[c],
             row=1, col=col, add_to_legend=add_to_legends[c], showlegend_scatter=add_to_legends[c])
+        all_symbol_inds_used += symbol_inds_used
+
+    all_symbol_inds_used = sorted(list(set(all_symbol_inds_used)))
+    all_symbols_used = np.array(symbols_legend)[all_symbol_inds_used]
+
+    # Add secret extra scatter points for a second legend:
+    # symbols_legend = ['circle', marker_increase, marker_decrease]
+    # Check which symbols were used in the previous steps
+    # for drawing the highlighted teams.
+    inds_to_draw = []
+    for i, symbol in enumerate(symbols_legend):
+        if symbol in all_symbols_used:
+            # If it's been plotted, draw it on this legend.
+            inds_to_draw.append(i)
+
+    s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
+    names = [
+        'Base',
+        f'Increase with {s_label}',
+        f'Decrease with {s_label}'
+        ]
+    sizes = [4, 8, 8]
+    for s in inds_to_draw:
+        fig.add_trace(go.Scatter(
+            x=[-100],
+            y=[-100],
+            mode='markers',
+            marker=dict(color='white', symbol=symbols_legend[s], size=sizes[s],
+                line=dict(color='black', width=1.0)),
+            name=names[s],
+            legendgroup='1',
+            hoverinfo='skip',
+            visible='legendonly'
+        ), row=None, col=None)
+
+    fig.update_layout(legend_tracegroupgap=50)
+
 
     # Make both histograms share an x-axis
     # (otherwise default is like two sets of bar charts)

@@ -123,30 +123,10 @@ def scatter_highlighted_teams(
     # Where to put highlighted teams:
     y_offsets_scatter = find_offsets_for_scatter(len(highlighted_teams_input), y_gap, y_max, positive)
 
-    if add_to_legend is True:
-        # Add secret extra scatter points for a second legend:
-        symbols = ['circle', marker_increase, marker_decrease]
-        s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
-        names = [
-            'Base',
-            f'Increase with {s_label}',
-            f'Decrease with {s_label}'
-            ]
-        sizes = [4, 8, 8]
-        for s in range(3):
-            fig.add_trace(go.Scatter(
-                x=[-100],
-                y=[-100],
-                mode='markers',
-                marker=dict(color='white', symbol=symbols[s], size=sizes[s],
-                    line=dict(color='black', width=1.0)),
-                name=names[s],
-                legendgroup='1',
-                hoverinfo='skip',
-                visible='legendonly'
-            ), row=row, col=col)
-
-        fig.update_layout(legend_tracegroupgap=50)
+    # Store the symbols used in here so later we can add an extra
+    # legend containing these markers.
+    all_symbols = ['circle', marker_increase, marker_decrease]
+    all_inds_used = []
 
     for t, team in enumerate(highlighted_teams_input):
         vals_teams = []
@@ -154,6 +134,8 @@ def scatter_highlighted_teams(
         rank_scenarios=[]
         symbols = ['circle']
         sizes = [4]  # Marker sizes
+
+        all_inds_used.append(0)
 
         for z, scenario in enumerate(scenarios):
 
@@ -181,9 +163,13 @@ def scatter_highlighted_teams(
             if z > 0:
                 if val_team > vals_teams[0]:
                     symbols.append(marker_increase)
+                    all_inds_used.append(1)
                 else:
                     symbols.append(marker_decrease)
+                    all_inds_used.append(2)
                 sizes.append(8)
+
+        all_inds_used = sorted(list(set(all_inds_used)))
 
 
         # Scatter on first violin:
@@ -255,3 +241,7 @@ def scatter_highlighted_teams(
         #             showlegend=False,
         #             customdata=custom_data_here
         #         ))
+
+
+
+    return all_symbols, all_inds_used
