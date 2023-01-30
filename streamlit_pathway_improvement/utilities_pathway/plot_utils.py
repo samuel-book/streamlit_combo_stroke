@@ -7,7 +7,8 @@ import matplotlib
 import numpy as np
 import streamlit as st
 
-from utilities_pathway.fixed_params import plain_str, bench_str
+from utilities_pathway.fixed_params import plain_str, bench_str, \
+    display_name_of_default_highlighted_team, default_highlighted_team
 
 # Functions:
 
@@ -137,6 +138,11 @@ def scatter_highlighted_teams(
 
         all_inds_used.append(0)
 
+        if team == display_name_of_default_highlighted_team:
+            df_team = default_highlighted_team
+        else:
+            df_team = team
+
         for z, scenario in enumerate(scenarios):
 
             df_scenario = df[df['scenario'] == scenario]
@@ -150,14 +156,18 @@ def scatter_highlighted_teams(
 
             # Find HB name for this team:
             hb_team = df_scenario['HB_team']\
-                [df_scenario['stroke_team'] == team].values[0]
+                [df_scenario['stroke_team'] == df_team].values[0]
+            # Find colour before overwriting hb_team:
+            colour = highlighted_colours[hb_team]
+            if team == display_name_of_default_highlighted_team:
+                hb_team = display_name_of_default_highlighted_team
             # Find sorted rank for this team in this scenario:
             rank_scenario = df_scenario['Sorted_rank!'+scenario]\
-                [df_scenario['stroke_team'] == team].values[0]
+                [df_scenario['stroke_team'] == df_team].values[0]
             rank_scenarios.append(rank_scenario)
 
             val_team = df_scenario[val_str]\
-                [df_scenario['stroke_team'] == team].values
+                [df_scenario['stroke_team'] == df_team].values
             vals_teams.append(val_team[0])
 
             if z > 0:
@@ -191,7 +201,8 @@ def scatter_highlighted_teams(
                 [hb_team]*2,
                 [prob_labels[0]]*2,
                 [rank_scenarios[0]]*2,
-                [vals_teams[0]]*2
+                [vals_teams[0]]*2,
+                ['%' if 'Percent' in val_str else '']*2
             ), axis=-1)
 
         # x_teams = np.arange(len(scenarios)) + x_offsets_scatter[t]
@@ -209,7 +220,7 @@ def scatter_highlighted_teams(
             y=y_teams,
             name=hb_team,
             mode='markers+lines',
-            marker=dict(color=highlighted_colours[hb_team],
+            marker=dict(color=colour,
                         symbol=symbols,
                         size=sizes,
                         line=dict(color='black', width=1.0)),

@@ -16,15 +16,19 @@ def page_setup():
 plain_str = 'Non-benchmark team'
 bench_str = 'Benchmark team: \U00002605'
 
+# Default highlighted team:
+default_highlighted_team = 'LECHF1024T'
+display_name_of_default_highlighted_team = '"St Elsewhere"'
+
 scenarios_dict = {
-    'Base':'base',
-    'Speed':'speed',
-    'Onset':'onset',
-    'Benchmark':'benchmark',
-    'Speed + Onset':'speed_onset',
-    'Speed + Benchmark':'speed_benchmark',
-    'Onset + Benchmark':'onset_benchmark',
-    'Speed + Onset + Benchmark':'speed_onset_benchmark'
+    'Base': 'base',
+    'Speed': 'speed',
+    'Onset': 'onset',
+    'Benchmark': 'benchmark',
+    'Speed + Onset': 'speed_onset',
+    'Speed + Benchmark': 'speed_benchmark',
+    'Onset + Benchmark': 'onset_benchmark',
+    'Speed + Onset + Benchmark': 'speed_onset_benchmark'
     # 'same_patient_characteristics'
 }
 scenarios_dict2 = dict(zip(scenarios_dict.values(), scenarios_dict.keys()))

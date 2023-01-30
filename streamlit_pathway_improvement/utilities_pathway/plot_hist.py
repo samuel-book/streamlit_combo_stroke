@@ -3,7 +3,8 @@ import plotly.graph_objects as go
 import numpy as np
 from plotly.subplots import make_subplots
 
-from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours, bench_str, plain_str
+from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours, \
+    bench_str, plain_str
 from utilities_pathway.plot_utils import scatter_highlighted_teams
 
 def plot_hist(
@@ -73,9 +74,22 @@ def plot_hist(
         scenario_str = scenarios_dict2[scenario]
         add_to_legends = [True, False]
         symbols_legend, symbol_inds_used = scatter_highlighted_teams(
-            fig, df, scenarios, highlighted_teams_input, highlighted_colours,
-            scenario_str, middle=0, horizontal=True, y_gap=2, y_max=30, val_str=x_data_strs[c],
-            row=1, col=col, add_to_legend=add_to_legends[c], showlegend_scatter=add_to_legends[c])
+            fig,
+            df,
+            scenarios,
+            highlighted_teams_input,
+            highlighted_colours,
+            scenario_str,
+            middle=0,
+            horizontal=True,
+            y_gap=2,
+            y_max=30,
+            val_str=x_data_strs[c],
+            row=1,
+            col=col,
+            add_to_legend=add_to_legends[c],
+            showlegend_scatter=add_to_legends[c]
+            )
         all_symbol_inds_used += symbol_inds_used
 
     all_symbol_inds_used = sorted(list(set(all_symbol_inds_used)))
@@ -165,7 +179,7 @@ def plot_hist(
         ht_scatter = (
             'Team %{customdata[0]}' +
             '<br>' +
-            'Base value: %{customdata[3]:.2f}' +
+            'Base value: %{customdata[3]:.2f}%{customdata[4]}' +
             '<extra></extra>'
         )
     # Update the hover template only for the bars that aren't
@@ -190,7 +204,7 @@ def plot_hist(
 
     # Reduce size of figure by adjusting margins:
     fig.update_layout(
-        margin=dict(    
+        margin=dict(
             l=0,
             r=0,
             b=0,
@@ -199,6 +213,6 @@ def plot_hist(
         ),
         height=350
         )
-        
+
     # Write to streamlit:
     st.plotly_chart(fig, use_container_width=True)

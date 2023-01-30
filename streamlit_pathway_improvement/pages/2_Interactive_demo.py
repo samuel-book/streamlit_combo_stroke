@@ -145,8 +145,12 @@ def main():
 
     with tabs_results[1]:
         # Bar chart for individual team:
-        for team in highlighted_teams_input:
-            utilities_pathway.plot_bars.plot_bars_for_single_team(df, team)
+        if len(highlighted_teams_input) < 1:
+            st.markdown('No teams are highlighted.')
+        else:
+            for team in highlighted_teams_input:
+                utilities_pathway.plot_bars.\
+                    plot_bars_for_single_team(df, team)
 
     # ----- The end! -----
 

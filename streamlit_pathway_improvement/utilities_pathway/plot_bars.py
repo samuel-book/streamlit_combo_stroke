@@ -3,7 +3,8 @@ import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from utilities_pathway.fixed_params import scenarios, scenarios_dict2
+from utilities_pathway.fixed_params import scenarios, scenarios_dict2, \
+    display_name_of_default_highlighted_team, default_highlighted_team
 
 
 def plot_two_scatter_sorted_rank(df, scenario, scenario_for_rank, y_strs, n_teams='all'):
@@ -57,14 +58,28 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     # change_colour = 'rgba(255,255,255,0.8)'
 
     for n, name in enumerate(hb_teams_input):
+
+        if default_highlighted_team in name:
+            display_name = display_name_of_default_highlighted_team
+        else:
+            display_name = name
+
         df = df_all[df_all['HB_team'] == name]
+
+        if default_highlighted_team in name:
+            name_arr = (
+                [display_name_of_default_highlighted_team] *
+                len(df['stroke_team'][df['scenario'] == 'base'])
+            )
+        else:
+            name_arr = df['stroke_team'][df['scenario'] == 'base']
 
         colour = highlighted_colours[name]
 
         # Percentage thrombolysis use:
         custom_data = np.stack((
             # Name of the stroke team:
-            df['stroke_team'][df['scenario'] == 'base'],
+            name_arr,
             # Effect of scenario:
             # (round this now so we can use the +/- sign format later)
             np.round(
@@ -122,7 +137,7 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
             fig.add_trace(go.Scatter(
                 y=x_for_scatter,
                 x=y_for_scatter,
-                name=name,
+                name=display_name,
                 mode=mode,
                 # width=1,
                 marker=dict(color=colour, symbol=symbols, size=size),
@@ -147,7 +162,7 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
                 fig.add_trace(go.Scatter(
                     y=x_for_scatter[:, t],
                     x=y_for_scatter[:, t],
-                    name=name,
+                    name=display_name,
                     mode=mode,
                     # width=1,
                     marker=dict(color=colour, symbol=symbols[:, t], size=[4, 8]),
@@ -264,6 +279,7 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     #     ), col=col, row=row)
     # fig.update_yaxes(minor_ticks="inside")
 
+
 def plot_bars_for_single_team(df, team):
 
     t_str = 'Percent_Thrombolysis_(mean)'
@@ -290,8 +306,13 @@ def plot_bars_for_single_team(df, team):
             s_label = ' +<br> Benchmark'.join(s_label.split(' + Benchmark'))
         scenarios_str_list.append(s_label)
 
+    if team == display_name_of_default_highlighted_team:
+        df_team = default_highlighted_team
+    else:
+        df_team = team
+
     # Pick out just the data for the chosen team:
-    df_here = df[df['stroke_team'] == team]
+    df_here = df[df['stroke_team'] == df_team]
     # Pick out base values:
     base_percent_thromb_here = df_here[t_str][df_here['scenario'] == 'base'].values[0]
     base_additional_good_here = df_here[o_str][df_here['scenario'] == 'base'].values[0]
