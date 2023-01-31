@@ -208,13 +208,15 @@ def inputs_for_bar_chart():
 
     with st.sidebar:
         st.markdown('# Inputs')
+        # Set value=True in these checkboxes
+        # to have them ticked by default.
         st.markdown('Show difference due to:')
         scenarios_picked = []
-        if st.checkbox('Speed'):
+        if st.checkbox('Speed', value=True):
             scenarios_picked.append('Speed')
-        if st.checkbox('Onset'):
+        if st.checkbox('Onset', value=True):
             scenarios_picked.append('Onset')
-        if st.checkbox('Benchmark'):
+        if st.checkbox('Benchmark', value=True):
             scenarios_picked.append('Benchmark')
 
     if len(scenarios_picked) == 0:
