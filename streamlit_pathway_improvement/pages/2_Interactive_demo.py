@@ -173,8 +173,12 @@ def main():
         if len(highlighted_teams_input) < 1:
             st.markdown('No teams are highlighted.')
         else:
+            cols_single_bars = st.columns(2)
+            with cols_single_bars[0]:
+                st.markdown('## Percentage of patients thrombolysed')
+            with cols_single_bars[1]:
+                st.markdown('## Additional good outcomes')
             for team in highlighted_teams_input:
-                cols_single_bars = st.columns(2)
                 with cols_single_bars[0]:
                     utilities_pathway.plot_bars.plot_bars_for_single_team(
                             df, team,
@@ -182,6 +186,8 @@ def main():
                             y_label='Thrombolysis use (%)',
                             bar_colour=plotly_colours[0]
                             )
+                    # Write an empty header for breathing room;
+                    st.markdown('# ')
                 with cols_single_bars[1]:
                     utilities_pathway.plot_bars.\
                         plot_bars_for_single_team(
@@ -190,8 +196,8 @@ def main():
                             y_label='Additional good outcomes<br>per 1000 admissions',
                             bar_colour=plotly_colours[1]
                             )
-                # Write an empty header for breathing room;
-                st.markdown('# ')
+                    # Write an empty header for breathing room;
+                    st.markdown('# ')
 
     # ----- The end! -----
 

@@ -59,7 +59,7 @@ def plot_hist(
 
     # Reduce opacity:
     # fig.update_traces(opacity=0.5, row=1, col=col)
-    fig.update_yaxes(title='Number of hospitals')
+    fig.update_yaxes(title='Number of teams')
 
     scenario_str = scenarios_dict2[scenario]
     symbols_legend, symbol_inds_used = scatter_highlighted_teams(
