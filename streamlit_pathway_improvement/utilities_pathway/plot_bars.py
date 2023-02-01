@@ -7,42 +7,10 @@ from utilities_pathway.fixed_params import scenarios, scenarios_dict2, \
     display_name_of_default_highlighted_team, default_highlighted_team
 
 
-def plot_two_scatter_sorted_rank(df, scenario, scenario_for_rank, y_strs, n_teams='all'):
-    cols = [1, 2]
-    showlegends = [True, False]
-
-    subplot_titles = [
-        'Thrombolysis use (%)',
-        'Additional good outcomes<br>per 1000 admissions'
-    ]
-    fig = make_subplots(rows=1, cols=2, subplot_titles=subplot_titles)
-    
-    for i in [0, 1]:
-        plot_scatter_sorted_rank(
-            df,
-            scenario,
-            scenario_for_rank,
-            n_teams,
-            y_str=y_strs[i],
-            col=cols[i],
-            row=1,
-            fig=fig,
-            showlegend_col=showlegends[i]
-            )
-
-    # To match histograms:
-    fig.update_xaxes(range=[0, 34], row=1, col=1)
-    fig.update_xaxes(range=[0, 34], row=1, col=2)
-
-
-    fig.update_layout(height=600)
-    st.plotly_chart(fig, use_container_width=True)
-        
-
 def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all', y_str='Percent_Thrombolysis_(mean)', col=None, row=None, fig=None, showlegend_col=False):
     if fig is None:
         fig = go.Figure()
-    
+
     if y_str == 'Percent_Thrombolysis_(mean)':
         y_label = 'Thrombolysis use (%)'
     else:
@@ -56,6 +24,9 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     highlighted_colours = st.session_state['highlighted_teams_colours']
 
     # change_colour = 'rgba(255,255,255,0.8)'
+
+    # Indices of the symbols used:
+    all_symbols_used = []
 
     for n, name in enumerate(hb_teams_input):
 
@@ -133,6 +104,7 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
             leg_str_full = f'Difference due to<br>"{leg_str}"'
 
 
+
         if scenario == 'base':
             fig.add_trace(go.Scatter(
                 y=x_for_scatter,
@@ -143,10 +115,12 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
                 marker=dict(color=colour, symbol=symbols, size=size),
                     # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
                 customdata=custom_data,
-                showlegend=showlegend_col
+                showlegend=showlegend_col,
+                legendgroup='2',
             ),
                 row=row, col=col
             )
+            all_symbols_used += [symbols]
         else:
             for t, team in enumerate(range(x_for_scatter.shape[1])):
                 showlegend = True if (t == 0 and showlegend_col is True) else False
@@ -168,9 +142,12 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
                     marker=dict(color=colour, symbol=symbols[:, t], size=[4, 8]),
                         # line=dict(color=colour)),  #'rgba(0,0,0,0.5)'),
                     customdata=custom_data_here,
-                    showlegend=showlegend
+                    showlegend=showlegend,
+                    legendgroup='2'
                 ),
                     row=row, col=col)
+            # Add these symbols to the list of all symbols used:
+            all_symbols_used += symbols.ravel().tolist()
 
 
 
@@ -233,23 +210,63 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     # fig.update_layout(legend_title='Highlighted team')
 
     # Format legend so newest teams appear at bottom:
-    fig.update_layout(legend=dict(traceorder='normal'))
+    # fig.update_layout(legend=dict(traceorder='normal'))
     # Set margins to the same as the histogram:
     fig.update_layout(margin=dict(    
-            l=0,
-            r=0,
+            # l=0,
+            # r=0,
             # b=0,
-            # t=40,
-            pad=0
+            t=10,
+            # pad=0
         ))
     # Set legend location to the same as the histogram:
     fig.update_layout(legend=dict(
-        # orientation='h', #'h',
-        yanchor='top',
-        y=1,
-        xanchor='right',
-        x=1.5
+        orientation='h', #'h',
+        # yanchor='top',
+        y=-0.2,
+        # xanchor='right',
+        # x=1.0
     ))
+    # Manually set the legend entry width to ensure that the
+    # legend is split into two columns no matter what entries
+    # it contains.
+    fig.update_layout(legend_entrywidth=0.48)
+    fig.update_layout(legend_entrywidthmode='fraction',)
+
+    # Add secret extra scatter points for a second legend:
+    # symbols_legend = ['circle', marker_increase, marker_decrease]
+    # Check which symbols were used in the previous steps
+    # for drawing the highlighted teams.
+    symbols_legend = ['circle', 'arrow-right', 'arrow-left']
+    # Check which symbols were used in the previous steps
+    # for drawing the highlighted teams.)
+    inds_to_draw = []
+    for i, symbol in enumerate(symbols_legend):
+        if symbol in all_symbols_used:
+            # If it's been plotted, draw it on this legend.
+            inds_to_draw.append(i)
+
+    s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
+    names = [
+        'Base',
+        f'Increase with<br>{s_label}',
+        f'Decrease with<br>{s_label}'
+        ]
+    sizes = [4, 8, 8]
+    for s in inds_to_draw:
+        fig.add_trace(go.Scatter(
+            x=[-100],
+            y=[-100],
+            mode='markers',
+            marker=dict(color='white', symbol=symbols_legend[s], size=sizes[s],
+                line=dict(color='black', width=1.0)),
+            name=names[s],
+            legendgroup='1',
+            hoverinfo='skip',
+            visible='legendonly'
+        ), row=None, col=None)
+
+    fig.update_layout(legend_tracegroupgap=50)
 
 
     # fig.update_xaxes(range=[0, max(df_all[y_str])*1.05], row=row, col=col)
@@ -257,6 +274,9 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
         min(df_all['Sorted_rank!'+scenario_for_rank])-1,
         max(df_all['Sorted_rank!'+scenario_for_rank])+1
         ][::-1], row=row, col=col)
+
+    # Remove y-axis grid lines:
+    fig.update_layout(yaxis=dict(showgrid=False, zeroline=False))
 
     # This simulates grid lines but makes the plot slow to display:
     # # Plot vertical lines:
@@ -279,21 +299,56 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     #     ), col=col, row=row)
     # fig.update_yaxes(minor_ticks="inside")
 
+    # To match histograms:
+    fig.update_xaxes(range=[0, 34])  #, row=1, col=1)
+    # fig.update_xaxes(range=[0, 34], row=1, col=2)
 
-def plot_bars_for_single_team(df, team):
 
-    t_str = 'Percent_Thrombolysis_(mean)'
-    t_label = 'Thrombolysis use (%)'
+    fig.update_layout(height=600 + 10 * len(hb_teams_input))
+    
+    # Disable zoom and pan:
+    fig.update_layout(
+        # Left subplot:
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True),
+        # # Right subplot:
+        # xaxis2=dict(fixedrange=True),
+        # yaxis2=dict(fixedrange=True)
+        )
 
-    o_str = 'Additional_good_outcomes_per_1000_patients_(mean)'
-    o_label = 'Additional good outcomes<br>per 1000 admissions'
+    # Turn off legend click events
+    # (default is click on legend item, remove that item from the plot)
+    fig.update_layout(legend_itemclick=False)
+    # Only change the specific item being clicked on, not the whole
+    # legend group:
+    # # fig.update_layout(legend=dict(groupclick="toggleitem"))
+
+    plotly_config = {
+        # Mode bar always visible:
+        # 'displayModeBar': True,
+        # Plotly logo in the mode bar:
+        'displaylogo': False,
+        # Remove the following from the mode bar:
+        'modeBarButtonsToRemove': [
+            'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+            'lasso2d'
+            ],
+        # Options when the image is saved:
+        'toImageButtonOptions': {'height': None, 'width': None},
+        }
+
+    # Write to streamlit:
+    st.plotly_chart(fig, use_container_width=True, config=plotly_config)
+
+
+
+def plot_bars_for_single_team(df, team, df_column, y_label, bar_colour=None):
+
 
     # For y-limits:
     # Find max y values across all teams.
-    max_percent_thrombolysis_mean = max(df[t_str])
+    max_percent_thrombolysis_mean = max(df[df_column])
     min_percent_thrombolysis_mean = 0
-    max_additional_good_mean = max(df[o_str])
-    min_additional_good_mean = 0
 
     scenarios_str_list = []
     for s in scenarios:
@@ -314,35 +369,28 @@ def plot_bars_for_single_team(df, team):
     # Pick out just the data for the chosen team:
     df_here = df[df['stroke_team'] == df_team]
     # Pick out base values:
-    base_percent_thromb_here = df_here[t_str][df_here['scenario'] == 'base'].values[0]
-    base_additional_good_here = df_here[o_str][df_here['scenario'] == 'base'].values[0]
+    base_percent_thromb_here = df_here[df_column][df_here['scenario'] == 'base'].values[0]
 
-
-    subplot_titles = [
-        t_label,
-        o_label
-    ]
-    fig = make_subplots(rows=1, cols=2, subplot_titles=subplot_titles)
-
+    fig = go.Figure()
     fig.update_layout(title='<b>Team ' + team)  # <b> for bold
 
     # --- Percentage thrombolysis use ---
-    diff_vals_mean = np.round(df_here[t_str + '_diff'].values, 1)[1:]
+    diff_vals_mean = np.round(df_here[df_column + '_diff'].values, 1)[1:]
     sign_list_mean = np.full(diff_vals_mean.shape, '+')
     sign_list_mean[np.where(diff_vals_mean < 0)[0]] = '-'
     bar_text_mean = []
     for i, diff in enumerate(diff_vals_mean):
-        diff_str = ''.join([sign_list_mean[i], str(diff)])
+        diff_str = ''.join([sign_list_mean[i], str(abs(diff))])
         bar_text_mean.append(diff_str)
     bar_text_mean = [np.round(base_percent_thromb_here, 1).astype(str)] + bar_text_mean
 
     custom_data_mean = np.stack((
         # Difference between this scenario and base:
-        np.round(df_here[t_str + '_diff'], 1),
+        np.round(df_here[df_column + '_diff'], 1),
         # Base value:
         np.full(
             df_here['scenario'].values.shape, 
-            df_here[t_str]\
+            df_here[df_column]\
                 [df_here['scenario'] == 'base']
             ),
         # Text for top of bars:
@@ -351,101 +399,94 @@ def plot_bars_for_single_team(df, team):
 
     fig.add_trace(go.Bar(
         x=df_here['scenario'],
-        y=df_here[t_str],
+        y=df_here[df_column],
         customdata=custom_data_mean,
-        showlegend=False
-    ),
-        row=1, col=1)
+        showlegend=False,
+        marker=dict(color=bar_colour)
+    ))
 
-    fig.update_yaxes(title=t_label, row=1, col=1)
-
+    fig.update_yaxes(title=y_label)#.split('<br>')[0])
+    
+    # Update y-axis limits with breathing room for labels above bars.
     fig.update_yaxes(range=[
         min_percent_thrombolysis_mean*1.1,
         max_percent_thrombolysis_mean*1.1
-        ],
-        row=1, col=1)
+        ])
 
-
-    # --- Additional good outcomes ---
-    diff_vals_add = np.round(df_here[o_str + '_diff'].values, 1)[1:]
-    sign_list_add = np.full(diff_vals_add.shape, '+')
-    sign_list_add[np.where(diff_vals_add < 0)[0]] = '-'
-    bar_text_add = []
-    for i, diff in enumerate(diff_vals_add):
-        diff_str = ''.join([sign_list_add[i], str(diff)])
-        bar_text_add.append(diff_str)
-    bar_text_add = [np.round(base_additional_good_here, 1).astype(str)] + bar_text_add
-
-    custom_data_add = np.stack((
-        # Difference between this scenario and base:
-        np.round(df_here[o_str + '_diff'], 1),
-        # Base value:
-        np.full(
-            df_here['scenario'].values.shape,
-            df_here[o_str]\
-                [df_here['scenario'] == 'base']
-            ),
-        # Text for top of bars:
-        bar_text_add
-    ), axis=-1)
-
-    fig.add_trace(go.Bar(
-        x=df_here['scenario'],
-        # y=df_here[o_str],
-        y=df_here[o_str],
-        # marker=dict(color='red'),
-        customdata=custom_data_add,
-        showlegend=False
-    ), row=1, col=2)
-
-    fig.update_yaxes(title=o_label.split('<br>')[0], row=1, col=2)
-
-    # Update y-axis limits with breathing room for labels above bars.
-    fig.update_yaxes(range=[
-        min_additional_good_mean*1.1,
-        max_additional_good_mean*1.1
-        ],
-        row=1, col=2)
-
-    # Shared formatting:
-    cols = [1, 2]
-    base_values = [base_percent_thromb_here, base_additional_good_here]
-    for c, col in enumerate(cols):
-        # Add some extra '%' for the first subplot but not the second.
-        perc_str = '%' if col == 1 else ''
-        # Update x-axis title and tick labels:
-        fig.update_xaxes(title='Scenario', row=1, col=col)
-        fig.update_xaxes(
-            tickmode='array',
-            tickvals = np.arange(len(scenarios_str_list)),
-            ticktext=scenarios_str_list,
-            tickangle=90,
-            row=1, col=col
+    
+    # Add some extra '%' for the first subplot but not the second.
+    perc_str = '%' if 'Percent' in df_column else ''
+    # Update x-axis title and tick labels:
+    fig.update_xaxes(title='Scenario')
+    fig.update_xaxes(
+        tickmode='array',
+        tickvals = np.arange(len(scenarios_str_list)),
+        ticktext=scenarios_str_list,
+        tickangle=90
+    )
+    # Draw a horizontal line at the base value:
+    fig.add_hline(
+        y=base_percent_thromb_here,
+        line=dict(color='silver', width=1.0),
+        layer='above',  # Puts it above the bars
         )
-        # Draw a horizontal line at the base value:
-        fig.add_hline(
-            y=base_values[c],
-            line=dict(color='silver', width=1.0),
-            layer='above',  # Puts it above the bars
-            row=1, col=col)
-        # Write the size of each bar within the bar:
-        fig.update_traces(text='%{customdata[2]}', row=1, col=col)
-        # Set text position to "auto" so it sits inside the bar if there's
-        # room, and outside the bar if there's not enough room.
-        # For everything inside and auto-size the text, use "inside".
-        fig.update_traces(textposition='outside', row=1, col=col)
-        # Explicitly ask for + and - signs:
-        fig.update_traces(texttemplate='%{customdata[2]}' + perc_str, row=1, col=col)
-        # Update hover template:
-        fig.update_traces(hovertemplate=(
-            # 'Value for %{x}: %{y}%' +
-            'Value: %{y}' + perc_str +
-            '<br>' +
-            'Difference from base: %{customdata[0]:+}' + perc_str +
-            '<br>' +
-            '<extra></extra>'
-        ),
-            row=1, col=col)
+    # Write the size of each bar within the bar:
+    fig.update_traces(text='%{customdata[2]}')
+    # Set text position to "auto" so it sits inside the bar if there's
+    # room, and outside the bar if there's not enough room.
+    # For everything inside and auto-size the text, use "inside".
+    fig.update_traces(textposition='outside')
+    # Explicitly ask for + and - signs:
+    fig.update_traces(texttemplate='%{customdata[2]}' + perc_str)
+    # Update hover template:
+    fig.update_traces(hovertemplate=(
+        # 'Value for %{x}: %{y}%' +
+        'Value: %{y}' + perc_str +
+        '<br>' +
+        'Difference from base: %{customdata[0]:+}' + perc_str +
+        '<br>' +
+        '<extra></extra>'
+    ))
+
+    # Reduce margins to reduce size of figure
+    fig.update_layout(margin=dict(    
+            # l=0,
+            # r=0,
+            b=0,
+            t=40,
+            # pad=0
+        ))
+
+    # Disable zoom and pan:
+    fig.update_layout(
+        # Left subplot:
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True),
+        # Right subplot:
+        xaxis2=dict(fixedrange=True),
+        yaxis2=dict(fixedrange=True)
+        )
+
+    # Turn off legend click events
+    # (default is click on legend item, remove that item from the plot)
+    fig.update_layout(legend_itemclick=False)
+    # Only change the specific item being clicked on, not the whole
+    # legend group:
+    # # fig.update_layout(legend=dict(groupclick="toggleitem"))
+
+    plotly_config = {
+        # Mode bar always visible:
+        # 'displayModeBar': True,
+        # Plotly logo in the mode bar:
+        'displaylogo': False,
+        # Remove the following from the mode bar:
+        'modeBarButtonsToRemove': [
+            'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+            'lasso2d'
+            ],
+        # Options when the image is saved:
+        'toImageButtonOptions': {'height': None, 'width': None},
+        }
 
     # Write to streamlit:
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_config)

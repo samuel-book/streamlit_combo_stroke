@@ -32,7 +32,7 @@ except ModuleNotFoundError:
 
 # Custom functions:
 from utilities_pathway.fixed_params import \
-    page_setup, scenarios, scenarios_dict
+    page_setup, scenarios, scenarios_dict, plotly_colours
 import utilities_pathway.inputs
 import utilities_pathway.plot_bars
 import utilities_pathway.plot_violins
@@ -51,20 +51,16 @@ def main():
     st.markdown('# Pathway improvement')
     st.warning(''.join([
         ':warning: __Work in progress__ ',
-        'This app runs but still needs explanatory text, ',
-        'and not all of these test plots will be in the final version. '
+        'This app runs but still needs explanatory text.'
         ]))
 
     container_highlighted_input = st.container()
 
     tabs_results = st.tabs(['All teams', 'Highlighted teams'])
     with tabs_results[0]:
-        container_hist = st.container()
-        container_violin = st.container()
+        container_percentage_thrombolysed = st.container()
         container_sort_input = st.container()
-        container_bar = st.container()
-
-
+        container_additional_good = st.container()
 
 
     # ###########################
@@ -76,6 +72,7 @@ def main():
 
     # User inputs:
     with container_sort_input:
+        st.markdown('__:warning: TO DO:__ implement sorting better.')
         scenario, scenario_for_rank = utilities_pathway.inputs.\
             inputs_for_bar_chart()
 
@@ -85,7 +82,7 @@ def main():
         st.markdown(''.join([
             'To highlight stroke teams on the following charts, ',
             'select them in this box. ',
-            '__TO DO:__ make charts clickable.'
+            '__:warning: TO DO:__ make charts clickable.'
             # ' or click on them in the charts.'
         ]))
         # Pick teams to highlight on the bar chart:
@@ -118,30 +115,58 @@ def main():
     # ######### RESULTS #########
     # ###########################
 
-    with container_hist:
-        # Histogram
-        utilities_pathway.plot_hist.plot_hist(
-            df,
-            ['base', scenario],
-            highlighted_teams_input,
-            highlighted_colours,
-            len(stroke_teams_list)
-        )
-
-    with container_bar:
-        st.write('Ranked scatter:')
-        y_strs = [
-            'Percent_Thrombolysis_(mean)',
-            'Additional_good_outcomes_per_1000_patients_(mean)'
-            ]
-        # Make a scatter chart of the mean values:
-        utilities_pathway.plot_bars.plot_two_scatter_sorted_rank(
-            df,
-            scenario,
-            scenario_for_rank,
-            y_strs=y_strs,
-            n_teams=len(stroke_teams_list)
+    with container_percentage_thrombolysed:
+        st.markdown('## Percentage of patients thrombolysed')
+        cols_perc = st.columns(2)
+        with cols_perc[0]:
+            st.markdown('__Histogram for all teams__')
+            utilities_pathway.plot_hist.plot_hist(
+                df,
+                ['base', scenario],
+                highlighted_teams_input,
+                highlighted_colours,
+                len(stroke_teams_list),
+                df_column='Percent_Thrombolysis_(mean)', 
+                y_title='Thrombolysis use (%)'
             )
+        with cols_perc[1]:
+            st.markdown('__Change for each team__')
+            utilities_pathway.plot_bars.plot_scatter_sorted_rank(
+                df,
+                scenario,
+                scenario_for_rank,
+                n_teams=len(stroke_teams_list),
+                y_str='Percent_Thrombolysis_(mean)',
+                showlegend_col=True
+                )
+
+
+    with container_additional_good:
+        st.markdown('## Additional good outcomes')
+        cols_add = st.columns(2)
+        with cols_add[0]:
+            st.markdown('__Histogram for all teams__')
+            utilities_pathway.plot_hist.plot_hist(
+                df,
+                ['base', scenario],
+                highlighted_teams_input,
+                highlighted_colours,
+                len(stroke_teams_list),
+                df_column='Additional_good_outcomes_per_1000_patients_(mean)', 
+                y_title='Additional good outcomes<br>per 1000 admissions'
+            )
+
+        with cols_add[1]:
+            st.markdown('__Change for each team__')
+            utilities_pathway.plot_bars.plot_scatter_sorted_rank(
+                df,
+                scenario,
+                scenario_for_rank,
+                n_teams=len(stroke_teams_list),
+                y_str='Additional_good_outcomes_per_1000_patients_(mean)',
+                showlegend_col=True
+                )
+
 
     with tabs_results[1]:
         # Bar chart for individual team:
@@ -149,8 +174,24 @@ def main():
             st.markdown('No teams are highlighted.')
         else:
             for team in highlighted_teams_input:
-                utilities_pathway.plot_bars.\
-                    plot_bars_for_single_team(df, team)
+                cols_single_bars = st.columns(2)
+                with cols_single_bars[0]:
+                    utilities_pathway.plot_bars.plot_bars_for_single_team(
+                            df, team,
+                            df_column='Percent_Thrombolysis_(mean)',
+                            y_label='Thrombolysis use (%)',
+                            bar_colour=plotly_colours[0]
+                            )
+                with cols_single_bars[1]:
+                    utilities_pathway.plot_bars.\
+                        plot_bars_for_single_team(
+                            df, team,
+                            df_column='Additional_good_outcomes_per_1000_patients_(mean)',
+                            y_label='Additional good outcomes<br>per 1000 admissions',
+                            bar_colour=plotly_colours[1]
+                            )
+                # Write an empty header for breathing room;
+                st.markdown('# ')
 
     # ----- The end! -----
 

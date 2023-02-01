@@ -8,7 +8,7 @@ from utilities_pathway.fixed_params import scenarios_dict2, plotly_colours, \
 from utilities_pathway.plot_utils import scatter_highlighted_teams
 
 def plot_hist(
-        df, scenarios, highlighted_teams_input=[], highlighted_colours={}, n_teams='all'
+        df, scenarios, highlighted_teams_input=[], highlighted_colours={}, n_teams='all', df_column='Percent_Thrombolysis_(mean)', y_title='Thrombolysis use (%)'
         ):
 
     # If only 'base' is in the list, remove repeats:
@@ -28,69 +28,56 @@ def plot_hist(
 
     hist_colours = ['grey', plotly_colours[0]]
 
-    subplot_titles = [
-        'Thrombolysis use (%)',
-        'Additional good outcomes<br>per 1000 admissions'
-    ]
-    fig = make_subplots(rows=1, cols=2, subplot_titles=subplot_titles)
+    fig = go.Figure()
 
-    cols = [1, 2]
-    x_data_strs = [
-        'Percent_Thrombolysis_(mean)',
-        'Additional_good_outcomes_per_1000_patients_(mean)'
-        ]
     all_symbol_inds_used = []
-    for c, col in enumerate(cols):
-        showlegend = False if c > 0 else True
-        for s, scenario in enumerate(scenarios):
-            # Pull out just the data for this scenario:
-            df_scenario = df[df['scenario'] == scenario]
-            # Draw the histogram:
-            fig.add_trace(go.Histogram(
-                x=df_scenario[x_data_strs[c]],
-                xbins=dict(
-                    start=0,
-                    end=35,
-                    size=1),
-                autobinx=False,
-                marker=dict(
-                    color=hist_colours[s],
-                    opacity=0.5,
-                    line=dict(
-                        width=1.0,
-                        color=hist_colours[s]
-                        )
-                    ),
-                name=scenarios_str_list[s],
-                showlegend=showlegend,
-                legendgroup='2',
-            ),
-            row=1, col=col)
 
-        # Reduce opacity:
-        # fig.update_traces(opacity=0.5, row=1, col=col)
-        fig.update_yaxes(title='Number of hospitals', row=1, col=col)
+    # showlegend = False if c > 0 else True
+    for s, scenario in enumerate(scenarios):
+        # Pull out just the data for this scenario:
+        df_scenario = df[df['scenario'] == scenario]
+        # Draw the histogram:
+        fig.add_trace(go.Histogram(
+            x=df_scenario[df_column],
+            xbins=dict(
+                start=0,
+                end=35,
+                size=1),
+            autobinx=False,
+            marker=dict(
+                color=hist_colours[s],
+                opacity=0.5,
+                line=dict(
+                    width=1.0,
+                    color=hist_colours[s]
+                    )
+                ),
+            name=scenarios_str_list[s],
+            showlegend=True, #showlegend,
+            legendgroup='2',
+        ))
 
-        scenario_str = scenarios_dict2[scenario]
-        add_to_legends = [True, False]
-        symbols_legend, symbol_inds_used = scatter_highlighted_teams(
-            fig,
-            df,
-            scenarios,
-            highlighted_teams_input,
-            highlighted_colours,
-            scenario_str,
-            middle=0,
-            horizontal=True,
-            y_gap=2,
-            y_max=30,
-            val_str=x_data_strs[c],
-            row=1,
-            col=col,
-            add_to_legend=add_to_legends[c],
-            showlegend_scatter=add_to_legends[c]
-            )
-        all_symbol_inds_used += symbol_inds_used
+    # Reduce opacity:
+    # fig.update_traces(opacity=0.5, row=1, col=col)
+    fig.update_yaxes(title='Number of hospitals')
+
+    scenario_str = scenarios_dict2[scenario]
+    symbols_legend, symbol_inds_used = scatter_highlighted_teams(
+        fig,
+        df,
+        scenarios,
+        highlighted_teams_input,
+        highlighted_colours,
+        scenario_str,
+        middle=0,
+        horizontal=True,
+        y_gap=2,
+        y_max=30,
+        val_str=df_column,
+        add_to_legend=True, #add_to_legends[c],
+        showlegend_scatter=True, #add_to_legends[c]
+        )
+    all_symbol_inds_used += symbol_inds_used
 
     all_symbol_inds_used = sorted(list(set(all_symbol_inds_used)))
     all_symbols_used = np.array(symbols_legend)[all_symbol_inds_used]
@@ -108,8 +95,8 @@ def plot_hist(
     s_label = '+<br>Benchmark'.join(scenario_str.split('+ Benchmark'))
     names = [
         'Base',
-        f'Increase with {s_label}',
-        f'Decrease with {s_label}'
+        f'Increase with<br>{s_label}',
+        f'Decrease with<br>{s_label}'
         ]
     sizes = [4, 8, 8]
     for s in inds_to_draw:
@@ -137,24 +124,24 @@ def plot_hist(
     # Move legend to within the axis area to disguise the fact
     # it changes width depending on which labels it contains.
     fig.update_layout(legend=dict(
-        # orientation='h', #'h',
+        orientation='h', #'h',
         yanchor='top',
-        y=1,
-        xanchor='right',
-        x=1.5
+        y=-0.2,
+        # xanchor='right',
+        # x=1.5
     ))
 
+    # Manually set the legend entry width to ensure that the
+    # legend is split into two columns no matter what entries
+    # it contains.
+    fig.update_layout(legend_entrywidth=0.48)
+    fig.update_layout(legend_entrywidthmode='fraction',)
 
-    fig.update_xaxes(title='Thrombolysis use (%)', row=1, col=1)
-    fig.update_yaxes(range=[0, 30], row=1, col=1)
-    fig.update_xaxes(range=[0, 34], row=1, col=1)
+    # fig.update_yaxes(range=[0, 30]) # , row=1, col=1)
 
-    fig.update_xaxes(
-        title='Additional good outcomes<br>per 1000 admissions',
-        row=1, col=2
-        )
-    fig.update_yaxes(range=[0, 33], row=1, col=2)
-    fig.update_xaxes(range=[0, 34], row=1, col=2)
+    fig.update_xaxes(title=y_title)
+    fig.update_yaxes(range=[0, 33])
+    fig.update_xaxes(range=[0, 34])
 
     # Make hover text show all traces in one label:
     fig.update_layout(hovermode='closest') # 'x unified')
@@ -202,17 +189,65 @@ def plot_hist(
     #     [rank_scenarios[1]]*2,
     #     [vals_teams[1]]*2
 
+    hb_teams_input = st.session_state['hb_teams_input']
+
+    # Mess with the height of the plot - 
+    # depends on how much is in the legend.
+    height = 500
+    if len(scenarios) > 1:
+        # More than just base.
+        n_extra = len(scenarios[1].split('_'))
+        if n_extra == 1:
+            # base + 1 other
+            height += 20
+        elif n_extra == 2:
+            height += 35
+        elif n_extra == 3:
+            height += 50
+    height += 10 * len(hb_teams_input)
     # Reduce size of figure by adjusting margins:
     fig.update_layout(
         margin=dict(
-            l=0,
-            r=0,
+            # l=0,
+            # r=0,
             b=0,
-            t=40,
-            pad=0
+            t=0, #40,
+            # pad=0
         ),
-        height=350
+        height=height
         )
 
+
+    # Disable zoom and pan:
+    fig.update_layout(
+        # Left subplot:
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True),
+        # # Right subplot:
+        # xaxis2=dict(fixedrange=True),
+        # yaxis2=dict(fixedrange=True)
+        )
+
+    # Turn off legend click events
+    # (default is click on legend item, remove that item from the plot)
+    fig.update_layout(legend_itemclick=False)
+    # Only change the specific item being clicked on, not the whole
+    # legend group:
+    # # fig.update_layout(legend=dict(groupclick="toggleitem"))
+
+    plotly_config = {
+        # Mode bar always visible:
+        # 'displayModeBar': True,
+        # Plotly logo in the mode bar:
+        'displaylogo': False,
+        # Remove the following from the mode bar:
+        'modeBarButtonsToRemove': [
+            'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+            'lasso2d'
+            ],
+        # Options when the image is saved:
+        'toImageButtonOptions': {'height': None, 'width': None},
+        }
+
     # Write to streamlit:
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_config)
