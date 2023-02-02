@@ -1,5 +1,41 @@
-# Template streamlit app 
+# streamlit_combo_stroke
+Combined the existing stroke streamlit apps into one multipage app
 
-This repository contains a template for creating streamlit apps. It already has separate pages, separate text files for writing markdown on those pages, and a few examples of functions split off into different files. 
+| **Combined** |     **Outcome**                  | **Economics**               | **Predict**                     |**Pathway**                      |
+|:--------------------------------|:--------------------------------|:--------------------------------|:--------------------------------|:------------------------------|
+| [![][github-img]][combo-github] | [![][github-img]][outcome-github] | [![][github-img]][economics-github] | [![][github-img]][predict-github] | [![][github-img]][pathway-github] |
+| [![][streamlit-img]][combo-streamlit] | [![][streamlit-img]][outcome-streamlit] | [![][streamlit-img]][economics-streamlit] | [![][streamlit-img]][predict-streamlit] | -- |
 
-The default page topics follow the recommendations of Tom Monks and Alison Harper (in Proceedings of the Operational Research Society Simulation Workshop 2023 (SW23)). 
+[streamlit-img]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
+
+[github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+
+
+[combo-github]: https://github.com/samuel-book/streamlit_combo_stroke
+[combo-streamlit]: https://stroke-predictions.streamlit.app/
+
+[pathway-github]:
+[pathway-streamlit]: --
+
+[outcome-github]: https://github.com/samuel-book/stroke_outcome_app
+[outcome-streamlit]: https://samuel2-stroke-outcome.streamlit.app/
+
+[economics-github]:
+[economics-streamlit]: https://lifetime-stroke-outcome.streamlit.app/
+
+[predict-github]: https://github.com/samuel-book/streamlit_stroke_treatment_ml
+[predict-streamlit]: https://samuel2-stroke-predict.streamlit.app/
+
+
+[proj-url]: http://www.repostatus.org/#active
+
+[doc-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[doc-dev-url]: https://fabienbaron.github.io/OITOOLS.jl/dev
+
+[license-url]: ./LICENSE.md
+[license-img]: http://img.shields.io/badge/license-GPL3-brightgreen.svg?style=flat
+
+[build-img]: https://github.com/fabienbaron/OITOOLS.jl/workflows/CI/badge.svg
+[build-url]: https://github.com/fabienbaron/OITOOLS.jl/actions
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://samuel2-stroke-outcome.streamlit.app/)
