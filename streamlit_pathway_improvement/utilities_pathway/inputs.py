@@ -207,7 +207,6 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
 def inputs_for_bar_chart():
 
     with st.sidebar:
-        st.markdown('# Inputs')
         # Set value=True in these checkboxes
         # to have them ticked by default.
         st.markdown('Show difference due to:')

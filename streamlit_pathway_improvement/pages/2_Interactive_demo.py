@@ -54,7 +54,12 @@ def main():
         'This app runs but still needs explanatory text.'
         ]))
 
-    container_highlighted_input = st.container()
+    with st.sidebar:
+        st.markdown('# Inputs')
+        st.markdown('### Highlighted teams')
+        container_highlighted_input = st.container()
+        st.markdown('### Scenarios')
+        container_scenario_input = st.container()
 
     tabs_results = st.tabs(['All teams', 'Highlighted teams'])
     with tabs_results[0]:
@@ -94,10 +99,11 @@ def main():
     # ########## MAIN CALCULATIONS ##########
     # #######################################
 
-    df = utilities_pathway.inputs.\
-        import_stroke_data(
-            stroke_teams_list, scenarios, highlighted_teams_input
-            )
+    with container_scenario_input:
+        df = utilities_pathway.inputs.\
+            import_stroke_data(
+                stroke_teams_list, scenarios, highlighted_teams_input
+                )
 
     # Sort the data according to this input:
     for each_scenario in scenarios + [scenario_for_rank]:
