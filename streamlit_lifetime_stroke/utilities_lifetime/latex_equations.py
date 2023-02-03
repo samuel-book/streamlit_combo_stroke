@@ -72,6 +72,27 @@ def table_lg_mrs_coeffs(vd):
     return str
 
 
+
+def table_lg_mrs_coeffs_dicho(vd):
+    """
+    Table of logistic regression mRS coefficients.
+
+    This uses the first and final row of the individual mRS table
+    with the rows and column headings re-labelled.
+    """
+    str = (
+        r'''
+        | Outcome | Outcome coefficient | Mean age coefficient |
+        | --- | --- | --- |
+        | Independent | ''' + f'{vd["lg_coeffs"][3+0]}' + r'''| ''' + \
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | Dependent | ''' + f'{vd["lg_coeffs"][3+5]}' + r'''| ''' + \
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
 def pDeath_yr1_generic():
     """Probability of death in year one."""
     str = (
@@ -291,6 +312,26 @@ def table_gz_mRS_coeffs(vd):
     return str
 
 
+def table_gz_mRS_coeffs_dicho(vd):
+    """
+    Table of mRS coefficients for Gompertz predictor.
+
+    This uses the first and bottom row of the individual mRS table
+    with the rows and column headings re-labelled.
+    """
+    str = (
+        r'''
+        | Outcome | Outcome coefficient | (Outcome $\times$ adjusted age) coefficient|
+        | --- | --- | --- |
+        | Independent | ''' + f'{vd["gz_coeffs"][10+0]}' + r'''| ''' + \
+            f'{vd["gz_coeffs"][4+0]}' + r'''|
+        | Dependent | ''' + f'{vd["gz_coeffs"][10+5]}' + r'''| ''' + \
+            f'{vd["gz_coeffs"][4+5]}' + r'''|
+        '''
+        )
+    return str
+
+
 def gammaH_display(gamma):
     """
     Shows the current value of the Gompertz gamma coefficient.
@@ -459,7 +500,7 @@ def FDeath_yrn_generic():
     str = (
         r'''
         \begin{equation}\tag{6}
-        F_{t} = 1 - (1-H_t)\times(1-P_{1})
+        F_{t} = 1 - (1-P_{1})\times(1-H_t)
         \end{equation}
         '''
         )
@@ -488,9 +529,9 @@ def FDeath_yrn(vd, time_input_yr):
         F_{\textcolor{Fuchsia}{''' +
         f'{time_input_yr}' +
         r'''}} &= 1 - (1-\textcolor{red}{''' +
-        f'{vd["fhazard_list"][time_input_yr]:.4f}' +
-        r'''})\times(1-\textcolor{red}{''' +
         f'{vd["P_yr1"]:.4f}' +
+        r'''})\times(1-\textcolor{red}{''' +
+        f'{vd["fhazard_list"][time_input_yr]:.4f}' +
         r'''}) \\
         &= \textcolor{red}{''' +
         f'{100.0*vd["hazard_list"][time_input_yr]:.2f}' +
@@ -717,9 +758,9 @@ def death_time_case1_generic():
         \begin{equation*}\tag{11}
         t_{\mathrm{death}}(P) = 1 +
         \frac{1}{\gamma \times 365} \cdot
-        \log\left(
+        \ln\left(
             \frac{P^{\prime} \times \gamma}{
-                \exp{(LP_\mathrm{H})}} + 1.0
+                \exp{(LP_\mathrm{H})}} + 1
             \right)
         \end{equation*}
         '''
@@ -735,8 +776,8 @@ def death_time_case2_generic():
         r'''
         \begin{equation*}\tag{12}
         t_{\mathrm{death}}(P) =
-        \frac{\log{(1 - P)}}
-        {\log{(1 - P_1)}}\times\frac{1}{365}
+        \frac{\ln{(1 - P)}}
+        {\ln{(1 - P_1)}}\times\frac{1}{365}
         \end{equation*}
         '''
     )
@@ -754,10 +795,10 @@ def death_time_case2(tDeath, p, P_yr1):
         t_{\mathrm{death}}(\textcolor{Fuchsia}{''' +
         f'{100.0*p:.0f}' +
         r'''\%}) &=
-        \frac{\log{(1 - \textcolor{Fuchsia}{''' +
+        \frac{\ln{(1 - \textcolor{Fuchsia}{''' +
         f'{p:.4f}' +
         r'''})}}
-        {\log{(1 - \textcolor{red}{''' +
+        {\ln{(1 - \textcolor{red}{''' +
         f'{P_yr1:.4f}' +
         r'''})}}\times \frac{1}{365} \\
         &= \textcolor{red}{''' +
@@ -781,7 +822,7 @@ def death_time_case1(tDeath, prob_prime, LP_yrn, gamma, P):
         f'{100.0*P:.0f}' +
         r'''\%}) &= 1 + \frac{1}{''' +
         f'{gamma}' +
-        r''' \times 365} \cdot \log\left(\frac{\textcolor{red}{''' +
+        r''' \times 365} \cdot \ln\left(\frac{\textcolor{red}{''' +
         f'{prob_prime:.4f}' +
         r'''}\times ''' +
         f'{gamma}' +
@@ -830,14 +871,27 @@ def life_expectancy(life_expectancy, tDeath_med, age):
 # ############################## QALYs ################################
 # #####################################################################
 
+def discounted_raw_qalys_generic():
+    """QALYs from utility, discount factor, and years."""
+    str = (
+        r'''
+        \begin{align*}\tag{13}
+        Q_{y, \mathrm{raw}} =& u + \\
+        & ([a + y] - \beta_{\mathrm{av\ age}})\times \beta_{\mathrm{age}} - \\
+        & ([a + y]^2 - \beta_{\mathrm{av\ age}}^2)\times \beta_{\mathrm{age\ sq}} + \\
+        & s \times \beta_{\mathrm{sex}}
+        \end{align*}
+        '''
+    )
+    return str
+
+
 def discounted_qalys_generic():
     """QALYs from utility, discount factor, and years."""
     str = (
         r'''
-        \begin{equation*}\tag{13}
-        Q = u +
-        \frac{u}{1+d} \times
-        \frac{1 - (1+d)^{-[\mathrm{yrs}-1]}}{1 - (1+d)^{-1}}
+        \begin{equation*}\tag{14}
+        Q_{y} = Q_{y,\mathrm{raw}} + \frac{1}{(1 + d)^{y}}
         \end{equation*}
         '''
     )
@@ -971,6 +1025,26 @@ def table_ae_mrs_coeffs(vd):
     return str
 
 
+def table_ae_mrs_coeffs_dicho(vd):
+    """
+    Table of outcome coefficients for A&E admissions model.
+
+    This uses the first and final rows of the table for the
+    individual mRS model, with some re-labelling.
+    """
+    str = (
+        r'''
+        | Outcome | Outcome coefficient | Mean age coefficient |
+        | --- | --- | --- |
+        | Independent | ''' + f'{vd["A_E_mRS"][0]}' + r'''| ''' + \
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | Dependent | ''' + f'{vd["A_E_mRS"][5]}'  + r'''| ''' + \
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
 def ae_count_generic():
     """Model for number of A&E admissions."""
     str = (
@@ -1057,17 +1131,17 @@ def ae_count(vd):
         \begin{align*}
         \mathrm{Count} &=
         \exp{
-            \left( \textcolor{red}{''' +
+            \left( ''' +
             f'{vd["A_E_coeffs"][3]}' +
-            r'''} \times \textcolor{red}{''' +
+            r''' \times \textcolor{red}{''' +
             f'{vd["LP_A_E"]:.4f}' +
             r'''} \right)
             }
         \times \textcolor{red}{''' +
         f'{vd["survival_meds_IQRs"][vd["mrs"], 0]:.2f}' +
-        r'''}^{\textcolor{red}{''' +
+        r'''}^{''' +
         f'{vd["A_E_coeffs"][3]}' +
-        r'''}} \\
+        r'''} \\
         &= \textcolor{red}{''' +
         f'{vd["A_E_count_list"][vd["mrs"]]:.4f}' +
         r'''}
@@ -1119,13 +1193,33 @@ def table_nel_mrs_coeffs(vd):
     return str
 
 
+def table_nel_mrs_coeffs_dicho(vd):
+    """
+    Table of mRS coefficients for the NEL count model.
+
+    This uses the first and final rows of the table for the
+    individual mRS model, with some re-labelling.
+    """
+    str = (
+        r'''
+        | Outcome | Outcome coefficient | Mean age coefficient |
+        | --- | --- | --- |
+        | Independent | ''' + f'{vd["NEL_mRS"][0]}' + r'''| ''' + \
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | Dependent | ''' + f'{vd["NEL_mRS"][5]}'  + r'''| ''' + \
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
 def nel_bed_days_generic():
     """NEL count model."""
     str = (
         r'''
         \begin{equation}\tag{16}
         \mathrm{Count} =
-            -\log{\left(
+            -\ln{\left(
             \frac{1}{
                 1+ [\mathrm{yrs}\times\exp{(-LP_\mathrm{NEL})} ] ^{
                     1/ \gamma_{\mathrm{NEL}}}
@@ -1203,16 +1297,16 @@ def nel_bed_days(vd):
         r'''
         \begin{align*}
         \mathrm{Count} &=
-            -\log{\left(
+            -\ln{\left(
             \frac{1}{
                 1+ [\textcolor{red}{''' +
                 f'{vd["survival_meds_IQRs"][vd["mrs"], 0]:.2f}' +
                 r'''} \times \exp{(-\textcolor{red}{''' +
                 f'{vd["LP_NEL"]:.4f}' +
                 r'''})} ]^{
-                1/ \textcolor{red}{''' +
+                1/ ''' +
                 f'{vd["NEL_coeffs"][3]}' +
-                r'''}}}
+                r'''}}
             \right)} \\
             & = \textcolor{red}{''' +
             f'{vd["NEL_count_list"][vd["mrs"]]:.4f}' +
@@ -1264,13 +1358,33 @@ def table_el_mrs_coeffs(vd):
     return str
 
 
+def table_el_mrs_coeffs_dicho(vd):
+    """
+    Table of mRS coefficients for the EL bed days model.
+
+    This uses the first and final rows of the table for the
+    individual mRS model, with some re-labelling.
+    """
+    str = (
+        r'''
+        | Outcome | Outcome coefficient | Mean age coefficient |
+        | --- | --- | --- |
+        | Independent | ''' + f'{vd["EL_mRS"][0]}' + r'''| ''' + \
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | Dependent | ''' + f'{vd["EL_mRS"][5]}'  + r'''| ''' + \
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
 def el_bed_days_generic():
     """Model for counting EL bed days."""
     str = (
         r'''
         \begin{equation}\tag{18}
         \mathrm{Count} =
-            -\log{\left(
+            -\ln{\left(
             \frac{1}{
                 1+ [\mathrm{yrs} \times \exp{(-LP_\mathrm{EL})} ] ^{
                     1/ \gamma_{\mathrm{EL}}}
@@ -1348,16 +1462,16 @@ def el_bed_days(vd):
         r'''
         \begin{align*}
         \mathrm{Count} &=
-            -\log{\left(
+            -\ln{\left(
             \frac{1}{
                 1+ [\textcolor{red}{''' +
                 f'{vd["survival_meds_IQRs"][vd["mrs"], 0]:.2f}' +
                 r'''} \times \exp{(-\textcolor{red}{''' +
                 f'{vd["LP_EL"]:.4f}' +
                 r'''})} ]^{
-                1/ \textcolor{red}{''' +
+                1/ ''' +
                 f'{vd["EL_coeffs"][3]}' +
-                r'''}}}
+                r'''}}
             \right)} \\
             & = \textcolor{red}{''' +
             f'{vd["EL_count_list"][vd["mrs"]]:.4f}' +
@@ -1404,8 +1518,38 @@ def table_time_in_care_coeffs(vd):
         | 4 | ''' +
             f'{100.0*vd["perc_care_home_over70"][4]:.4f}' + \
             r'''\% | ''' + \
-            f'{100.0*vd["perc_care_home_not_over70"][4]:.4f}' + r'''\%
+            f'{100.0*vd["perc_care_home_not_over70"][4]:.4f}'
+            + r'''\%
         | 5 | ''' +
+            f'{100.0*vd["perc_care_home_over70"][5]:.4f}' + \
+            r'''\% | ''' + \
+            f'{100.0*vd["perc_care_home_not_over70"][5]:.4f}' + r'''\%
+        '''
+        )
+    return str
+
+
+def table_time_in_care_coeffs_dicho(vd):
+    """
+    Table of coefficients for the time in residential care model.
+
+    This uses the first and final rows of the table for the
+    individual mRS model, with some re-labelling.
+
+    The unicode characters \U00002002 are used to fudge right-alignment
+    of the values by providing an extra space in front of coefficients
+    with fewer digits before the decimal point.
+    """
+    str = (
+        r'''
+        | Outcome | Age over 70 | Age not over 70 |
+        | --- | --- | --- |
+        | Independent | ''' +
+            f'\U00002002{100.0*vd["perc_care_home_over70"][0]:.4f}' + \
+            r'''\% | ''' + \
+            f'\U00002002{100.0*vd["perc_care_home_not_over70"][0]:.4f}'
+            + r'''\%
+        | Dependent | ''' +
             f'{100.0*vd["perc_care_home_over70"][5]:.4f}' + \
             r'''\% | ''' + \
             f'{100.0*vd["perc_care_home_not_over70"][5]:.4f}' + r'''\%

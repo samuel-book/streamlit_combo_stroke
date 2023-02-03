@@ -46,7 +46,7 @@ def main():
     # ##### START OF SCRIPT #####
     # ###########################
     # Set up the tab title and emoji:
-    # page_setup()
+    page_setup()
 
     # Page title:
     st.markdown('# Lifetime mortality')
@@ -67,25 +67,32 @@ def main():
     # Place the user inputs in the sidebar:
     with st.sidebar:
         st.markdown('## Select the patient details.')
-
-        age_input, sex_input_str, sex_input, mRS_input = \
-            utilities_lifetime.container_inputs.patient_detail_inputs()
-        # sex_input_str is a string, either "Female" or "Male".
-        # sex_input is an integer,  0 for female and 1 for male.
-        # age_input and mRS_input are both integers.
+        # Place this container now and add stuff to it later:
+        container_patient_detail_inputs = st.container()
 
         st.markdown('## Model type')
         st.markdown(''.join([
             'Choose between showing results for each mRS band individually ',
             '(mRS), or aggregating results into two categories (Dichotomous). '
         ]))
-
-        model_input_str = utilities_lifetime.container_inputs.model_type_input()
-        # model_input_str is a string, either "mRS" or "Dichotomous".
+        # Place this container now and add stuff to it later:
+        container_model_type_inputs = st.container()
 
         # Add an empty header for breathing room in the sidebar:
         st.markdown('# ')
 
+
+    with container_model_type_inputs:
+        model_input_str = utilities_lifetime.container_inputs.model_type_input()
+        # model_input_str is a string, either "mRS" or "Dichotomous".
+
+    with container_patient_detail_inputs:
+        age_input, sex_input_str, sex_input, mRS_input = \
+            utilities_lifetime.container_inputs.\
+                patient_detail_inputs(model_input_str)
+        # sex_input_str is a string, either "Female" or "Male".
+        # sex_input is an integer,  0 for female and 1 for male.
+        # age_input and mRS_input are both integers.
 
     # ##################################
     # ########## CALCULATIONS ##########
@@ -269,7 +276,9 @@ def main():
     with tabs[3]:
         st.header('Cost-effectiveness')
         utilities_lifetime.container_costeffectiveness.main(
-            table_cost_effectiveness, variables_dict)
+            table_cost_effectiveness,
+            variables_dict
+            )
 
     # ----- The end! -----
 
