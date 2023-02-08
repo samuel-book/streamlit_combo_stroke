@@ -871,14 +871,110 @@ def life_expectancy(life_expectancy, tDeath_med, age):
 # ############################## QALYs ################################
 # #####################################################################
 
-def discounted_raw_qalys_generic():
-    """QALYs from utility, discount factor, and years."""
+
+def table_qaly_coeffs(vd):
+    """Table of coefficients for QALY linear predictor."""
     str = (
         r'''
-        \begin{align*}\tag{13}
+        | Description | Coefficient |
+        | --- | --- |
+        | Adjusted age | ''' + f'{vd["qaly_age_coeff"]}' + r'''|
+        | (Adjusted age)$^{2}$ | ''' + f'{vd["qaly_age2_coeff"]:.7f}' + r'''|
+        | Sex | ''' + f'{vd["qaly_sex_coeff"]}' + r'''|
+        '''
+        )
+    return str
+
+
+def table_mean_age_coeffs(vd):
+    """
+    Table of mean age coefficients (as in year 1).
+    """
+    str = (
+        r'''
+        | mRS | Utility, $u$ | Mean age coefficient|
+        | --- | --- | --- |
+        | 0 | ''' +
+            f'{vd["utility_list"][0]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | 1 | '''  +
+            f'{vd["utility_list"][1]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][1]}' + r'''|
+        | 2 | '''  +
+            f'{vd["utility_list"][2]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][2]}' + r'''|
+        | 3 | '''  +
+            f'{vd["utility_list"][3]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][3]}' + r'''|
+        | 4 | '''  +
+            f'{vd["utility_list"][4]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][4]}' + r'''|
+        | 5 | ''' +
+            f'{vd["utility_list"][5]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
+def table_mean_age_coeffs_dicho(vd):
+    """
+    Table of mean age coefficients (as in year 1)
+
+    First and final rows of the individual mRS table
+    with rows re-labelled for the dichotomous model.
+    """
+    str = (
+        r'''
+        | Outcome | Utility, $u$ | Mean age coefficient|
+        | --- | --- | --- |
+        | Independent | ''' +
+            f'{vd["utility_list"][0]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][0]}' + r'''|
+        | Dependent | ''' +
+            f'{vd["utility_list"][5]}' + r'''| ''' +
+            f'{vd["lg_mean_ages"][5]}' + r'''|
+        '''
+        )
+    return str
+
+
+def discounted_raw_qalys_generic():
+    """
+    QALYs from utility, discount factor, and years.
+
+    Similar format to other linear predictors.
+    """
+    str = (
+        r'''
+        \begin{equation}\tag{13}
+        Q_{y, \mathrm{raw}} =
+            u +
+            \displaystyle\sum_{i=1}^{n}
+            \beta_{\mathrm{Q},\ i}
+            \cdot
+            X_{\mathrm{Q},\ i,\ y}
+        \end{equation}
+        '''
+        )
+    return str
+
+
+def discounted_raw_qalys_symbols_generic():
+    """
+    Version of the QALYs linear predictor that's more explicit.
+    Changed to the usual LP equation to avoid defining more symbols.
+
+    QALYs from utility, discount factor, and years.
+    """
+    str = (
+        r'''
+        \begin{align*}#\tag{15}
         Q_{y, \mathrm{raw}} =& u + \\
-        & ([a + y] - \beta_{\mathrm{av\ age}})\times \beta_{\mathrm{age}} - \\
-        & ([a + y]^2 - \beta_{\mathrm{av\ age}}^2)\times \beta_{\mathrm{age\ sq}} + \\
+        & ([a + y] - \beta_{\mathrm{av\ age}})
+            \times \beta_{\mathrm{age}} - \\
+        & ([a + y]^2 - \beta_{\mathrm{av\ age}}^2)
+            \times \beta_{\mathrm{age\ sq}} + \\
         & s \times \beta_{\mathrm{sex}}
         \end{align*}
         '''
@@ -891,14 +987,163 @@ def discounted_qalys_generic():
     str = (
         r'''
         \begin{equation*}\tag{14}
-        Q_{y} = Q_{y,\mathrm{raw}} + \frac{1}{(1 + d)^{y}}
+        Q_{y} = Q_{y,\mathrm{raw}} \times \frac{1}{(1 + d)^{y}}
         \end{equation*}
         '''
     )
     return str
 
 
-def discounted_qalys(vd):
+def discounted_qalys_total_generic():
+    """Sum discounted resources in all years to get total use."""
+    str = (
+        r'''
+        \begin{equation*}\tag{15}
+        Q = \displaystyle\sum_{y=1}^{m} Q_{y}
+        \end{equation*}
+        '''
+    )
+    return str
+
+
+def discounted_raw_qalys(vd, year, qaly_raw):
+    """
+    Version of the QALYs linear predictor that's more explicit.
+    Changed to the usual LP equation to avoid defining more symbols.
+
+    QALYs from utility, discount factor, and years.
+    """
+    str = (
+        r'''
+        \begin{align*}
+        Q_{\textcolor{Fuchsia}{''' +
+        f'{year}' +
+        r'''}, \mathrm{raw}} =& \textcolor{Fuchsia}{'''
+        f'{vd["utility_list"][vd["mrs"]]}' +
+        r'''} + & \mathrm{utility} \\
+        & ([\textcolor{red}{''' +
+        f'{vd["age"]}' + r'''} +
+        \textcolor{Fuchsia}{''' +
+        f'{year}' +
+        r'''}] - \textcolor{Fuchsia}{''' +
+        f'{vd["lg_mean_ages"][vd["mrs"]]}' +
+        r'''}) \times ''' +
+        f'{vd["qaly_age_coeff"]}' +
+        r''' - & \mathrm{age} \\
+        & ([\textcolor{red}{''' +
+        f'{vd["age"]}' + r'''} +
+        \textcolor{Fuchsia}{''' +
+        f'{year}' +
+        r'''}]^{2} - \textcolor{Fuchsia}{''' +
+        f'{vd["lg_mean_ages"][vd["mrs"]]}' +
+        r'''}^{2}) \times ''' +
+        f'{vd["qaly_age2_coeff"]:.7f}' +
+        r''' + & \mathrm{age}^{2} \\
+        & \textcolor{red}{''' +
+        f'{vd["sex"]}' +
+        r'''} \times ''' +
+        f'{vd["qaly_sex_coeff"]}' +
+        r''' & \mathrm{sex}^{*} \\
+        =& \textcolor{red}{''' +
+        f'{qaly_raw:.3f}' +
+        r'''}
+        \end{align*}
+        '''
+    )
+    return str
+
+
+def discounted_qalys(vd, qaly_raw, year, qaly, frac):
+    """QALYs from utility, discount factor, and years."""
+    # Check if this is the final year.
+    # If it is, add an extra string to explain that we reduce
+    # the value to match the fraction of the year that is lived in.
+    if frac == 0:
+        extra_str = ''
+    else:
+        extra_str = r'''\times \textcolor{red}{''' + f'{frac:.2f}' + r'''}'''
+
+    str = (
+        r'''
+        \begin{align*}
+        Q_{\textcolor{Fuchsia}{''' +
+        f'{year}' +
+        r'''}} &= \textcolor{red}{''' +
+        f'{qaly_raw:.3f}' +
+        r'''} \times \frac{1}{(1 + ''' +
+        f'{vd["discount_factor_QALYs_perc"]/100.0:.4f}' +
+        r''')^{\textcolor{Fuchsia}{''' +
+        f'{year}' +
+        r'''}}} ''' +
+        extra_str +
+        r'''\\
+        &= \textcolor{red}{''' +
+        f'{qaly:.3f}' +
+        r'''}
+        \end{align*}
+        '''
+    )
+    return str
+
+
+def build_table_str_qalys(
+        qalys_yraw, qalys_y, discounted_sum
+        ):
+    """
+    Table of raw and discounted QALYs in each year 
+    up to the median survival year.
+
+    For each year, add another row to the table.
+    If the table is long, cut out the middle and replace with "...".
+    """
+    # ----- Function for tables -----
+    # Set up header:
+    table_rows = (
+        r'''
+        | Year | $Q_{y, \mathrm{raw}}$ | $Q_{y}$ |
+        | --- | --- | --- |
+        '''
+    )
+
+    max_year = len(qalys_y)+1
+    # When the max_year is large, end up with a hugely long table.
+    # Instead only show the first four and final four rows,
+    # with a separating row of "..." in the middle.
+    # Set the conditions for the rows to skip:
+    if max_year > 10:
+        # Long table:
+        skip_min = 5
+        skip_max = max_year - 5
+    else:
+        # Table is short enough that we can show the whole thing:
+        # Set to values we'll never reach:
+        skip_min = max_year + 10
+        skip_max = max_year + 10
+
+    for i, year in enumerate(range(1, max_year)):
+        if year < skip_min or year > skip_max:
+            # Valid entry, so add a row of values to the table:
+            row = r'''| ''' + f'{year}' + r''' |  ''' + \
+                f'{qalys_yraw[i]:.4f}' + r''' | ''' +\
+                f'{qalys_y[i]:.4f}' + r''' |
+        '''
+            # ^ don't move these quote marks!!!
+            # it looks silly but is necessary for the markdown table,
+            # so that each row starts on a new line but is not indented.
+            table_rows += row
+        else:
+            # Either do nothing, or...
+            if year == skip_min:
+                # Add this row of ... to the table:
+                table_rows += r'''| ... | ... | ... |
+        '''
+        # ^ don't move these quote marks either!!
+    # Add a final row to show the sum of the discounted resource values:
+    table_rows += r'''| | Sum: | ''' + f'{discounted_sum:.4f}' + r'''|'''
+    return table_rows
+
+
+def discounted_qalys_v7(vd):
     """
     QALYs from utility, discount factor, and years,
     with symbols replaced with variables from the calculations.
@@ -931,13 +1176,13 @@ def discounted_qalys(vd):
 def discounted_qalys_generic_v7():
     """
     QALYs from utility, discount factor, and years.
-    
+
     This was used for an older version of the Excel sheet, NHCT v7.0.
     It now goes unused in Streamlit.
     """
     str = (
         r'''
-        \begin{equation*}\tag{13}
+        \begin{equation*}#\tag{13}
         Q = u +
         \frac{u}{1+d} \times
         \frac{1 - (1+d)^{-[\mathrm{yrs}-1]}}{1 - (1+d)^{-1}}
@@ -1049,7 +1294,7 @@ def ae_count_generic():
     """Model for number of A&E admissions."""
     str = (
         r'''
-        \begin{equation}\tag{14}
+        \begin{equation}\tag{16}
         \mathrm{Count (yrs)} =
         \exp{
             \left(\gamma_\mathrm{AE}
@@ -1068,7 +1313,7 @@ def ae_lp_generic():
     """Linear predictor for A&E admissions model."""
     str = (
         r'''
-        \begin{equation}\tag{15}
+        \begin{equation}\tag{17}
         LP_{\mathrm{AE}} =
         \alpha_{\mathrm{AE}} +
         \displaystyle\sum_{i=1}^{n}
@@ -1219,7 +1464,7 @@ def nel_bed_days_generic():
     """NEL count model."""
     str = (
         r'''
-        \begin{equation}\tag{16}
+        \begin{equation}\tag{18}
         \mathrm{Count (yrs)} =
             -\ln{\left(
             \frac{1}{
@@ -1237,7 +1482,7 @@ def nel_lp_generic():
     """Linear predictor for the NEL count model."""
     str = (
         r'''
-        \begin{equation}\tag{17}
+        \begin{equation}\tag{19}
         LP_{\mathrm{NEL}} =
         \alpha_{\mathrm{NEL}} +
         \displaystyle\sum_{i=1}^{n}
@@ -1386,7 +1631,7 @@ def el_bed_days_generic():
     """Model for counting EL bed days."""
     str = (
         r'''
-        \begin{equation}\tag{18}
+        \begin{equation}\tag{20}
         \mathrm{Count (yrs)} =
             -\ln{\left(
             \frac{1}{
@@ -1404,7 +1649,7 @@ def el_lp_generic():
     """Linear predictor for the EL bed days model."""
     str = (
         r'''
-        \begin{equation}\tag{19}
+        \begin{equation}\tag{21}
         LP_{\mathrm{EL}} =
         \alpha_{\mathrm{EL}} +
         \displaystyle\sum_{i=1}^{n}
@@ -1568,7 +1813,7 @@ def tic_generic():
     """Model for time spent in residential care."""
     str = (
         r'''
-        \begin{equation}\tag{20}
+        \begin{equation}\tag{22}
         \mathrm{Count (yrs)} =
         95\% \times c \times \mathrm{yrs}
         \end{equation}
@@ -1614,7 +1859,7 @@ def count_yeari_generic():
     """
     str = (
         r'''
-        \begin{equation*}\tag{21}
+        \begin{equation*}\tag{23}
         \mathrm{Count}_i =
         \mathrm{Count}(\mathrm{yrs}=i) -
         \mathrm{Count}(\mathrm{yrs}=[i-1])
@@ -1628,7 +1873,7 @@ def discounted_resource_generic(vd):
     """Converting resource use to discounted resource use."""
     str = (
         r'''
-        \begin{equation*}\tag{22}
+        \begin{equation*}\tag{24}
         D_i = \mathrm{Count}_i \times \frac{1}{\left(
             1 + ''' +
             f'{vd["discount_factor_QALYs_perc"]/100.0:.4f}' +
@@ -1644,7 +1889,7 @@ def discounted_resource_total_generic():
     """Sum discounted resources in all years to get total use."""
     str = (
         r'''
-        \begin{equation*}\tag{23}
+        \begin{equation*}\tag{25}
         D =
         c \times \displaystyle\sum_{i=1}^{m}
         D_i

@@ -846,8 +846,8 @@ def write_details_discounted_resource_use(vd):
     with tabs[0]:
         # A&E admissions:
         caption_str = ''.join([
-            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [14] ',
-            'and "Discounted use" is from Equation [22].'
+            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [16] ',
+            'and "Discounted use" is from Equation [24].'
             ])
         write_details_discounted_resource(
             vd, "A_E_counts", "discounted_list_A_E",
@@ -855,8 +855,8 @@ def write_details_discounted_resource_use(vd):
     with tabs[1]:
         # NEL bed days:
         caption_str = ''.join([
-            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [16] ',
-            'and "Discounted use" is from Equation [22].'
+            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [18] ',
+            'and "Discounted use" is from Equation [24].'
             ])
         write_details_discounted_resource(
             vd, "NEL_counts", "discounted_list_NEL",
@@ -865,8 +865,8 @@ def write_details_discounted_resource_use(vd):
     with tabs[2]:
         # EL bed days:
         caption_str = ''.join([
-            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [18] ',
-            'and "Discounted use" is from Equation [22].'
+            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [20] ',
+            'and "Discounted use" is from Equation [24].'
             ])
         write_details_discounted_resource(
             vd, "EL_counts", "discounted_list_EL",
@@ -875,8 +875,8 @@ def write_details_discounted_resource_use(vd):
     with tabs[3]:
         # Time in care:
         caption_str = ''.join([
-            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [20] ',
-            'and "Discounted use" is from Equation [22].'
+            '$\mathrm{Count}(\mathrm{yrs})$ is from Equation [22] ',
+            'and "Discounted use" is from Equation [24].'
             ])
         write_details_discounted_resource(
             vd, "care_years", "discounted_list_care",
@@ -921,36 +921,39 @@ def write_details_discounted_resource(
     # Total discounted use:
     discounted_sum = np.sum(discounted_i)
 
-    # ----- Write table with the values -----
-    table_ae = utilities_lifetime.latex_equations.\
-        build_table_str_resource_count(
-            counts_yrs, counts_i, discounted_i, discounted_sum)
-    st.markdown(table_ae)
-    st.caption(caption_str)
+    cols = st.columns([0.45, 0.3])
+    with cols[0]:
+        # ----- Write table with the values -----
+        table_ae = utilities_lifetime.latex_equations.\
+            build_table_str_resource_count(
+                counts_yrs, counts_i, discounted_i, discounted_sum)
+        st.markdown(table_ae)
+        st.caption(caption_str)
 
-    # ----- Example calculation of discounted resource -----
-    st.markdown(''.join([
-        'Example of the calculation of the discounted resource ',
-        'for a chosen year:'
-    ]))
+    with cols[-1]:
+        # ----- Example calculation of discounted resource -----
+        st.markdown(''.join([
+            'Example of the calculation of the discounted resource ',
+            'for a chosen year:'
+        ]))
 
-    # ----- Input number of years -----
-    # Give this slider a key or streamlit throws warnings
-    # about multiple identical sliders.
-    time_input_yr = st.slider(
-        'Choose number of years for this example',
-        min_value=1,
-        max_value=len(counts_i),
-        value=2,
-        key='TimeForDiscountTable' + cost_str
-        )
-    for year in [time_input_yr]:
-        latex_example_di = utilities_lifetime.latex_equations.\
-            discounted_resource(
-                vd, counts_i[year-1], year, discounted_i[year-1])
-        st.latex(latex_example_di)
+        # ----- Input number of years -----
+        # Give this slider a key or streamlit throws warnings
+        # about multiple identical sliders.
+        time_input_yr = st.slider(
+            'Choose number of years for this example',
+            min_value=1,
+            max_value=len(counts_i),
+            value=2,
+            key='TimeForDiscountTable' + cost_str
+            )
+        for year in [time_input_yr]:
+            latex_example_di = utilities_lifetime.latex_equations.\
+                discounted_resource(
+                    vd, counts_i[year-1], year, discounted_i[year-1])
+            st.latex(latex_example_di)
 
-    # ----- Calculate discounted cost -----[
+    # ----- Calculate discounted cost -----
     st.markdown(''.join([
         'The total discounted cost is then: '
     ]))
