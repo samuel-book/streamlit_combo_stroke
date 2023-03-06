@@ -131,7 +131,8 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
                 df_team['Features']
                 ), axis=-1),
             name=trace_name,
-            showlegend=leggy
+            showlegend=leggy,
+            # legendgroup='2',
             ))
 
         if pretty_jitter == True:
@@ -153,7 +154,8 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
                     [df_short['Sorted rank']]
                     ), axis=-1),
                 name='Final Probability', #df_short['HB team'],
-                showlegend=show_legend_dot
+                showlegend=show_legend_dot,
+                # legendgroup='2',
                 ))
             # st.write(df_short['Probabilities'], y_jigg[ind], colour, df_short['HB team'])
 
@@ -211,7 +213,8 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
         y0=y_vals[-1],
         orientation='h',
         name='Final Probability',
-        points=False  # 'all'
+        points=False,  # 'all'
+        # legendgroup='2',
         ))
 
     # Update x axis limits:
@@ -228,8 +231,10 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
         xaxis_title='Probability of thrombolysis (%)',
         # Add some blank lines below "feature" to help position it.
         yaxis_title='Feature<br> <br> <br>',
-        legend_title='Highlighted team'
+        legend_title='Highlighted team'  # + '~'*20
         )
+
+
     # fig.update_layout(
     #     yaxis=dict(
     #         tickmode='array',
@@ -352,13 +357,17 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
         name='Final Probability',
         showlegend=False,
         hoverinfo='skip',
+        # legendgroup='2',
         ))
 
     # Flip y-axis so bars are read from top to bottom.
     # fig['layout']['yaxis']['autorange'] = 'reversed'
     # fig['layout']['yaxis2']['autorange'] = 'reversed'
     # Reduce size of figure by adjusting margins:
-    fig.update_layout(margin=dict(l=200, r=150, b=80, t=20), height=600)
+    fig.update_layout(margin=dict(
+        l=200, 
+        r=20,  # 150, 
+        b=80, t=20), height=600)
     # Make the y axis title stand out from the tick labels:
     # fig.update_yaxes(automargin=True)
     # Move legend to side
@@ -366,22 +375,49 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
         orientation='v', #'h',
         yanchor='top',
         y=1,
-        xanchor='left',
-        x=1.03
+        xanchor='right',
+        x=1.03,
+        # itemwidth=50
     ))
     # Remove y=0 line:
     fig.update_yaxes(zeroline=False)
     # Remove other vertical grid lines:
     fig.update_xaxes(showgrid=False)
 
-    # Write to streamlit:
+
+    # plotly_config = {
+    #     # Mode bar always visible:
+    #     # 'displayModeBar': True,
+    #     # Plotly logo in the mode bar:
+    #     'displaylogo': False,
+    #     # Remove the following from the mode bar:
+    #     'modeBarButtonsToRemove': [
+    #         'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+    #         'lasso2d'
+    #         ],
+    #     # Options when the image is saved:
+    #     'toImageButtonOptions': {'height': None, 'width': None},
+    #     }
+
+
+    # This doesn't work with plotly_events:
+    # fig.update_layout(modebar_remove=[
+    #     'zoom', 'pan', 'select', 'zoomIn',
+    #     'zoomOut', 'autoScale', 'lasso2d'
+    #     ])
+
+    # # Fake a legend with annotations:
+    # fig.add_annotation(dict(x=1.0, y=0.7, xref="paper", yref="paper", 
+    #                         text='testing', showarrow=False))
+
+    # # Write to streamlit:
     # st.plotly_chart(fig, use_container_width=True)
     # Clickable version:
     # Write the plot to streamlit, and store the details of the last
     # bar that was clicked:
     selected_waterfall = plotly_events(
         fig, click_event=True, key='waterfall_combo',
-        override_height=600, override_width='100%')
+        override_height=600, override_width='100%')#, config=plotly_config)
 
     callback_waterfall(selected_waterfall, inds_order, stroke_team_list, pretty_jitter=pretty_jitter)
 
@@ -433,6 +469,10 @@ def callback_waterfall(selected_waterfall, inds_order, stroke_team_list, pretty_
             ind = inds_order[curve_selected]
             # Find which team this is:
             team_selected = stroke_team_list[ind]
+
+            # Update the label if this is "St Elsewhere":
+            if team_selected == default_highlighted_team:
+                team_selected = display_name_of_default_highlighted_team
 
             # Copy the current highlighted teams list
             highlighted_teams_list_updated = \
@@ -666,15 +706,16 @@ def box_plot_of_prob_shifts(
                 else:
                     df_team = team
 
-                if team == display_name_of_default_highlighted_team:
-                    name_for_customdata = team
-                else:
-                    name_for_customdata = hb_team
                 # Index in the big array:
                 ind = np.where(sorted_results['Stroke team'].values == df_team)[0]
                 hb_team = sorted_results['HB team'].values[ind][0]
                 colour = st.session_state['highlighted_teams_colours'][hb_team]
                 team_effect = effect_vals[t]
+
+                if team == display_name_of_default_highlighted_team:
+                    name_for_customdata = team
+                else:
+                    name_for_customdata = hb_team
 
                 # fig.add_vline(x=team_effect, line=dict(color=colour))
                 # Add a separate marker for each grid (all, bench, non-bench)
@@ -773,8 +814,22 @@ def box_plot_of_prob_shifts(
                 )
             # st.write(fig.data[0].hovertemplate)
 
+            plotly_config = {
+                # Mode bar always visible:
+                # 'displayModeBar': True,
+                # Plotly logo in the mode bar:
+                'displaylogo': False,
+                # Remove the following from the mode bar:
+                'modeBarButtonsToRemove': [
+                    'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+                    'lasso2d'
+                    ],
+                # Options when the image is saved:
+                'toImageButtonOptions': {'height': None, 'width': None},
+                }
+
             # Write to streamlit:
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, config=plotly_config)
 
 
 def make_pretty_jitter_offsets(final_probs):

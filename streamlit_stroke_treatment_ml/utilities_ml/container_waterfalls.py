@@ -30,11 +30,11 @@ def show_waterfalls_max_med_min(
         indices_high_mid_low,
         sorted_results
         ):
-    titles = [
-        'Maximum probability',
-        'Median probability',
-        'Minimum probability'
-        ]
+    # titles = [
+    #     'Maximum probability',
+    #     'Median probability',
+    #     'Minimum probability'
+    #     ]
     for i_here, i in enumerate(indices_high_mid_low):
         # Find the data:
         sv_to_display = shap_values_probability_extended_high_mid_low[i_here]
@@ -47,13 +47,13 @@ def show_waterfalls_max_med_min(
         # Final probability:
         final_prob = sorted_results['Probability'].loc[i]
 
-        title = '__' + titles[i_here] + ' of thrombolysis__'
+        # title = '__' + titles[i_here] + ' of thrombolysis__'
         team_info = (
             'Team ' +
             sorted_results['Stroke team'].loc[i] +
             f' (Rank {sorted_rank} of {sorted_results.shape[0]})'
         )
-        st.markdown(title)
+        # st.markdown(title)
         # st.markdown(team_info)
         # Plot:
         plot_shap_waterfall(sv_to_display, final_prob, team_info)
@@ -359,5 +359,19 @@ def plot_shap_waterfall(shap_values, final_prob, title='', n_to_show=9):
     # fig['layout']['yaxis']['autorange'] = 'reversed'
     # fig['layout']['yaxis2']['autorange'] = 'reversed'
 
+    plotly_config = {
+        # Mode bar always visible:
+        # 'displayModeBar': True,
+        # Plotly logo in the mode bar:
+        'displaylogo': False,
+        # Remove the following from the mode bar:
+        'modeBarButtonsToRemove': [
+            'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+            'lasso2d'
+            ],
+        # Options when the image is saved:
+        'toImageButtonOptions': {'height': None, 'width': None},
+        }
+
     # Write to streamlit:
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_config)
