@@ -6,7 +6,7 @@ Combined the existing stroke streamlit apps into one multipage app.
 |:--------------------------------|:--------------------------------|:--------------------------------|:--------------------------------|:------------------------------|
 | [![][github-img]][combo-github] | [![][github-img]][outcome-github] | [![][github-img]][economics-github] | [![][github-img]][predict-github] | [![][github-img]][pathway-github] |
 | [![][streamlit-img]][combo-streamlit] | [![][streamlit-img]][outcome-streamlit] | [![][streamlit-img]][economics-streamlit] | [![][streamlit-img]][predict-streamlit] | -- |
-| ![][combo-qr] |  ![][outcome-qr] | ![][economics-qr] | ![][predict-qr] | -- |
+| [![][combo-qr]][combo-streamlit] |  [![][outcome-qr]][outcome-streamlit] | [![][economics-qr]][economics-streamlit] | [![][predict-qr]][predict-streamlit] | -- |
 
 [streamlit-img]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
 
