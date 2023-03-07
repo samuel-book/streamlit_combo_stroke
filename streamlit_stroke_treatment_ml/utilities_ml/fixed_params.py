@@ -1,5 +1,7 @@
 import streamlit as st
 
+# For drawing a sneaky bar:
+import base64
 
 def page_setup():
     # ----- Page setup -----
@@ -11,6 +13,20 @@ def page_setup():
         # layout='wide'
         )
     # n.b. this can be set separately for each separate page if you like.
+
+
+def draw_sneaky_bar():
+    # Add an invisible bar that's wider than the column:
+    file_ = open('./utilities_ml/sneaky_bar.png', "rb")
+    contents = file_.read()
+    data_url = base64.b64encode(contents).decode("utf-8")
+    file_.close()
+    st.markdown(
+        f'''<center><img src="data:image/png;base64,{data_url}" width="500"
+            height="1" alt="It's a secret to everybody">''',
+        unsafe_allow_html=True,
+    )
+
 
 # Starting probability in the model:
 starting_probabilities = 0.2995270168908044

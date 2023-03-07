@@ -11,8 +11,6 @@ done in functions stored in files named container_(something).py
 # ----- Imports -----
 import streamlit as st
 import numpy as np
-# For drawing a sneaky bar:
-import base64
 
 # For compatibility with combo app,
 # add an extra bit to the path if we need to.
@@ -32,7 +30,7 @@ except ModuleNotFoundError:
 
 # Custom functions:
 from utilities_ml.fixed_params import \
-    starting_probabilities, plain_str, bench_str
+    starting_probabilities, plain_str, bench_str, draw_sneaky_bar
 # from utilities_ml.inputs import \
 #     write_text_from_file
 import utilities_ml.inputs
@@ -319,13 +317,27 @@ def main():
     # ######### RESULTS #########
     # ###########################
 
+    # Add an option for removing plotly_events()
+    # which doesn't play well on skinny screens / touch devices.
+    with st.sidebar:
+        if st.checkbox('Disable interactive plots'):
+            use_plotly_events = False
+        else:
+            use_plotly_events = True
+        st.caption(''.join([
+            'The clickable plots sometimes appear strange ',
+            'on small screens and touch devices, ',
+            'so select this option to convert them to normal plots.'
+        ]))
+
     with container_metrics:
         # Print metrics for how many teams would thrombolyse:
         utilities_ml.container_metrics.main(sorted_results)
 
     with container_bar_chart:
         # Top interactive bar chart:
-        utilities_ml.container_bars.main(sorted_results, hb_teams_input)
+        utilities_ml.container_bars.main(
+            sorted_results, hb_teams_input, use_plotly_events)
 
     with container_shapley_probs:
 
@@ -337,6 +349,7 @@ def main():
             else:
                 # Individual waterfalls for the highlighted teams.
                 st.markdown(waterfall_explanation_str)
+                draw_sneaky_bar()
                 utilities_ml.container_waterfalls.show_waterfalls_highlighted(
                     shap_values_probability_extended_highlighted,
                     indices_highlighted,
@@ -345,11 +358,13 @@ def main():
 
         with tabs_waterfall[1]:
             # Combo waterfall (all teams).
+            draw_sneaky_bar()
             utilities_ml.container_combo_waterfall.plot_combo_waterfalls(
                 df_waterfalls,
                 sorted_results,
                 final_probs,
-                patient_data_waterfall
+                patient_data_waterfall,
+                use_plotly_events
                 )
 
         with tabs_waterfall[2]:
@@ -366,16 +381,7 @@ def main():
             # Individual waterfalls for the teams with the
             # max / median / min probabilities of thrombolysis.
             st.markdown(waterfall_explanation_str)
-            # Add an invisible bar that's wider than the column:
-            file_ = open('./utilities_ml/sneaky_bar.png', "rb")
-            contents = file_.read()
-            data_url = base64.b64encode(contents).decode("utf-8")
-            file_.close()
-            st.markdown(
-                f'''<center><img src="data:image/png;base64,{data_url}" width="500"
-                    height="1" alt="It's a secret to everybody">''',
-                unsafe_allow_html=True,
-            )
+            draw_sneaky_bar()
             utilities_ml.container_waterfalls.show_waterfalls_max_med_min(
                 shap_values_probability_extended_high_mid_low,
                 indices_high_mid_low,

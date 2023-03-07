@@ -359,6 +359,23 @@ def plot_shap_waterfall(shap_values, final_prob, title='', n_to_show=9):
     # fig['layout']['yaxis']['autorange'] = 'reversed'
     # fig['layout']['yaxis2']['autorange'] = 'reversed'
 
+    # Disable zoom and pan:
+    fig.update_layout(
+        # Main subplot:
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True),
+        # Second subplot for y-axis labels
+        xaxis2=dict(fixedrange=True),
+        yaxis2=dict(fixedrange=True),
+        )
+
+    # Turn off legend click events
+    # (default is click on legend item, remove that item from the plot)
+    fig.update_layout(legend_itemclick=False)
+    # Only change the specific item being clicked on, not the whole
+    # legend group:
+    # # fig.update_layout(legend=dict(groupclick="toggleitem"))
+
     plotly_config = {
         # Mode bar always visible:
         # 'displayModeBar': True,
@@ -373,5 +390,14 @@ def plot_shap_waterfall(shap_values, final_prob, title='', n_to_show=9):
         'toImageButtonOptions': {'height': None, 'width': None},
         }
 
+    # Set a specific width, not container width,
+    # for the sake of viewing on thin mobile screens where
+    # half the plot width is used for the y-axis labels.
+    fig.update_layout(width=650)
+
     # Write to streamlit:
-    st.plotly_chart(fig, use_container_width=True, config=plotly_config)
+    st.plotly_chart(
+        fig,
+        # use_container_width=True,
+        config=plotly_config
+        )

@@ -15,7 +15,7 @@ from utilities_ml.fixed_params import bench_str, plain_str, \
     default_highlighted_team, display_name_of_default_highlighted_team
 
 
-def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_data_waterfall):
+def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_data_waterfall, use_plotly_events=True):
     """
     Add the elements to the chart in order so that the last thing
     added ends up on the top. Add the unhighlighted teams first,
@@ -205,7 +205,7 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
     # # Add a violin plot
     fig.add_trace(go.Violin(
         x=final_probs,
-        line_color='black',
+        line_color='grey',
         # meanline_visible=True,
         # box_visible=True,
         # fillcolor='lightseagreen',
@@ -385,6 +385,21 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
     fig.update_xaxes(showgrid=False)
 
 
+    # Disable zoom and pan:
+    fig.update_layout(
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True),
+        xaxis2=dict(fixedrange=True),
+        yaxis2=dict(fixedrange=True),
+        )
+
+    # Turn off legend click events
+    # (default is click on legend item, remove that item from the plot)
+    fig.update_layout(legend_itemclick=False)
+    # Only change the specific item being clicked on, not the whole
+    # legend group:
+    # # fig.update_layout(legend=dict(groupclick="toggleitem"))
+
     # plotly_config = {
     #     # Mode bar always visible:
     #     # 'displayModeBar': True,
@@ -411,15 +426,35 @@ def plot_combo_waterfalls(df_waterfalls, sorted_results, final_probs, patient_da
     #                         text='testing', showarrow=False))
 
     # # Write to streamlit:
-    # st.plotly_chart(fig, use_container_width=True)
-    # Clickable version:
-    # Write the plot to streamlit, and store the details of the last
-    # bar that was clicked:
-    selected_waterfall = plotly_events(
-        fig, click_event=True, key='waterfall_combo',
-        override_height=600, override_width='100%')#, config=plotly_config)
+    if use_plotly_events is False:
+        # Non-interactive version:
+        fig.update_layout(width=700)
+        plotly_config = {
+            # Mode bar always visible:
+            # 'displayModeBar': True,
+            # Plotly logo in the mode bar:
+            'displaylogo': False,
+            # Remove the following from the mode bar:
+            'modeBarButtonsToRemove': [
+                'zoom', 'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+                'lasso2d'
+                ],
+            # Options when the image is saved:
+            'toImageButtonOptions': {'height': None, 'width': None},
+            }
+        st.plotly_chart(
+            fig,
+            # use_container_width=True,
+            config=plotly_config)
+    else:
+        # Clickable version:
+        # Write the plot to streamlit, and store the details of the last
+        # bar that was clicked:
+        selected_waterfall = plotly_events(
+            fig, click_event=True, key='waterfall_combo',
+            override_height=600, override_width='100%')#, config=plotly_config)
 
-    callback_waterfall(selected_waterfall, inds_order, stroke_team_list, pretty_jitter=pretty_jitter)
+        callback_waterfall(selected_waterfall, inds_order, stroke_team_list, pretty_jitter=pretty_jitter)
 
 
 def callback_waterfall(selected_waterfall, inds_order, stroke_team_list, pretty_jitter=False):
@@ -827,6 +862,24 @@ def box_plot_of_prob_shifts(
                 # Options when the image is saved:
                 'toImageButtonOptions': {'height': None, 'width': None},
                 }
+
+
+            # Disable zoom and pan:
+            fig.update_layout(
+                # Left subplot:
+                xaxis=dict(fixedrange=True),
+                yaxis=dict(fixedrange=True),
+                # Right subplot:
+                xaxis2=dict(fixedrange=True),
+                yaxis2=dict(fixedrange=True)
+                )
+
+            # Turn off legend click events
+            # (default is click on legend item, remove that item from the plot)
+            fig.update_layout(legend_itemclick=False)
+            # Only change the specific item being clicked on, not the whole
+            # legend group:
+            # # fig.update_layout(legend=dict(groupclick="toggleitem"))
 
             # Write to streamlit:
             st.plotly_chart(fig, use_container_width=True, config=plotly_config)
