@@ -171,9 +171,12 @@ def import_stroke_data(stroke_teams_list, scenarios, highlighted_teams_input):
     return df
 
 
-def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
-    col_to_sort = 'Percent_Thrombolysis_(mean)'
-    scenario_for_name = scenario_for_rank
+def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios, col_to_sort='Percent_Thrombolysis_(mean)'):
+    if col_to_sort == 'Percent_Thrombolysis_(mean)':
+        col_short = '!perc_thromb'
+    else:
+        col_short = '!add_good'
+    scenario_for_name = scenario_for_rank + col_short
     if '!' in scenario_for_rank:
         scenario_for_rank = '!'.join(scenario_for_rank.split('!')[:-1])
         col_to_sort += '_diff'
@@ -206,17 +209,16 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios):
 
 def inputs_for_bar_chart():
 
-    with st.sidebar:
-        # Set value=True in these checkboxes
-        # to have them ticked by default.
-        st.markdown('Show difference due to:')
-        scenarios_picked = []
-        if st.checkbox('Speed', value=True):
-            scenarios_picked.append('Speed')
-        if st.checkbox('Onset', value=True):
-            scenarios_picked.append('Onset')
-        if st.checkbox('Benchmark', value=True):
-            scenarios_picked.append('Benchmark')
+    # Set value=True in these checkboxes
+    # to have them ticked by default.
+    st.markdown('Show difference due to:')
+    scenarios_picked = []
+    if st.checkbox('Speed', value=True):
+        scenarios_picked.append('Speed')
+    if st.checkbox('Onset', value=True):
+        scenarios_picked.append('Onset')
+    if st.checkbox('Benchmark', value=True):
+        scenarios_picked.append('Benchmark')
 
     if len(scenarios_picked) == 0:
         scenario = 'base'
@@ -231,23 +233,23 @@ def inputs_for_bar_chart():
         # Remove initial underscore:
         scenario = scenario[1:]
 
-    scenario_for_rank = st.radio(
-        'Sort ranked values by this:',
-        options=[
-            'Base value',
-            'Final value',
-            f'Effect of scenario'
-            ],#{scenario}'],
-        horizontal=True
-        )
+    # scenario_for_rank = st.radio(
+    #     'Sort ranked values by this:',
+    #     options=[
+    #         'Base value',
+    #         'Final value',
+    #         f'Effect of scenario'
+    #         ],#{scenario}'],
+    #     horizontal=True
+    #     )
 
-    if scenario_for_rank == 'Base value':
-        scenario_for_rank = 'base'
-    elif scenario_for_rank == 'Final value':
-        scenario_for_rank = scenario
-    else:
-        scenario_for_rank = scenario + '!diff'
-    return scenario, scenario_for_rank
+    # if scenario_for_rank == 'Base value':
+    #     scenario_for_rank = 'base'
+    # elif scenario_for_rank == 'Final value':
+    #     scenario_for_rank = scenario
+    # else:
+        # scenario_for_rank = scenario + '!diff'
+    return scenario  #, scenario_for_rank
 
 
 def import_benchmark_data():

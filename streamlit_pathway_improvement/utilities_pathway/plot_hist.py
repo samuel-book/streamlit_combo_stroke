@@ -11,6 +11,11 @@ def plot_hist(
         df, scenarios, highlighted_teams_input=[], highlighted_colours={}, n_teams='all', df_column='Percent_Thrombolysis_(mean)', y_title='Thrombolysis use (%)'
         ):
 
+    # if 'Percent_Thrombolysis' in df_column:
+    #     col_str = '!perc_thromb'
+    # else:
+    #     col_str = '!add_good'
+
     # If only 'base' is in the list, remove repeats:
     if len(list(set(scenarios))) == 1:
         scenarios = [scenarios[0]]
@@ -193,7 +198,7 @@ def plot_hist(
 
     # Mess with the height of the plot - 
     # depends on how much is in the legend.
-    height = 500
+    height = 300  # 500 for similar height to arrow plot
     if len(scenarios) > 1:
         # More than just base.
         n_extra = len(scenarios[1].split('_'))
@@ -235,6 +240,8 @@ def plot_hist(
     # legend group:
     # # fig.update_layout(legend=dict(groupclick="toggleitem"))
 
+    # Options for the mode bar.
+    # (which doesn't appear on touch devices.)
     plotly_config = {
         # Mode bar always visible:
         # 'displayModeBar': True,

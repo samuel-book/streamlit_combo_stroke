@@ -13,12 +13,15 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
 
     if y_str == 'Percent_Thrombolysis_(mean)':
         y_label = 'Thrombolysis use (%)'
+        # scenario_for_rank_str += '!percent_thromb'
     else:
         y_label = 'Additional good outcomes<br>per 1000 admissions'
+        # scenario_for_rank_str += '!add_good'
 
     # Use this string for labels:
     scenario_str = scenarios_dict2[scenario]
-    scenario_for_rank_str = scenarios_dict2[scenario_for_rank.split('!')[0]]
+    scenario_for_rank_str = 'Base'
+    # scenario_for_rank_str = scenarios_dict2[scenario_for_rank.split('!')[0]]
     # List of all the separate traces:
     hb_teams_input = st.session_state['hb_teams_input']
     highlighted_colours = st.session_state['highlighted_teams_colours']
@@ -62,10 +65,10 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
             # Final prob:
             # (round this now so we can use the +/- sign format later)
             df[y_str][df['scenario'] == scenario],
-            # Base rank:
-            df['Sorted_rank!base'][df['scenario'] == 'base'],
-            # Final rank:
-            df['Sorted_rank!'+scenario][df['scenario'] == 'base']
+            # # Base rank:
+            # df['Sorted_rank!base'][df['scenario'] == 'base'],
+            # # Final rank:
+            # df['Sorted_rank!'+scenario][df['scenario'] == 'base']
             ), axis=-1)
 
 
@@ -167,8 +170,8 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
             '%{customdata[0]}' +
             '<br>' +
             'Base probability: %{customdata[2]:.1f}%' +
-            '<br>' +
-            'Rank: %{y} of ' + f'{n_teams} teams'
+            # '<br>' +
+            # 'Rank: %{y} of ' + f'{n_teams} teams'
             '<extra></extra>'
         )
     else:
@@ -181,10 +184,10 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
             f'Effect of {scenario_str}: ' + '%{customdata[1]:+}%' +
             '<br>' +
             f'Final probability: ' + '%{customdata[3]:.1f}%' +
-            '<br>' +
-            'Base rank: %{customdata[4]} of ' + f'{n_teams} teams'
-            '<br>' +
-            f'{scenario_str} rank:' + ' %{customdata[5]} of ' + f'{n_teams} teams'
+            # '<br>' +
+            # 'Base rank: %{customdata[4]} of ' + f'{n_teams} teams'
+            # '<br>' +
+            # f'{scenario_str} rank:' + ' %{customdata[5]} of ' + f'{n_teams} teams'
             '<extra></extra>'
         )
 
@@ -304,7 +307,11 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
     # fig.update_xaxes(range=[0, 34], row=1, col=2)
 
 
-    fig.update_layout(height=600 + 10 * len(hb_teams_input))
+    fig.update_layout(height=(
+        800 +
+        10 * len(hb_teams_input) +
+        20 * (len(s_label.split('<br>')) - 1)
+        ))
     
     # Disable zoom and pan:
     fig.update_layout(

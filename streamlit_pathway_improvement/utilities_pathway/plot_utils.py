@@ -121,6 +121,11 @@ def scatter_highlighted_teams(
         marker_increase = 'arrow-up'
         marker_decrease = 'arrow-down'
 
+    if 'Percent_Thrombolysis' in val_str:
+        col_str = '!perc_thromb'
+    else:
+        col_str = '!add_good'
+
     # Where to put highlighted teams:
     y_offsets_scatter = find_offsets_for_scatter(len(highlighted_teams_input), y_gap, y_max, positive)
 
@@ -162,7 +167,7 @@ def scatter_highlighted_teams(
             if team == display_name_of_default_highlighted_team:
                 hb_team = display_name_of_default_highlighted_team
             # Find sorted rank for this team in this scenario:
-            rank_scenario = df_scenario['Sorted_rank!'+scenario]\
+            rank_scenario = df_scenario['Sorted_rank!'+scenario+col_str]\
                 [df_scenario['stroke_team'] == df_team].values[0]
             rank_scenarios.append(rank_scenario)
 
