@@ -113,9 +113,9 @@ def show_data_for_all(df):
         *columns_to_keep_display
         ]]
     
-
     # Rename values in the 'Scenario' column:
-    df['Scenario'].replace({
+    # Use this rather indirect syntax to avoid SettingWithCopyWarning.
+    replace_dict = {
         'base': 'Base',
         'speed': 'Speed',
         'onset': 'Onset',
@@ -124,7 +124,9 @@ def show_data_for_all(df):
         'speed_benchmark': 'Speed + Benchmark',
         'onset_benchmark': 'Onset + Benchmark',
         'speed_onset_benchmark': 'Speed + Onset + Benchmark'
-        }, inplace=True)
+        }
+    for i, key in enumerate(list(replace_dict.keys())):
+        df.loc[df['Scenario'] == key, 'Scenario'] = list(replace_dict.values())[i]
     # Only keep the scenarios we want:
     df = df[df['Scenario'].isin(scenarios_to_keep_display)]
 
