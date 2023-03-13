@@ -1,7 +1,7 @@
 # To be printed as markdown on the "Project" page. 
 # ---------------------------------------------------------------------
 
-# SAMueL-2: Stroke Audit and Machine Learning 2.
+# SAMueL-2: Stroke Audit and Machine Learning 2
 
 The demo pages on this app show projects from SAMueL-2, (Stroke Audit and Machine Learning 2). More details about SAMueL-2 generally are available at the [online book](https://samuel-book.github.io/samuel-2/), and our published papers, presentations and other useful documents are available at [this GitHub repository](https://github.com/samuel-book/samuel-2-reference). 
 
