@@ -6,6 +6,7 @@
 The demo pages on this app show projects from SAMueL-2, (Stroke Audit and Machine Learning 2). More details about SAMueL-2 generally are available at the [online book](https://samuel-book.github.io/samuel-2/), and our published papers, presentations and other useful documents are available at [this GitHub repository](https://github.com/samuel-book/samuel-2-reference). 
 
 For an overview on SAMueL and our results so far: 
++ [Summary of the SAMueL project](https://samuel-book.github.io/samuel-1/introduction/intro.html) with links to more detailed methods, analysis and results
 + Article on SAMueL-1 results on [machine learning for thrombolysis](https://github.com/samuel-book/samuel-2-reference/blob/main/samuel_1_papers_report/2022_stroke_paper.pdf). Allen M, James C, Frost J, Liabo K, Pearn K, Monks T, et al. Using simulation and machine learning to maximise the benefit of intravenous thrombolysis in acute stroke in England and Wales: the SAMueL modelling and qualitative study. Health Soc Care Deliv Res 2022;10(31) [https://doi.org/10.3310/GVZL5699](https://doi.org/10.3310/GVZL5699).
 
 

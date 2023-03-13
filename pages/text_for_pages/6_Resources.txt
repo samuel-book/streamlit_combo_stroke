@@ -3,31 +3,37 @@
 
 # Resources 
 
-## About the method 
+
+## About the methods
 
 More detail can be found in these places:
 
-1. Our paper 
-2. Their paper
-3. This website 
+**🔮 Thrombolysis decisions**
++ [Summary of the machine learning model and SHAP waterfall plots](https://samuel-book.github.io/samuel-2/samuel_shap_paper_1/introduction/intro.html).
+
+**⏱️ Pathway improvement**
++ [Chapters on generating the results](https://samuel-book.github.io/samuel-1/pathway_sim/outline_scenarios.html), in particular [this analysis](https://samuel-book.github.io/samuel-1/pathway_sim/scenario_analysis.html).
+
+**📋 Population outcomes**
++ [Summary of the data sources and methodology](https://samuel-book.github.io/stroke_outcome/intro.html).
+
+**💷 Lifetime mortality**
++ Academic paper in prep.: _"A lifetime economic stroke outcome model: A model for predicting mortality and lifetime secondary care use by patients who have been discharged from hospital following a stroke"_, Peter McMeekin, Stephen McCarthy, Andrew McCarthy, Jennifer Porteous, Michael Allen, Anna Laws, Phil White, Martin James, Gary Ford, Christopher Price.
 
 
 ## Use our models
 
 The code behind our models can be found in the GitHub repositories for each demo:
 
-| **Combined** |     **📋 Population outcomes**                  | **💷 Lifetime mortality**               | **🔮 Thrombolysis decisions**                     |**⏱️ Pathway improvement**                      |
+| **Combined** |    **🔮 Thrombolysis decisions**                 | **⏱️ Pathway improvement**               | **📋 Population outcomes**                     | **💷 Lifetime mortality**                      |
 |:--------------------------------|:--------------------------------|:--------------------------------|:--------------------------------|:------------------------------|
-| [![][github-img]][combo-github] | [![][github-img]][outcome-github] | [![][github-img]][economics-github] | [![][github-img]][predict-github] | [![][github-img]][pathway-github] |
-| [![][streamlit-img]][combo-streamlit] | [![][streamlit-img]][outcome-streamlit] | [![][streamlit-img]][economics-streamlit] | [![][streamlit-img]][predict-streamlit] | -- 
+| [![][github-img]][combo-github] | [![][github-img]][predict-github] | [![][github-img]][pathway-github] | [![][github-img]][outcome-github] | [![][github-img]][economics-github] |
+| [![][streamlit-img]][combo-streamlit] | [![][streamlit-img]][predict-streamlit] | -- | [![][streamlit-img]][outcome-streamlit] | [![][streamlit-img]][economics-streamlit] | 
+
 
 ## About the app  
 
 The code behind this app is written in `python3` and the app itself is deployed using `streamlit`, which is a free service for hosting [python web apps](https://streamlit.io/). 
-
-## References
-
-+ Me, I. et al., 2022. A Brilliant Paper I Wrote. *Journal* 1, 1-10. DOI
 
 
 [streamlit-img]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
