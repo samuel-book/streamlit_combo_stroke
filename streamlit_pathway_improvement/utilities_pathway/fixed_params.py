@@ -7,7 +7,7 @@ def page_setup():
     # Set page to widescreen must be first call to st.
     st.set_page_config(
         page_title='Pathway improvement',
-        page_icon=':hospital:',
+        page_icon='⏱️',
         # layout='wide'
         )
     # n.b. this can be set separately for each separate page if you like.
