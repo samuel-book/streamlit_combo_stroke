@@ -12,3 +12,6 @@ st.warning(''.join([
 
 write_text_from_file('pages/text_for_pages/4_Project.txt',
                     head_lines_to_skip=2)
+                   
+st.image('pages/text_for_pages/NIHR_screenshot.png')
+
