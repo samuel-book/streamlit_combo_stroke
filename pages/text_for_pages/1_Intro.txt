@@ -2,42 +2,21 @@
 # ---------------------------------------------------------------------
 
 
-## Summary
-
-Give a short summary of what the app does here. You could also include some links that contain more information than there's space for here. 
 
 
-## Background information 
 
-It's worth having a quick overview of what the app is about, if it's not obvious. 
+### Modified Rankin Scale (mRS) and utility-weighted mRS
 
-We're looking at how 
+Disability levels may be measured in various ways. In this project we are using the modified Rankin Scale (__mRS__). It is a commonly used scale for measuring the degree of disability or dependence in the daily activities of people who have suffered a stroke. The scale runs from 0-6, running from perfect health without symptoms to death.
 
-+ input 1 
-+ input 2 and
-+ input 3
+In addition to mRS, we may calculate utility-weighted mRS (UW-mRS). UW-mRS incorporates both treatment effect and patient perceived quality of life as a single outcome measure for stroke trials. UW-mRS scores are based on a pooled analysis of 20,000+ patients, from Wang et al. (2020). 
 
-affect the output. 
-
-Emoji can be written too. For :ambulance: the `:ambulance:` format can be used in markdown, and the `\U0001f691` format can be used in streamlit input labels. 
-
-
-## How to use this app
-
-Go to the "Interactive demo" in the left sidebar.
-There you can change **the input parameters** to see the resulting effect on **the output**.
-
-To change between light mode and dark mode or to make the display wider, change the settings under the Menu in the top right of the screen.
-
-
-### Acronym reference 
-
-| Acronym | Full name | 
-|---|---|
-| WAUA | Weird And Unusual Acronym  | 
-| TCBU | This Can Be Useful  |
-
-
-### Limitations 
-
-Is there anything your app *does not* do but that people might reasonably misunderstand it to be doing? 
+| mRS Score | Utility | Description |
+|---|---|---|
+| 0 | 0.97 | No symptoms. |
+| 1 | 0.88 | No significant disability. Able to carry out all usual activities, despite some symptoms. |
+| 2 | 0.74 | Slight disability. Able to look after own affairs without assistance, but unable to carry out all previous activities. |
+| 3 | 0.55 | Moderate disability. Requires some help, but able to walk unassisted. |
+| 4 | 0.20 | Moderately severe disability. Unable to attend to own bodily needs without assistance, and unable to walk unassisted. |
+| 5 | -0.19 | Severe disability. Requires constant nursing care and attention, bedridden, incontinent. |
+| 6 | 0.00 | Dead. |

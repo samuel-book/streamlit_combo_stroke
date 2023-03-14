@@ -1,13 +1,6 @@
 # To be printed as markdown on the "Resources" page. 
 # ---------------------------------------------------------------------
 
-# Resources 
-
-
-## About the methods
-
-More detail can be found in these places:
-
 **🔮 Thrombolysis decisions**
 + [Summary of the machine learning model and SHAP waterfall plots](https://samuel-book.github.io/samuel-2/samuel_shap_paper_1/introduction/intro.html).
 
@@ -21,9 +14,6 @@ More detail can be found in these places:
 + Academic paper in prep.: _"A lifetime economic stroke outcome model: A model for predicting mortality and lifetime secondary care use by patients who have been discharged from hospital following a stroke"_, Peter McMeekin, Stephen McCarthy, Andrew McCarthy, Jennifer Porteous, Michael Allen, Anna Laws, Phil White, Martin James, Gary Ford, Christopher Price.
 
 
-## Use our models
-
-The code behind our models can be found in the GitHub repositories for each demo:
 
 | **Combined** |    **🔮 Thrombolysis decisions**                 | **⏱️ Pathway improvement**               | **📋 Population outcomes**                     | **💷 Lifetime mortality**                      |
 |:--------------------------------|:--------------------------------|:--------------------------------|:--------------------------------|:------------------------------|
