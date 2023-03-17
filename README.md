@@ -32,3 +32,38 @@ Combined the existing stroke streamlit apps into one multipage app.
 [predict-github]: https://github.com/samuel-book/streamlit_stroke_treatment_ml
 [predict-streamlit]: https://samuel2-stroke-predict.streamlit.app/
 [predict-qr]: ./info/qrcode_streamlit_predictions.png
+
+
+### Run this app locally
+
+To download this whole app and run it on your local machine,
+use either of the following two options.
+
+__🐍 Python users__
+
+[![][github-img]][combo-github]
+
++ Clone the GitHub repository 
++ Check your packages match those in `requirements.txt` (I recommend using a conda environment for this).
++ Run the app with `streamlit run Introduction.py`
+
+If you're only interested in one of the demo pages, you can follow
+these same instructions with one of the other GitHub repositories
+linked to above.
+
+[github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+[combo-github]: https://github.com/samuel-book/streamlit_combo_stroke
+
+
+__🐳 Docker users__
+
+[![][docker-img]][combo-dockerhub]
+
+[docker-img]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
+[combo-dockerhub]: https://hub.docker.com/r/aselaws/streamlit_combo_stroke
+
++ Download the Docker image: `docker pull aselaws/streamlit_combo_stroke`
++ Run the image: `docker run -p 8501:8501 aselaws/streamlit_combo_stroke`
+
+This should display a Local URL that can be copy and pasted into your favourite browser to see the app.
+''')
