@@ -66,4 +66,3 @@ __🐳 Docker users__
 + Run the image: `docker run -p 8501:8501 aselaws/streamlit_combo_stroke`
 
 This should display a Local URL that can be copy and pasted into your favourite browser to see the app.
-''')
