@@ -10,9 +10,6 @@ st.markdown('''
 # Resources 
 
 For more detail on each of the methods, follow the links below.
-
-The code behind our models can be found in the GitHub repositories for each demo.
-
 ''')
 
      
@@ -103,7 +100,52 @@ st.markdown('''
 
 The code behind this app is written in `python3` and the app itself is deployed using `streamlit`, which is a free service for hosting [python web apps](https://streamlit.io/). 
 
+
+## Use our code
+
+Our data and the code behind our models can be found in the GitHub repositories for each demo.
+The main README file on each repository gives information about how best to use the code.
+
+### Run this app locally
+
+To download this whole app and run it on your local machine,
+use either of the following two options.
+
 ''')
+
+cols_use_code = st.columns(2)
+with cols_use_code[0]:
+    st.markdown('''
+    __:snake: Python users__
+
+    [![][github-img]][combo-github]
+
+    + Clone the GitHub repository 
+    + Check your packages match those in `requirements.txt` (I recommend using a conda environment for this).
+    + Run the app with `streamlit run Introduction.py`
+
+    If you're only interested in one of the demo pages, you can follow
+    these same instructions with one of the other GitHub repositories
+    linked to above.
+
+    [github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+    [combo-github]: https://github.com/samuel-book/streamlit_combo_stroke
+    ''')
+
+with cols_use_code[1]:
+    st.markdown('''
+    __:whale: Docker users__
+    
+    [![][docker-img]][combo-dockerhub]
+
+    [docker-img]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
+    [combo-dockerhub]: https://hub.docker.com/r/aselaws/streamlit_combo_stroke
+
+    + Download the Docker image: `docker pull aselaws/streamlit_combo_stroke`
+    + Run the image: `docker run -p 8501:8501 aselaws/streamlit_combo_stroke`
+
+    This should display a Local URL that can be copy and pasted into your favourite browser to see the app.
+    ''')
             
 # write_text_from_file('pages/text_for_pages/6_Resources.txt',
 #                      head_lines_to_skip=2)
