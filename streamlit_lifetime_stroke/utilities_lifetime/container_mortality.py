@@ -23,12 +23,20 @@ def main(
         ):
     # Details on probability with time
     # Year one:
+    st.markdown(''.join([
+        'Mortality during year one is calculated using ',
+        'a logistic model.'
+        ]))
     with st.expander('Details: Mortality during year one'):
         write_details_mortality_in_year_one(variables_dict)
     with st.expander('Example: Mortality during year one'):
         write_example_mortality_in_year_one(variables_dict)
 
     # After year one:
+    st.markdown(''.join([
+        'Mortality after year one is calculated using ',
+        'a Gompertz model.'
+        ]))
     with st.expander('Details: Mortality after year one'):
         write_details_mortality_after_year_one(variables_dict)
     with st.expander('Example: Mortality after year one'):
@@ -48,6 +56,8 @@ def main(
     # Details on probability of death table values
     with st.expander('Details: Mortality in a chosen year'):
         write_details_mortality_in_chosen_year(variables_dict)
+    with st.expander('Example: Mortality in a chosen year'):
+        write_example_mortality_in_chosen_year(variables_dict)
     # Table:
     write_table_of_pDeath(pDeath_list, invalid_inds_for_pDeath, n_columns=3)
 
@@ -55,6 +65,8 @@ def main(
     # Details on median survival table values
     with st.expander('Details: Median survival'):
         write_details_median_survival(variables_dict)
+    with st.expander('Example: Median survival'):
+        write_example_median_survival(variables_dict)
     # Table:
     # Check which model we're using and draw a bespoke table:
     if st.session_state['lifetime_model_type'] == 'mRS':
@@ -538,7 +550,6 @@ def write_example_mortality_in_year_one(vd):
     """
     # ##### EXAMPLE #####
     # ----- Calculations with user input -----
-    # st.markdown('### Example')
     st.markdown(''.join([
         'For the current patient details, these are calculated as follows.',
         ' Values in red change with the patient details, and values in ',
@@ -649,7 +660,6 @@ def write_example_mortality_after_year_one(vd):
     """
     # ##### EXAMPLE #####
     # ----- Calculations with user input -----
-    # st.markdown('### Example')
     st.markdown(''.join([
         'For the current patient details, these are calculated as follows.',
         ' Values in red change with the patient details, and values in ',
@@ -701,7 +711,7 @@ def write_example_mortality_after_year_one(vd):
 
 def write_details_mortality_in_chosen_year(vd):
     """
-    Write the method and example for calculating mortality during any
+    Write the method for calculating mortality during any
     year after year one.
 
     Inputs:
@@ -736,9 +746,18 @@ def write_details_mortality_in_chosen_year(vd):
         'greater than 0%.'
         ]))
 
+
+def write_example_mortality_in_chosen_year(vd):
+    """
+    Write the example for calculating mortality during any
+    year after year one.
+
+    Inputs:
+    vd - dict. vd is short for variables_dict from main_calculations.
+         It contains lots of useful constants and variables.
+    """
     # ##### EXAMPLE #####
     # ----- Calculations with user input -----
-    st.markdown('### Example')
     st.markdown(''.join([
         'For the current patient details, these are calculated as follows.',
         ' Values in red change with the patient details, ',
@@ -791,7 +810,7 @@ def write_details_mortality_in_chosen_year(vd):
 
 def write_details_median_survival(vd):
     """
-    Write the method and example for calculating the survival time
+    Write the method for calculating the survival time
     for a given probability, e.g. median is P=0.5.
 
     Inputs:
@@ -853,9 +872,18 @@ def write_details_median_survival(vd):
         'Economic Evaluations_.'
     ]))
 
+
+def write_example_median_survival(vd):
+    """
+    Write the example for calculating the survival time
+    for a given probability, e.g. median is P=0.5.
+
+    Inputs:
+    vd - dict. vd is short for variables_dict from main_calculations.
+         It contains lots of useful constants and variables.
+    """
     # ##### EXAMPLE #####
     # ----- Calculations with user input -----
-    st.markdown('### Example')
     st.markdown(''.join([
         'For the current patient details, these are calculated as follows.',
         ' Values in red change with the patient details, ',
