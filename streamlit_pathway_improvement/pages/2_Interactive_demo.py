@@ -218,7 +218,10 @@ def main():
                 try:
                     bar_colour = highlighted_colours[team]
                 except KeyError:
-                    bar_colour = highlighted_colours[default_highlighted_team]
+                    try:
+                        bar_colour = highlighted_colours[team + ' \U00002605']
+                    except KeyError:
+                        bar_colour = highlighted_colours[default_highlighted_team]
                 with cols_single_bars[0]:
                     utilities_pathway.plot_bars.plot_bars_for_single_team(
                             df, team,
