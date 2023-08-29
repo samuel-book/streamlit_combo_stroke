@@ -280,18 +280,25 @@ def highlighted_teams(stroke_teams_list):
         # clickable plotly graphs, then load that list:
         existing_teams = st.session_state['highlighted_teams_with_click']
     except KeyError:
+        pass
+    try:
+        # If we've already selected highlighted teams using the
+        # clickable plotly graphs, then load that list:
+        existing_teams = st.session_state['highlighted_teams']
+    except KeyError:
         # Make a dummy list so streamlit behaves as normal:
         existing_teams = [display_name_of_default_highlighted_team]
 
     # Swap out the default highlighted team's name for
     # the label chosen in fixed_params.
     teams_input_list = stroke_teams_list.copy()
-    # Remove the chosen default team...
-    teams_input_list.remove(default_highlighted_team)
-    # ... and add the new name to the start of the list.
-    teams_input_list = [display_name_of_default_highlighted_team] + \
-                       teams_input_list
-                       
+    if default_highlighted_team in teams_input_list:
+        # Remove the chosen default team...
+        teams_input_list.remove(default_highlighted_team)
+        # ... and add the new name to the start of the list.
+        teams_input_list = [display_name_of_default_highlighted_team] + \
+                        teams_input_list
+
     # Remove any existing teams that are not in this input list.
     existing_teams = [team for team in existing_teams
                       if team in teams_input_list]
