@@ -226,49 +226,50 @@ def main():
         # Decide whether to use new or old model:
         st.markdown('-'*50)
         st.markdown('## Advanced options')
-        model_version = st.radio(
-            'Model version',
-            ['SAMueL-1: December 2022',
-             'SAMueL-2: April 2023'],
-            index=1  # Initial selection
-        )
+        # model_version = st.radio(
+        #     'Model version',
+        #     ['SAMueL-1: December 2022',
+        #      'SAMueL-2: April 2023'],
+        #     index=1  # Initial selection
+        # )
+        model_version = 'SAMueL-2: August 2023'
 
-    if 'SAMueL-1' in model_version:
-        stroke_teams_file = 'stroke_teams.csv'
-        ml_model_file = 'model.p'
-        explainer_file = 'shap_explainer_probability.p'
+    # if 'SAMueL-1' in model_version:
+    stroke_teams_file = 'stroke_teams.csv'
+    ml_model_file = 'model.p'
+    explainer_file = 'shap_explainer_probability.p'
 
-        # Stroke team column heading for the model
-        stroke_team_col = 'Stroke team'
+    # Stroke team column heading for the model
+    stroke_team_col = 'stroke_team_id'
 
-        # Benchmark teams:
-        benchmark_filename = 'hospital_10k_thrombolysis.csv'
-        benchmark_team_column = 'stroke_team'
+    # Benchmark teams:
+    benchmark_filename = 'benchmark_codes.csv'
+    benchmark_team_column = 'stroke_team_id'
 
-        # Default highlighted team:
-        default_highlighted_team = 'LECHF1024T'
-        display_name_of_default_highlighted_team = '"St Elsewhere"'
+    # Default highlighted team:
+    default_highlighted_team = '42' # 'LECHF1024T'
+    display_name_of_default_highlighted_team = str(default_highlighted_team) # '"St Elsewhere"'
 
-        starting_probabilities = 0.2995
+    starting_probabilities = 0.3481594278820853 # 0.42355026099306586
 
-    else:
-        stroke_teams_file = 'stroke_teams_samuel2_anon.csv'
-        ml_model_file = 'thrombolysis_xgb_model_anonymised_2017_2019.pkl'
-        explainer_file = \
-            'thrombolysis_xgb_explainer_anonymised_probability_2017_2019.pkl'
+    # else:
+    #     stroke_teams_file = 'stroke_teams_samuel2_anon.csv'
+    #     ml_model_file = 'thrombolysis_xgb_model_anonymised_2017_2019.pkl'
+    #     explainer_file = \
+    #         'thrombolysis_xgb_explainer_anonymised_probability_2017_2019.pkl'
 
-        # Stroke team column heading for the model
-        stroke_team_col = 'stroke team'
+    #     # Stroke team column heading for the model
+    #     stroke_team_col = 'stroke team'
 
-        # Benchmark teams:
-        benchmark_filename = 'benchmark_codes.csv'
-        benchmark_team_column = 'Hospital code'
+    #     # Benchmark teams:
+    #     benchmark_filename = 'benchmark_codes.csv'
+    #     benchmark_team_column = 'Hospital code'
 
-        # Default highlighted team:
-        default_highlighted_team = 'team_100'
-        display_name_of_default_highlighted_team = 'team_100'
+    #     # Default highlighted team:
+    #     default_highlighted_team = 'team_100'
+    #     display_name_of_default_highlighted_team = 'team_100'
 
-        starting_probabilities = 0.3314
+    #     starting_probabilities = 0.3314
 
     # This is down here so that the starting probability is ok.
     with container_shap_explanation:
@@ -459,8 +460,15 @@ def main():
         ]
     for feature in features_yn:
         i = np.where(np.array(headers_X) == feature)[0]
-        patient_data_waterfall[i] = 'Yes' \
-            if patient_data_waterfall[i] > 0 else 'No'
+        # Annoying nested list to pacify DeprecationWarning for
+        # checking for element of empty array.
+        if patient_data_waterfall[i].size > 0:
+            if patient_data_waterfall[i] > 0:
+                patient_data_waterfall[i] = 'Yes'
+            else:
+                patient_data_waterfall[i] = 'No'
+        else:
+            patient_data_waterfall[i] = 'No'
     # Resulting list format e.g.:
     #     [15, 'Yes', 15, 'Yes', 0, 'No', 90, 'No', 72.5, '']
     # where headers_X provides the feature names to match the values.
@@ -537,7 +545,7 @@ def main():
                     # team = 'Team ' + team
                 with col:
                     write_markdown_in_colour(
-                        '<strong>' + team + '</strong>',
+                        '<strong> Team ' + team + '</strong>',
                         colour=colour_here)
                     prob_here = df_here['Probability_perc'].values[0]
                     thromb_here = df_here['Thrombolyse_str'].values[0]
@@ -611,6 +619,7 @@ def main():
                 hb_teams_input,
                 default_highlighted_team,
                 display_name_of_default_highlighted_team,
+                starting_probabilities
                 )
 
         with tabs_waterfall[3]:
