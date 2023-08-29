@@ -43,7 +43,9 @@ def import_lists_from_data():
         )
 
     # Pull out the list of stroke teams:
+    # stroke_teams_list = sorted(set(df['stroke_team'].to_numpy()))
     stroke_teams_list = sorted(set(df['stroke_team'].to_numpy()))
+    stroke_teams_list = np.array(stroke_teams_list, dtype=str).tolist()
 
     # # Remove "same patient characteristics" scenario:
     # df = df[
@@ -85,56 +87,69 @@ def import_stroke_data(stroke_teams_list, scenarios, highlighted_teams_input):
         # index_col=index_col,
         header='infer'
         )
+    df = df.astype(dtype={'stroke_team': str})
+    df['team_scenario'] = df['stroke_team'] + ' / ' + df['scenario']
 
-    # Remove "same patient characteristics" scenario:
-    df = df[
-        df['scenario'].str.contains('same_patient_characteristics') == False
-        ]
+    # # Remove "same patient characteristics" scenario:
+    # df = df[
+    #     df['scenario'].str.contains('same_patient_characteristics') == False
+    #     ]
 
     # Import benchmark info.
     benchmark_df = import_benchmark_data()
-    # Make list of benchmark rank:
-    # (original data is sorted alphabetically by stroke team)
-    benchmark_rank_list = \
-        benchmark_df.sort_values('stroke_team')['Rank'].to_numpy()
-    # Indices of benchmark data at the moment:
-    inds_benchmark = np.where(benchmark_rank_list <= 30)[0]
-    # Convert this to a column for the dataframe:
-    benchmark_col = np.tile(benchmark_rank_list, len(scenarios))
-    # Add to the dataframe:
-    df['Benchmark_rank'] = benchmark_col
+    benchmark_bool = np.array([False] * len(benchmark_df))
+    benchmark_bool[benchmark_df['Benchmark_rank'] <= 25] = True
+    benchmark_df['Benchmark_bool'] = benchmark_bool
+    benchmark_df = benchmark_df.astype(dtype={'stroke_team_id': str})#, 'team_scenario': str})
+
+    # Expand the dataframe so it's the same length as the big dataframe:
+    for i, scenario in enumerate(scenarios):
+        benchmark_df['team_scenario'] = benchmark_df['stroke_team_id'] + ' / ' + scenario
+
+        if i < 1:
+            benchmark_big_df = benchmark_df[['stroke_team_id', 'Benchmark_rank', 'Benchmark_bool', 'team_scenario']].copy()
+        else:
+            benchmark_big_df = pd.concat([
+                benchmark_big_df, benchmark_df[['stroke_team_id', 'Benchmark_rank', 'Benchmark_bool', 'team_scenario']]])
+
+    df = df.merge(benchmark_big_df, on='team_scenario')
 
     # Update the "Highlighted teams" column:
     # Label benchmarks:
     # table[np.where(table[:, 7] <= 30), 6] = 'Benchmark'
-    highlighted_teams_list = np.array(
-        ['-' for team in stroke_teams_list], dtype=object)
     # Combo highlighted and benchmark:
-    hb_teams_list = np.array(
-        [plain_str for team in stroke_teams_list], dtype=object)
-    hb_teams_list[inds_benchmark] = bench_str
+    hb_teams_col = np.array(
+        [plain_str] * len(df), dtype=object)
+    hb_teams_col[df['Benchmark_bool'] == True] = bench_str
     # Put in selected Highlighteds (overwrites benchmarks):
     hb_teams_input = [plain_str, bench_str]
     for team in highlighted_teams_input:
         if team == display_name_of_default_highlighted_team:
             team = default_highlighted_team
-        ind_t = np.argwhere(np.array(stroke_teams_list) == team)[0][0]
-        # inds_highlighted.append(ind_t)
-        highlighted_teams_list[ind_t] = team
-        if ind_t in inds_benchmark:
+
+        mask = df['stroke_team'] == team
+        df_here = df[mask]
+        if df_here['Benchmark_bool'].all() == True:
+
+            # ind_t = np.argwhere(np.array(stroke_teams_list) == team)[0][0]
+            # # inds_highlighted.append(ind_t)
+            # if ind_t in inds_benchmark:
             team = team + ' \U00002605'
-        hb_teams_list[ind_t] = team
+        hb_teams_col[mask] = team
+
+        # hb_teams_list[ind_t] = team
         hb_teams_input.append(team)
 
     # Add the short list of names to the session_state so we can
     # retrieve it immediately when the script is re-run:
     st.session_state['hb_teams_input'] = hb_teams_input
     # Add the full list to the dataframe:
-    hb_teams_col = np.tile(hb_teams_list, len(scenarios))
+
     df['HB_team'] = hb_teams_col
 
     # Reduce this dataframe to just the important features:
     key_features = [
+        'team_scenario',  # unique identifier
         'Baseline_good_outcomes_per_1000_patients_(mean)',
         'Percent_Thrombolysis_(mean)',
         'Additional_good_outcomes_per_1000_patients_(mean)',
@@ -145,28 +160,22 @@ def import_stroke_data(stroke_teams_list, scenarios, highlighted_teams_input):
     ]
     df = df[key_features].copy()
 
+
     # Add some new columns.
     # Data for the new columns will be put in these lists.
     # Initialise as all zero for the difference between base and base.
-    diff_perc_thromb = [0] * len(stroke_teams_list)
-    diff_additional_good = [0] * len(stroke_teams_list)
-    # Define some bits to stop the following lines being really long:
-    d = df['scenario'] == 'base'
+
     p_str = 'Percent_Thrombolysis_(mean)'
     a_str = 'Additional_good_outcomes_per_1000_patients_(mean)'
-    for scenario in scenarios[1:]:
-        # Find a shorter dataframe containing just this scenario:
-        df_here = df[df['scenario'] == scenario]
-        # Find lists of the differences from base:
-        diff_p = df_here[p_str].values - df[p_str][d].values
-        diff_a = df_here[a_str].values - df[a_str][d].values
-        # Add to the existing lists:
-        diff_perc_thromb = np.concatenate((diff_perc_thromb, diff_p))
-        diff_additional_good = np.concatenate((diff_additional_good, diff_a))
-    # Add these new columns to the dataframe:
-    df[p_str + '_diff'] = diff_perc_thromb
-    df[a_str + '_diff'] = diff_additional_good
+    for col in [p_str, a_str]:
+        df[col + '_base'] = 0.0  # Placeholder to initialise column
+        for team in stroke_teams_list:
+            mask = df['stroke_team'] == team
+            df_here = df[mask]
+            base_val_here = df_here[df_here['scenario'] == 'base'][col]
+            df[col + '_base'][mask] = np.array([base_val_here] * len(df_here)).ravel()
 
+        df[col + '_diff'] = df[col] - df[col + '_base']
 
     return df
 
@@ -253,11 +262,15 @@ def inputs_for_bar_chart():
 
 
 def import_benchmark_data():
+    # all_teams_and_probs = pd.read_csv(
+    #     dir + 'data_pathway/hospital_10k_thrombolysis.csv')
+    # # Add an index row to rank the teams:
+    # all_teams_and_probs['Rank'] = \
+    #     np.arange(1, len(all_teams_and_probs['stroke_team'])+1)
     all_teams_and_probs = pd.read_csv(
-        dir + 'data_pathway/hospital_10k_thrombolysis.csv')
+        dir + 'data_pathway/benchmark_codes.csv')
     # Add an index row to rank the teams:
-    all_teams_and_probs['Rank'] = \
-        np.arange(1, len(all_teams_and_probs['stroke_team'])+1)
+    all_teams_and_probs['Benchmark_rank'] = all_teams_and_probs['Rank']
     return all_teams_and_probs
 
 

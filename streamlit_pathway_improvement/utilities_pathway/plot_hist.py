@@ -155,7 +155,7 @@ def plot_hist(
     # Set hover template for scatter points:
     if len(scenarios) > 1:
         ht_scatter = (
-            'Team %{customdata[0]}' +
+            '%{customdata[0]}' +
             '<br>' +
             'Base value: %{customdata[3]:.2f}%{customdata[8]}' +
             '<br>' +
@@ -169,7 +169,7 @@ def plot_hist(
         # don't include any information about the change due to
         # the (non-existent) chosen scenario.
         ht_scatter = (
-            'Team %{customdata[0]}' +
+            '%{customdata[0]}' +
             '<br>' +
             'Base value: %{customdata[3]:.2f}%{customdata[4]}' +
             '<extra></extra>'

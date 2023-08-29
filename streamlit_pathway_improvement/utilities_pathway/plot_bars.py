@@ -2,6 +2,7 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import pandas as pd
 
 from utilities_pathway.fixed_params import scenarios, scenarios_dict2, \
     display_name_of_default_highlighted_team, default_highlighted_team
@@ -33,20 +34,24 @@ def plot_scatter_sorted_rank(df_all, scenario, scenario_for_rank, n_teams='all',
 
     for n, name in enumerate(hb_teams_input):
 
-        if default_highlighted_team in name:
+        if default_highlighted_team == name.split(' \U00002605')[0]:
+        # if default_highlighted_team in name:
             display_name = display_name_of_default_highlighted_team
         else:
             display_name = name
+        if 'enchmark' not in display_name:
+            display_name = f'Team {display_name}'
 
         df = df_all[df_all['HB_team'] == name]
 
-        if default_highlighted_team in name:
+        # if default_highlighted_team in name:
+        if default_highlighted_team == name.split(' \U00002605')[0]:
             name_arr = (
-                [display_name_of_default_highlighted_team] *
+                [f'Team {display_name_of_default_highlighted_team}'] *
                 len(df['stroke_team'][df['scenario'] == 'base'])
             )
         else:
-            name_arr = df['stroke_team'][df['scenario'] == 'base']
+            name_arr = 'Team ' + df['stroke_team'][df['scenario'] == 'base']
 
         colour = highlighted_colours[name]
 
@@ -375,8 +380,13 @@ def plot_bars_for_single_team(df, team, df_column, y_label, bar_colour=None):
 
     # Pick out just the data for the chosen team:
     df_here = df[df['stroke_team'] == df_team]
+    # Sort the data into the order expected by the scenarios list:
+    df_here['scenario'] = pd.CategoricalIndex(df_here['scenario'], ordered=True, categories=scenarios)
+    df_here = df_here.sort_values('scenario')
+
     # Pick out base values:
-    base_percent_thromb_here = df_here[df_column][df_here['scenario'] == 'base'].values[0]
+    base_percent_thromb_here = df_here[df_column][
+        df_here['scenario'] == 'base'].values[0]
 
     fig = go.Figure()
     fig.update_layout(title='<b>Team ' + team)  # <b> for bold
@@ -396,9 +406,9 @@ def plot_bars_for_single_team(df, team, df_column, y_label, bar_colour=None):
         np.round(df_here[df_column + '_diff'], 1),
         # Base value:
         np.full(
-            df_here['scenario'].values.shape, 
-            df_here[df_column]\
-                [df_here['scenario'] == 'base']
+            df_here['scenario'].values.shape,
+            df_here[df_column][
+                df_here['scenario'] == 'base']
             ),
         # Text for top of bars:
         bar_text_mean

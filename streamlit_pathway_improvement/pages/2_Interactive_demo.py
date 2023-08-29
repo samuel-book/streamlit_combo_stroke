@@ -240,7 +240,7 @@ def main():
                     st.markdown('# ')
 
                 # Offer up a table:
-                if st.checkbox(f'Show table of data for {team}'):
+                if st.checkbox(f'Show table of data for Team {team}'):
                     show_data_for_team(team, df)
 
 

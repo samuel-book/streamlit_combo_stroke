@@ -166,6 +166,10 @@ def scatter_highlighted_teams(
             colour = highlighted_colours[hb_team]
             if team == display_name_of_default_highlighted_team:
                 hb_team = display_name_of_default_highlighted_team
+
+            # Add "Team " to team name:
+            hb_team = f'Team {hb_team}'
+
             # Find sorted rank for this team in this scenario:
             rank_scenario = df_scenario['Sorted_rank!'+scenario+col_str]\
                 [df_scenario['stroke_team'] == df_team].values[0]
