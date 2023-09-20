@@ -69,7 +69,11 @@ def main():
         st.image('./streamlit_stroke_treatment_ml/' +
                  'utilities_ml/SAMueL2_model_wide.png')
 
-    path_to_details = './Details#'  #'http://localhost:8501/Details#'
+    import sys
+    if './streamlit_stroke_treatment_ml/' in sys.path:
+        path_to_details = './🔎_Details:_Thrombolysis_decisions#'
+    else:
+        path_to_details = './Details#'
 
     st.markdown('''
         We can use the model to give the same patient details

@@ -7,4 +7,4 @@ predict_package = importlib.import_module(
     package='3_🔎_Details.py'
     )
 # Run the main function:
-predict_package.main()
+# predict_package.main()
