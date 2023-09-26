@@ -41,7 +41,7 @@ except FileNotFoundError:
     dir = 'streamlit_descriptive_stats/'
 
 # Custom functions:
-from utilities_descriptive.fixed_params import page_setup
+# from utilities_descriptive.fixed_params import page_setup
 # from utilities.inputs import \
 #     write_text_from_file
 # Containers:
@@ -66,8 +66,10 @@ def main():
     st.subheader('Inputs')
 
     stroke_team_list = pd.read_csv(
-        dir + './data_descriptive/stroke_teams.csv', 
+        dir + './data_descriptive/stroke_teams.csv',
         index_col=False).sort_values('stroke_team')
+    # List of stroke teams
+    stroke_team_list = list(stroke_team_list.squeeze().values)
 
     stroke_teams_selected = st.multiselect(
         'Stroke team', options=stroke_team_list)
@@ -83,6 +85,13 @@ def main():
         dir + './data_descriptive/' + summary_stats_file, index_col=0
     )
 
+    # Find which teams are in the stroke teams options but
+    # are not in the stats dataframe:
+    missing_teams_list = (
+        set(stroke_team_list) -
+        set(summary_stats_df.columns)
+    )
+
     teams_to_show = ['all E+W'] + stroke_teams_selected
 
     # ###########################
@@ -90,7 +99,19 @@ def main():
     # ###########################
     st.header('Results')
 
-    st.write(summary_stats_df[teams_to_show])
+    try:
+        df_to_show = summary_stats_df[teams_to_show]
+    except KeyError:
+        # Remove teams that aren't in the dataframe:
+        reduced_teams_to_show = []
+        for team in teams_to_show:
+            if team in missing_teams_list:
+                st.markdown(f':warning: There is no data for {team}.')
+            else:
+                reduced_teams_to_show.append(team)
+        df_to_show = summary_stats_df[reduced_teams_to_show]
+
+    st.write(df_to_show)
 
     # ----- The end! -----
 
