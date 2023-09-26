@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/samuel-book/streamlit_descriptive_stats
+	branch = main
+	commit = ead231c695efaefa5522d65688fa2dcb8e95a6cb
+	parent = d414b6ae17277bb5ed71c64d090ef5a2c8df65ef
+	method = merge
+	cmdver = 0.4.5
