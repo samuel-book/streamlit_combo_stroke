@@ -12,6 +12,22 @@ import streamlit as st
 import pandas as pd
 # import numpy as np
 
+
+# Add an extra bit to the path if we need to.
+# Try importing something as though we're running this from the same
+# directory as the landing page.
+try:
+    from utilities_descriptive.fixed_params import page_setup
+except ModuleNotFoundError:
+    # If the import fails, add the landing page directory to path.
+    # Assume that the script is being run from the directory above
+    # the landing page directory, which is called
+    # streamlit_lifetime_stroke.
+    import sys
+    sys.path.append('./streamlit_descriptive_stats/')
+    # The following should work now:
+    from utilities_descriptive.fixed_params import page_setup
+
 # Custom functions:
 from utilities_descriptive.fixed_params import page_setup
 # from utilities.inputs import \
