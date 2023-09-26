@@ -27,6 +27,18 @@ except ModuleNotFoundError:
     sys.path.append('./streamlit_descriptive_stats/')
     # The following should work now:
     from utilities_descriptive.fixed_params import page_setup
+try:
+    test_file = pd.read_csv(
+        './data_descriptive/stroke_teams.csv',
+        index_col='stroke_team'
+        )
+    dir = './'
+except FileNotFoundError:
+    # If the import fails, add the landing page directory to path.
+    # Assume that the script is being run from the directory above
+    # the landing page directory, which is called
+    # stroke_outcome_app.
+    dir = 'streamlit_descriptive_stats/'
 
 # Custom functions:
 from utilities_descriptive.fixed_params import page_setup
@@ -54,7 +66,8 @@ def main():
     st.subheader('Inputs')
 
     stroke_team_list = pd.read_csv(
-        './data_descriptive/stroke_teams.csv', index_col=False).sort_values('stroke_team')
+        dir + './data_descriptive/stroke_teams.csv', 
+        index_col=False).sort_values('stroke_team')
 
     stroke_teams_selected = st.multiselect(
         'Stroke team', options=stroke_team_list)
@@ -67,7 +80,7 @@ def main():
         summary_stats_file = 'summary_stats.csv'
 
     summary_stats_df = pd.read_csv(
-        './data_descriptive/' + summary_stats_file, index_col=0
+        dir + './data_descriptive/' + summary_stats_file, index_col=0
     )
 
     teams_to_show = ['all E+W'] + stroke_teams_selected
