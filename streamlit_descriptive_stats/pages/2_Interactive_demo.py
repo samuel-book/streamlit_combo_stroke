@@ -178,7 +178,7 @@ def main():
         'mrs 0-2'
     ]
     df_to_show = df_to_show.loc[row_order]
-    st.dataframe(df_to_show)
+    st.table(df_to_show)
 
     # ----- The end! -----
 
