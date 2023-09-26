@@ -71,8 +71,55 @@ def main():
     # List of stroke teams
     stroke_team_list = list(stroke_team_list.squeeze().values)
 
+    # Add in all the year options:
+    year_options = ['2016 to 2021', '2016', '2017', '2018', '2019', '2020', '2021']
+    stroke_team_list_years = [
+        f'{s} ({y})' for s in ['all E+W'] + stroke_team_list for y in year_options
+    ]
+    # Builds a list containing:
+    # Team 1 (2016 to 2021)
+    # Team 1 (2016)
+    # Team 1 (2017)
+    # ...
+    # Team 1 (2021)
+    # Team 2 (2016 to 2021)
+    # Team 2 (2016)
+    # Team 2 (2017)
+    # ...
+    # Team 2 (2021)
+
+    emoji_teams = ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣'] # '🟤' '⚪' '⚫' ⏺
+    emoji_teams_vals = ['⚫'] * len(year_options)
+    for i in range(len(stroke_team_list)):
+        emoji_teams_vals += [emoji_teams[i % len(emoji_teams)]] * len(year_options)
+    # st.write(text_colours_vals)
+    emoji_teams_dict = dict(zip(stroke_team_list_years, emoji_teams_vals))
+
+    text_colours = ['blue', 'green', 'orange', 'red', 'violet', 'grey', 'rainbow']
+    text_colours_vals = []
+    for i in range(len(stroke_team_list) + 1):
+        text_colours_vals += [text_colours[i % len(text_colours)]] * len(year_options)
+    # st.write(text_colours_vals)
+    text_colours_dict = dict(zip(stroke_team_list_years, text_colours_vals))
+    # st.write(text_colours_dict)
+
+
+    # Use the format function in the multiselect to highlight the
+    # options that use all years of the data.
+    # Because the current ordering of the list is by team and then
+    # by year, this also visually breaks up the list into groups of
+    # each team.
     stroke_teams_selected = st.multiselect(
-        'Stroke team', options=stroke_team_list)
+        'Stroke team',
+        options=stroke_team_list_years,
+        # default='⏺ all E+W (2016 to 2021)'
+        default='all E+W (2016 to 2021)',
+        # format_func=(lambda x: f'⏺ {x}'
+        #              if year_options[0] in x else f'{x}')
+        # format_func=(lambda x: f':{text_colours_dict[x]}[⏺ {x}]')
+        # format_func=(lambda x: f''':{text_colours_dict[x]}[⏺] {x}''')
+        format_func=(lambda x: f'{emoji_teams_dict[x]} {x}')
+        )
 
     limit_to_4hr = st.toggle('Limit to arrival within 4hr')
 
@@ -88,11 +135,11 @@ def main():
     # Find which teams are in the stroke teams options but
     # are not in the stats dataframe:
     missing_teams_list = (
-        set(stroke_team_list) -
+        set(stroke_team_list_years) -
         set(summary_stats_df.columns)
     )
 
-    teams_to_show = ['all E+W'] + stroke_teams_selected
+    teams_to_show = stroke_teams_selected
 
     # ###########################
     # ######### RESULTS #########
@@ -111,7 +158,27 @@ def main():
                 reduced_teams_to_show.append(team)
         df_to_show = summary_stats_df[reduced_teams_to_show]
 
-    st.write(df_to_show)
+    row_order = [
+        'age',
+        'infarction',
+        'precise onset known',
+        'onset during sleep',
+        'use of AF anticoagulants',
+        'prior disability',
+        'prestroke mrs 0-2',
+        'stroke severity',
+        'onset-to-arrival time',
+        'arrival-to-scan time',
+        'thrombolysis',
+        'scan-to-thrombolysis time',
+        'discharge disability',
+        'death',
+        'increased disability due to stroke',
+        'mrs 5-6',
+        'mrs 0-2'
+    ]
+    df_to_show = df_to_show.loc[row_order]
+    st.dataframe(df_to_show)
 
     # ----- The end! -----
 
