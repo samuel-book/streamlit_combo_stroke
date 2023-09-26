@@ -54,7 +54,7 @@ def main():
     st.subheader('Inputs')
 
     stroke_team_list = pd.read_csv(
-        './data/stroke_teams.csv', index_col=False).sort_values('stroke_team')
+        './data_descriptive/stroke_teams.csv', index_col=False).sort_values('stroke_team')
 
     stroke_teams_selected = st.multiselect(
         'Stroke team', options=stroke_team_list)
@@ -67,7 +67,7 @@ def main():
         summary_stats_file = 'summary_stats.csv'
 
     summary_stats_df = pd.read_csv(
-        './data/' + summary_stats_file, index_col=0
+        './data_descriptive/' + summary_stats_file, index_col=0
     )
 
     teams_to_show = ['all E+W'] + stroke_teams_selected
