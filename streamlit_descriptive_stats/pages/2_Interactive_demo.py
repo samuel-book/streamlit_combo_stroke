@@ -62,8 +62,6 @@ def main():
     # ###########################
     # ########## SETUP ##########
     # ###########################
-    st.header('Setup')
-    st.subheader('Inputs')
 
     stroke_team_list = pd.read_csv(
         dir + './data_descriptive/stroke_teams.csv',
@@ -71,10 +69,16 @@ def main():
     # List of stroke teams
     stroke_team_list = list(stroke_team_list.squeeze().values)
 
+    # Add filter by region:
+    # ----------------------------------------------------------------------------------------------- To do 
+
     # Add in all the year options:
-    year_options = ['2016 to 2021', '2016', '2017', '2018', '2019', '2020', '2021']
+    year_options = ['2016 to 2021', '2016', '2017',
+                    '2018', '2019', '2020', '2021']
     stroke_team_list_years = [
-        f'{s} ({y})' for s in ['all E+W'] + stroke_team_list for y in year_options
+        f'{s} ({y})'
+        for s in ['all E+W'] + stroke_team_list
+        for y in year_options
     ]
     # Builds a list containing:
     # Team 1 (2016 to 2021)
@@ -88,8 +92,10 @@ def main():
     # ...
     # Team 2 (2021)
 
-    emoji_teams = ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣'] # '🟤' '⚪' '⚫' ⏺
+    # Start with black circle for "all teams" group:
     emoji_teams_vals = ['⚫'] * len(year_options)
+    # Cycle through these emoji for the other stroke teams:
+    emoji_teams = ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣'] # '🟤' '⚪' '⚫' ⏺
     for i in range(len(stroke_team_list)):
         emoji_teams_vals += [emoji_teams[i % len(emoji_teams)]] * len(year_options)
     # st.write(text_colours_vals)
@@ -159,20 +165,24 @@ def main():
         df_to_show = summary_stats_df[reduced_teams_to_show]
 
     row_order = [
+        'count',
         'age',
+        'male',
         'infarction',
+        'stroke severity',
+        'onset-to-arrival time',
+        'onset known',
+        'arrive in 4  hours',
         'precise onset known',
         'onset during sleep',
         'use of AF anticoagulants',
         'prior disability',
         'prestroke mrs 0-2',
-        'stroke severity',
-        'onset-to-arrival time',
         'arrival-to-scan time',
         'thrombolysis',
         'scan-to-thrombolysis time',
-        'discharge disability',
         'death',
+        'discharge disability',
         'increased disability due to stroke',
         'mrs 5-6',
         'mrs 0-2'
