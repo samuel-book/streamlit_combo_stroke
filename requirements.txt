@@ -14,7 +14,6 @@ xgboost==1.7.5
 numba>=0.57
 streamlit-plotly-events
 geojson
-json
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
 streamlit
