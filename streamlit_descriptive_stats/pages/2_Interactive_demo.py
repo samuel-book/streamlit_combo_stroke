@@ -160,7 +160,7 @@ def plot_geography_pins(region_list, df_stroke_team):
 
     # for region in region_list:
     geojson_file = 'regions_EW.geojson'  # 'region_' + region.replace(' ', '~') + '.geojson'
-    with open('./data_descriptive/region_geojson/' + geojson_file) as f:
+    with open(dir + './data_descriptive/region_geojson/' + geojson_file) as f:
         geojson_ew = json.load(f)
     # Find extent of this geojson data.
     import geojson
