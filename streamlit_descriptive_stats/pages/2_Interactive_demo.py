@@ -11,7 +11,7 @@ done in functions stored in files named container_(something).py
 import streamlit as st
 import pandas as pd
 import numpy as np
-import json
+import geojson
 import plotly.graph_objs as go
 
 
@@ -161,9 +161,9 @@ def plot_geography_pins(region_list, df_stroke_team):
     # for region in region_list:
     geojson_file = 'regions_EW.geojson'  # 'region_' + region.replace(' ', '~') + '.geojson'
     with open(dir + './data_descriptive/region_geojson/' + geojson_file) as f:
-        geojson_ew = json.load(f)
+        geojson_ew = geojson.load(f)
     # Find extent of this geojson data.
-    import geojson
+
     coords = np.array(list(geojson.utils.coords(geojson_ew)))
     extent = [
         coords[:, 0].min(),
