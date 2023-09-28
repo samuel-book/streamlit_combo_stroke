@@ -159,7 +159,7 @@ def plot_geography_pins(region_list, df_stroke_team):
         )
 
     # for region in region_list:
-    geojson_file = 'regions_EW.geojson'  # 'region_' + region.replace(' ', '~') + '.geojson'
+    geojson_file = 'regions_EW.geojson'
     with open(dir + './data_descriptive/region_geojson/' + geojson_file) as f:
         geojson_ew = geojson.load(f)
     # Find extent of this geojson data.
@@ -173,9 +173,7 @@ def plot_geography_pins(region_list, df_stroke_team):
     ]
 
     df_regions = pd.DataFrame(region_list, columns=['RGN11NM'])
-    df_regions['v'] = [0] * len(df_regions) #np.arange(len(df_regions))
-    
-    # st.write(geojson_ew['features']['properties'])
+    df_regions['v'] = [0] * len(df_regions)  # Same value, same colour.
 
     fig.add_trace(go.Choropleth(
         geojson=geojson_ew,
@@ -188,7 +186,6 @@ def plot_geography_pins(region_list, df_stroke_team):
         showscale=False,
         hoverinfo='skip'
     ))
-
     fig.add_trace(go.Scattergeo(
         lon=df_stroke_team['long'],
         lat=df_stroke_team['lat'],
@@ -197,23 +194,28 @@ def plot_geography_pins(region_list, df_stroke_team):
         text=df_stroke_team['emoji']
         # marker_color=df_stroke_team['RGN11NM']
     ))
+    # Text size for markers:
+    fig.update_layout(
+        font=dict(
+            # family="Courier New, monospace",
+            size=6,  # Set the font size here
+            # color="RebeccaPurple"
+        )
+    )
+    # Projection options:
+    # august  eckert1  fahey  times  van der grinten
     fig.update_layout(
         geo_scope='europe',
-        geo_resolution=50,
-        geo_projection=go.layout.geo.Projection(type = 'airy'),
+        geo_projection=go.layout.geo.Projection(type='times'),
         geo_lonaxis_range=[extent[0], extent[1]],
         geo_lataxis_range=[extent[2], extent[3]],
-    )
-
-    fig.update_traces(
-        hovertemplate='%{customdata[0]}<extra></extra>',
-        selector=dict(type='scattergeo')
+        # geo_resolution=50,
+        geo_visible=False
     )
     fig.update_traces(
         hovertemplate='%{customdata[0]}<extra></extra>',
         selector=dict(type='scattergeo')
     )
-
     fig.update_geos(fitbounds="locations", visible=False)
 
     plotly_config = {
@@ -237,6 +239,7 @@ def main():
     # ###########################
 
     all_regions_str = 'all E+W'
+    all_teams_str = 'all E+W'
 
     # Import list of all stroke teams:
     df_stroke_team = pd.read_csv(
@@ -265,7 +268,7 @@ def main():
     # Use these emoji for the regions:
     emoji_teams = [
         '',  # for "all regions"
-        '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '⚪', '⚫', '🩵'
+        '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '🩶', '⚫', '🩵'
         ]
     # st.write('''
     # 🟥🟧🟨🟩🟦🟪🟫⬜⬛  
@@ -275,7 +278,10 @@ def main():
     region_set = [all_regions_str] + region_list
     emoji_regions_dict = dict(zip(region_set, emoji_teams))
 
-    df_stroke_team['emoji'] = [emoji_regions_dict[region] for region in df_stroke_team['RGN11NM']]
+    df_stroke_team['emoji'] = [
+        emoji_regions_dict[region]
+        for region in df_stroke_team['RGN11NM']
+        ]
 
     cols_regions = st.columns([0.6, 0.4])
     with cols_regions[1]:
@@ -283,8 +289,10 @@ def main():
         plot_geography_pins(region_list, df_stroke_team)
 
     # Add in all the year options:
-    year_options = ['2016 to 2021', '2016', '2017',
+    all_years_str = '2016 to 2021'
+    year_options = [all_years_str, '2016', '2017',
                     '2018', '2019', '2020', '2021']
+    # ^ to do - change this to read it from new "years" index
 
     stroke_team_list_years, region_team_list_years = (
         build_lists_for_each_team_and_year(
@@ -325,7 +333,7 @@ def main():
         stroke_teams_selected = st.multiselect(
             'Stroke team',
             options=stroke_team_list_years_by_region_selected,
-            default='all E+W (2016 to 2021)',
+            default=f'all E+W ({all_years_str})',
             format_func=(lambda x: f'{emoji_teams_dict_by_region_selected[x]} {x}')
             )
 
@@ -391,6 +399,91 @@ def main():
     ]
     df_to_show = df_to_show.loc[row_order]
     st.table(df_to_show)
+
+    # #########################
+    # ######### PLOTS #########
+    # #########################
+    feature = st.selectbox(
+        'Pick a feature to plot',
+        options=row_order,
+        # default='count'
+    )
+
+    # Remove the (year) string from the selected teams:
+    stroke_teams_selected_without_year = [
+        team.split(' (')[0] for team in stroke_teams_selected]
+
+    fig = go.Figure()
+
+    fig.update_layout(
+        width=1300,
+        height=500,
+        # margin_l=0, margin_r=0, margin_t=0, margin_b=0
+        )
+
+    # Rename to keep code short:
+    s = summary_stats_df.T
+    # Remove "all teams" data:
+    s = s[s['stroke_team'] != 'all E+W']
+
+    for y, year in enumerate(year_options):
+        if year == all_years_str:
+            colour = 'Thistle'
+        else:
+            colour = 'Grey'
+
+        # Include "to numeric" in case some of the numbers
+        # are secretly strings (despite my best efforts).
+        violin_vals = pd.to_numeric(s[feature][s['year'] == year])
+
+        fig.add_trace(go.Violin(
+            x=s['year'][s['year'] == year],
+            y=violin_vals,
+            name=year,
+            line=dict(color=colour),
+            points=False,
+            hoveron='points',
+            showlegend=False
+            ))
+
+        # Add three scatter markers for min/max/median
+        # with vertical line connecting them:
+        fig.add_trace(go.Scatter(
+            x=[year]*3,
+            y=[violin_vals.min(), violin_vals.max(), violin_vals.median()],
+            line_color='black',
+            marker=dict(size=20, symbol='line-ew-open'),
+            # name='Final Probability',
+            showlegend=False,
+            hoverinfo='skip',
+            ))
+
+    for stroke_team in stroke_teams_selected_without_year:
+        if stroke_team != all_teams_str:
+            scatter_vals = s[(
+                # (s['year'] == year) &
+                (s['stroke_team'] == stroke_team)
+                )]
+            fig.add_trace(go.Scatter(
+                x=scatter_vals['year'],
+                y=scatter_vals[feature],
+                mode='markers',
+                name=stroke_team
+            ))
+
+    fig.update_layout(yaxis_title=feature)
+    # Move legend to bottom
+    fig.update_layout(legend=dict(
+        orientation='h', #'h',
+        yanchor='top',
+        y=-0.2,
+        xanchor='right',
+        x=0.9,
+        # itemwidth=50
+    ))
+
+    st.plotly_chart(fig)
+
 
     # ----- The end! -----
 
