@@ -1,6 +1,6 @@
 matplotlib
 numpy
-pandas==1.5.3
+pandas
 scipy
 markdown
 pip
