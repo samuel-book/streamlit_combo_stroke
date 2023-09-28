@@ -2,29 +2,78 @@
 All of the content for the Results section.
 """
 import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Import some fixed parameters from our file:
-from utilities.fixed_params import x_min, x_max, colours_plot
 
 
-def main(row_value, animal, feature):
-    st.write('We will draw a simple plot using our chosen value.')
+def check_teams_in_stats_df(
+        summary_stats_df,
+        stroke_teams_selected,
+        container_warnings
+        ):
+    """
+    Remove any selected teams and years that aren't in the data.
 
-    # Define the arrays to plot:
-    # The x_min and x_max values are defined in fixed_params
-    # so that they can be reused in multiple places.
-    x_values = np.arange(x_min, x_max)
-    y_values = (x_values/row_value)**2.0
+    If all of the selected teams and years exist in the descriptive
+    stats dataframe, then return a shorter dataframe of just those
+    teams and years. If some of them are missing, then check each
+    team and year combo in turn to root out the missing ones.
+    Return a dataframe of only the combos that exist and print a
+    warning message about those that don't.
 
-    # Make the plot using matplotlib:
-    fig, ax = plt.subplots()
-    # The colours_plot list is also defined in fixed_params.
-    ax.plot(x_values, y_values, color=colours_plot[0])
-    ax.set_ylim(-5, 90)
-    ax.set_title(f'{animal} {feature}')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    # Call to streamlit:
-    st.pyplot(fig)
+    Inputs:
+    -------
+    summary_stats_df      - pd.DataFrame. The descriptive stats data.
+    stroke_teams_selected - list. One string per team and year combo
+                            selected by the user.
+    container_warnings    - streamlit container. Where to print any
+                            warnings about missing data.
+
+    Returns:
+    --------
+    df_to_show - pd.DataFrame. A subset of data from the input
+                 dataframe that covers only the selected team and
+                 year combinations.
+    """
+    try:
+        # Smaller dataframe of only selected teams:
+        df_to_show = summary_stats_df[stroke_teams_selected]
+    except KeyError:
+        # Remove teams that aren't in the dataframe.
+        # Keep the valid ones in here:
+        reduced_teams_to_show = []
+        # Keep the invalid ones in here:
+        missing_teams = []
+        # Set up for printing a nice warning message:
+        show_warning = False
+        warning_str = 'There is no data for '
+
+        # Sort the teams into the valid and invalid lists:
+        for team in stroke_teams_selected:
+            try:
+                summary_stats_df[team]
+                reduced_teams_to_show.append(team)
+            except KeyError:
+                show_warning = True
+                missing_teams.append(team)
+
+        # The dataframe containing only the valid teams:
+        df_to_show = summary_stats_df[reduced_teams_to_show]
+
+        # If there were missing teams (should always be True),
+        # show the message.
+        if show_warning is True:
+            # Create a warning message to print.
+            # e.g. "There is no data for {1}, {2} or {3}."
+            warning_str = (
+                warning_str +
+                ', '.join(missing_teams[:-1])
+                )
+            if len(missing_teams) > 1:
+                warning_str += ' or '
+            warning_str = (
+                warning_str + missing_teams[-1] + '.'
+            )
+            # Display the warning:
+            with container_warnings:
+                st.warning(warning_str, icon='⚠️')
+
+    return df_to_show

@@ -1,18 +1,16 @@
 """
-Streamlit app template.
+Descriptive statistics demo.
 
-Because a long app quickly gets out of hand,
-try to keep this document to mostly direct calls to streamlit to write
-or display stuff. Use functions in other files to create and
-organise the stuff to be shown. In this example, most of the work is
-done in functions stored in files named container_(something).py
+This app reads in a dataframe containing descriptive statistics
+and displays selected parts of it nicely. The stats exist for
+acute stroke teams in the SSNAP data.
+
+The dataframe is created in a notebook that is also included in
+the app's repository. The data that goes into it is secret.
 """
 # ----- Imports -----
 import streamlit as st
 import pandas as pd
-import numpy as np
-import geojson
-import plotly.graph_objs as go
 
 
 # Add an extra bit to the path if we need to.
@@ -43,186 +41,10 @@ except FileNotFoundError:
     dir = 'streamlit_descriptive_stats/'
 
 # Custom functions:
-# from utilities_descriptive.fixed_params import page_setup
-# from utilities.inputs import \
-#     write_text_from_file
-# Containers:
-# import utilities.container_inputs
-# import utilities.container_results
-# import utilities.container_details
-
-
-def make_emoji_dict_by_team(
-        year_options,
-        stroke_team_list,
-        stroke_team_list_years
-        ):
-    # Start with black circle for "all teams" group:
-    emoji_teams_vals = ['⚫'] * len(year_options)
-    # Cycle through these emoji for the other stroke teams:
-    emoji_teams = ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣'] # '🟤' '⚪' '⚫' ⏺
-    for i in range(len(stroke_team_list)):
-        emoji_teams_vals += [emoji_teams[i % len(emoji_teams)]] * len(year_options)
-    # st.write(text_colours_vals)
-    emoji_teams_dict = dict(zip(stroke_team_list_years, emoji_teams_vals))
-    return emoji_teams_dict
-
-
-def make_emoji_dict_by_region(
-        emoji_regions_dict,
-        year_options,
-        stroke_team_list,
-        stroke_team_list_years,
-        region_list,
-        all_regions_str = 'all E+W'
-        ):
-
-    # Start with "all teams" group:
-    emoji_teams_vals = [emoji_regions_dict[all_regions_str]] * len(year_options)
-    for i in range(len(stroke_team_list)):
-        emoji_teams_vals += [emoji_regions_dict[region_list[i]]] * len(year_options)
-    # st.write(text_colours_vals)
-    emoji_teams_dict = dict(zip(stroke_team_list_years, emoji_teams_vals))
-    return emoji_teams_dict
-
-
-def build_lists_for_each_team_and_year(stroke_team_list, year_options, region_team_list):
-    stroke_team_list_years = [
-        f'{s} ({y})'
-        for s in ['all E+W'] + stroke_team_list
-        for y in year_options
-    ]
-    # Builds a list containing:
-    # Team 1 (2016 to 2021)
-    # Team 1 (2016)
-    # Team 1 (2017)
-    # ...
-    # Team 1 (2021)
-    # Team 2 (2016 to 2021)
-    # Team 2 (2016)
-    # Team 2 (2017)
-    # ...
-    # Team 2 (2021)
-    # Similar for regions:
-    region_team_list_years = [
-        region
-        for region in ['all E+W'] + region_team_list
-        for y in year_options
-    ]
-    return stroke_team_list_years, region_team_list_years
-
-
-def inputs_region_choice(region_list):
-    cols_regions = st.columns(3)
-    regions_selected_bool = []
-    for r, region in enumerate(region_list):
-        with cols_regions[r % len(cols_regions)]:
-            region_bool = st.checkbox(region, key=region)
-        regions_selected_bool.append(region_bool)
-    regions_selected = list(np.array(region_list)[regions_selected_bool])
-    return regions_selected
-
-
-def reduce_big_lists_to_regions_selected(
-        region_team_list_years,
-        regions_selected,
-        stroke_team_list_years,
-        emoji_teams_dict
-):
-    full_list_regions_selected_bool = np.full(len(region_team_list_years), False)
-    for region in ['all E+W'] + regions_selected:
-        inds = np.where(np.array(region_team_list_years) == region)
-        full_list_regions_selected_bool[inds] = True
-
-    stroke_team_list_years_by_region_selected = (
-        np.array(stroke_team_list_years)[full_list_regions_selected_bool]
-    )
-    # st.write(emoji_teams_dict.keys())
-    # st.write(emoji_teams_dict.keys())
-    emoji_teams_dict_by_region_selected = dict(
-        zip(
-            np.array(list(emoji_teams_dict.keys()))[full_list_regions_selected_bool],
-            np.array(list(emoji_teams_dict.values()))[full_list_regions_selected_bool]
-            )
-        )
-    return (stroke_team_list_years_by_region_selected,
-            emoji_teams_dict_by_region_selected)
-
-
-def plot_geography_pins(region_list, df_stroke_team):
-    fig = go.Figure()
-
-    fig.update_layout(
-        width=500,
-        height=500,
-        margin_l=0, margin_r=0, margin_t=0, margin_b=0
-        )
-
-    # for region in region_list:
-    geojson_file = 'regions_EW.geojson'
-    with open(dir + './data_descriptive/region_geojson/' + geojson_file) as f:
-        geojson_ew = geojson.load(f)
-    # Find extent of this geojson data.
-
-    coords = np.array(list(geojson.utils.coords(geojson_ew)))
-    extent = [
-        coords[:, 0].min(),
-        coords[:, 0].max(),
-        coords[:, 1].min(),
-        coords[:, 1].max()
-    ]
-
-    df_regions = pd.DataFrame(region_list, columns=['RGN11NM'])
-    df_regions['v'] = [0] * len(df_regions)  # Same value, same colour.
-
-    fig.add_trace(go.Choropleth(
-        geojson=geojson_ew,
-        locations=df_regions['RGN11NM'],
-        z=df_regions['v'],
-        featureidkey='properties.RGN11NM',
-        # coloraxis="coloraxis",
-        colorscale='Picnic',
-        # autocolorscale=False
-        showscale=False,
-        hoverinfo='skip'
-    ))
-    fig.add_trace(go.Scattergeo(
-        lon=df_stroke_team['long'],
-        lat=df_stroke_team['lat'],
-        customdata=np.stack([df_stroke_team['Stroke Team']], axis=-1),
-        mode='text',
-        text=df_stroke_team['emoji']
-        # marker_color=df_stroke_team['RGN11NM']
-    ))
-    # Text size for markers:
-    fig.update_layout(
-        font=dict(
-            # family="Courier New, monospace",
-            size=6,  # Set the font size here
-            # color="RebeccaPurple"
-        )
-    )
-    # Projection options:
-    # august  eckert1  fahey  times  van der grinten
-    fig.update_layout(
-        geo_scope='europe',
-        geo_projection=go.layout.geo.Projection(type='times'),
-        geo_lonaxis_range=[extent[0], extent[1]],
-        geo_lataxis_range=[extent[2], extent[3]],
-        # geo_resolution=50,
-        geo_visible=False
-    )
-    fig.update_traces(
-        hovertemplate='%{customdata[0]}<extra></extra>',
-        selector=dict(type='scattergeo')
-    )
-    fig.update_geos(fitbounds="locations", visible=False)
-
-    plotly_config = {
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
-    }
-    st.plotly_chart(fig, config=plotly_config)
-    st.caption('Locations of the stroke teams, colour-coded by region.')
+from utilities_descriptive.fixed_params import all_teams_str, all_years_str
+import utilities_descriptive.container_inputs
+import utilities_descriptive.container_results
+import utilities_descriptive.container_plots
 
 
 def main():
@@ -234,146 +56,133 @@ def main():
     # Title:
     st.markdown('# 📊 Descriptive statistics')
 
+    # Build up the page layout:
+    _ = """
+    +-----------------------------------------------------------------+
+    | 📊 Descriptive statistics                                       |
+    |                                                                 |
+    +----------cols_inputs_map[0]----------+---cols_inputs_map[1]-----+
+    |                                      |                          |
+    |       container_input_regions        |                          |
+    |                                      |      container_map       |
+    |        container_input_teams         |                          |
+    +--------------------------------------+--------------------------+
+    |                       container_warnings                        |
+    |                                                                 |
+    |                   container_input_4hr_toggle                    |
+    |                                                                 |
+    |                        container_results                        |
+    |                                                                 |
+    |                        container_violins                        |
+    +-----------------------------------------------------------------+
+    """
+
+    cols_inputs_map = st.columns([0.6, 0.4])
+    with cols_inputs_map[0]:
+        container_input_regions = st.container()
+    with cols_inputs_map[0]:
+        container_input_teams = st.container()
+    with cols_inputs_map[1]:
+        container_map = st.container()
+
+    container_warnings = st.container()
+    container_input_4hr_toggle = st.container()
+    container_results_table = st.container()
+    container_violins = st.container()
+
+    # Each team input box:
+    with container_input_teams:
+        st.markdown('### Select stroke teams')
+        cols_t = st.columns(3)
+        with cols_t[0]:
+            st.markdown('All years:')
+        with cols_t[1]:
+            st.markdown('Separate years:')
+        for col in cols_t[2:]:
+            with col:
+                # Unicode looks-like-a-space character
+                # for vertical alignment with the other columns
+                # that have text in.
+                st.markdown('\U0000200B')
+        containers_list_team_inputs = [
+            cols_t[0],             # All years
+            cols_t[1], cols_t[2],  # 2016, 2017
+            cols_t[1], cols_t[2],  # 2018, 2019
+            cols_t[1], cols_t[2]   # 2020, 2021
+        ]
+
+    with container_input_regions:
+        st.markdown('### Filter by region')
+        containers_list_region_inputs = st.columns(3)
+
     # ###########################
     # ########## SETUP ##########
     # ###########################
 
-    all_regions_str = 'all E+W'
-    all_teams_str = 'all E+W'
-
-    # Import list of all stroke teams:
-    df_stroke_team = pd.read_csv(
-        dir + './data_descriptive/hospitals_and_lsoas_descriptive_stats.csv',
-        index_col=False).sort_values('Stroke Team')
-
-    # List of stroke teams
-    stroke_team_list = list(df_stroke_team['Stroke Team'].squeeze().values)
-
-    # List of regions
-    region_list = sorted(list(set(df_stroke_team['RGN11NM'].squeeze().values)))
-    region_team_list = list(df_stroke_team['RGN11NM'].squeeze().values)
-
-    region_list = [
-        'North East',
-        'North West',
-        'Yorkshire and The Humber',
-        'East Midlands',
-        'West Midlands',
-        'Wales',
-        'South West',
-        'South East',
-        'East of England',
-        'London',
-    ]
-    # Use these emoji for the regions:
-    emoji_teams = [
-        '',  # for "all regions"
-        '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '🩶', '⚫', '🩵'
-        ]
-    # st.write('''
-    # 🟥🟧🟨🟩🟦🟪🟫⬜⬛  
-    # 🔴🟠🟡🟢🔵🟣🟤⚪⚫  
-    # ❤️🧡💛💚💙🩵💜🤎🖤🩶🤍  
-    # ''')
-    region_set = [all_regions_str] + region_list
-    emoji_regions_dict = dict(zip(region_set, emoji_teams))
-
-    df_stroke_team['emoji'] = [
-        emoji_regions_dict[region]
-        for region in df_stroke_team['RGN11NM']
-        ]
-
-    cols_regions = st.columns([0.6, 0.4])
-    with cols_regions[1]:
-        # Plot the team locations
-        plot_geography_pins(region_list, df_stroke_team)
-
-    # Add in all the year options:
-    all_years_str = '2016 to 2021'
-    year_options = [all_years_str, '2016', '2017',
-                    '2018', '2019', '2020', '2021']
-    # ^ to do - change this to read it from new "years" index
-
-    stroke_team_list_years, region_team_list_years = (
-        build_lists_for_each_team_and_year(
-            stroke_team_list, year_options, region_team_list)
-    )
-
-    emoji_teams_dict = make_emoji_dict_by_region(
-        emoji_regions_dict,
-        year_options,
-        stroke_team_list,
-        stroke_team_list_years,
-        region_team_list
-        )
-
-    with cols_regions[0]:
-        # Select a region:
-        st.markdown('Show teams from these regions:')
-        regions_selected = inputs_region_choice(region_list)
-
-    # Reduce the big lists to only regions selected:
-    (stroke_team_list_years_by_region_selected,
-     emoji_teams_dict_by_region_selected
-     ) = reduce_big_lists_to_regions_selected(
-        region_team_list_years,
-        regions_selected,
-        stroke_team_list_years,
-        emoji_teams_dict
-        )
-
-
-    with cols_regions[0]:
-        # Use the format function in the multiselect to change how
-        # the team names are displayed without changing their names
-        # in the underlying data.
-        # Because the current ordering of the list is by team and then
-        # by year, this also visually breaks up the list into groups of
-        # each team.
-        stroke_teams_selected = st.multiselect(
-            'Stroke team',
-            options=stroke_team_list_years_by_region_selected,
-            default=f'all E+W ({all_years_str})',
-            format_func=(lambda x: f'{emoji_teams_dict_by_region_selected[x]} {x}')
-            )
-
+    # Decide which descriptive stats file to use:
+    with container_input_4hr_toggle:
         limit_to_4hr = st.toggle('Limit to arrival within 4hr')
-
     if limit_to_4hr:
         summary_stats_file = 'summary_stats_4hr.csv'
     else:
         summary_stats_file = 'summary_stats.csv'
-
+    # Read in the data:
     summary_stats_df = pd.read_csv(
-        dir + './data_descriptive/' + summary_stats_file, index_col=0
-    )
+        f'{dir}/data_descriptive/{summary_stats_file}',
+        index_col=0
+        )
 
-    # Find which teams are in the stroke teams options but
-    # are not in the stats dataframe:
-    missing_teams_list = (
-        set(stroke_team_list_years) -
-        set(summary_stats_df.columns)
-    )
+    # Import list of all stroke teams:
+    df_stroke_team = pd.read_csv(
+        f'{dir}/data_descriptive/hospitals_and_lsoas_descriptive_stats.csv',
+        index_col=False
+        ).sort_values('Stroke Team')
 
-    teams_to_show = stroke_teams_selected
+    with container_map:
+        # Plot the team locations
+        utilities_descriptive.container_plots.\
+            plot_geography_pins(df_stroke_team)
+
+    # List of years in the data:
+    year_options = sorted(set(summary_stats_df.loc['year']))
+    # Move the "all years" option to the front of the list:
+    year_options.remove(all_years_str)
+    year_options = [all_years_str] + year_options
+
+    with container_input_regions:
+        # Select regions:
+        regions_selected = utilities_descriptive.container_inputs.\
+            inputs_region_choice(
+                df_stroke_team,
+                containers_list_region_inputs
+                )
+
+    with container_input_teams:
+        # Select stroke teams:
+        stroke_teams_selected = utilities_descriptive.container_inputs.\
+            input_stroke_teams_to_highlight(
+                df_stroke_team,
+                regions_selected,
+                all_teams_str,
+                year_options,
+                all_years_str=all_years_str,
+                containers=containers_list_team_inputs
+                )
 
     # ###########################
     # ######### RESULTS #########
     # ###########################
-    st.header('Results')
 
-    try:
-        df_to_show = summary_stats_df[teams_to_show]
-    except KeyError:
-        # Remove teams that aren't in the dataframe:
-        reduced_teams_to_show = []
-        for team in teams_to_show:
-            if team in missing_teams_list:
-                st.markdown(f':warning: There is no data for {team}.')
-            else:
-                reduced_teams_to_show.append(team)
-        df_to_show = summary_stats_df[reduced_teams_to_show]
+    # Check that all of the requested data exists.
+    # Remove any teams that don't exist and print a warning message.
+    df_to_show = utilities_descriptive.container_results.\
+        check_teams_in_stats_df(
+            summary_stats_df,
+            stroke_teams_selected,
+            container_warnings
+        )
 
+    # Update the order of the rows to this:
     row_order = [
         'count',
         'age',
@@ -398,92 +207,37 @@ def main():
         'mrs 0-2'
     ]
     df_to_show = df_to_show.loc[row_order]
-    st.table(df_to_show)
+
+    with container_results_table:
+        st.header('Results')
+        st.table(df_to_show)
 
     # #########################
     # ######### PLOTS #########
     # #########################
-    feature = st.selectbox(
-        'Pick a feature to plot',
-        options=row_order,
-        # default='count'
-    )
 
-    # Remove the (year) string from the selected teams:
-    stroke_teams_selected_without_year = [
-        team.split(' (')[0] for team in stroke_teams_selected]
+    with container_violins:
+        st.header('Feature breakdown')
 
-    fig = go.Figure()
-
-    fig.update_layout(
-        width=1300,
-        height=500,
-        # margin_l=0, margin_r=0, margin_t=0, margin_b=0
+        # User inputs for which feature to plot:
+        feature = st.selectbox(
+            'Pick a feature to plot',
+            options=row_order,
+            # default='count'
         )
 
-    # Rename to keep code short:
-    s = summary_stats_df.T
-    # Remove "all teams" data:
-    s = s[s['stroke_team'] != 'all E+W']
+        # Remove the (year) string from the selected teams:
+        stroke_teams_selected_without_year = [
+            team.split(' (')[0] for team in stroke_teams_selected]
 
-    for y, year in enumerate(year_options):
-        if year == all_years_str:
-            colour = 'Thistle'
-        else:
-            colour = 'Grey'
-
-        # Include "to numeric" in case some of the numbers
-        # are secretly strings (despite my best efforts).
-        violin_vals = pd.to_numeric(s[feature][s['year'] == year])
-
-        fig.add_trace(go.Violin(
-            x=s['year'][s['year'] == year],
-            y=violin_vals,
-            name=year,
-            line=dict(color=colour),
-            points=False,
-            hoveron='points',
-            showlegend=False
-            ))
-
-        # Add three scatter markers for min/max/median
-        # with vertical line connecting them:
-        fig.add_trace(go.Scatter(
-            x=[year]*3,
-            y=[violin_vals.min(), violin_vals.max(), violin_vals.median()],
-            line_color='black',
-            marker=dict(size=20, symbol='line-ew-open'),
-            # name='Final Probability',
-            showlegend=False,
-            hoverinfo='skip',
-            ))
-
-    for stroke_team in stroke_teams_selected_without_year:
-        if stroke_team != all_teams_str:
-            scatter_vals = s[(
-                # (s['year'] == year) &
-                (s['stroke_team'] == stroke_team)
-                )]
-            fig.add_trace(go.Scatter(
-                x=scatter_vals['year'],
-                y=scatter_vals[feature],
-                mode='markers',
-                name=stroke_team
-            ))
-
-    fig.update_layout(yaxis_title=feature)
-    # Move legend to bottom
-    fig.update_layout(legend=dict(
-        orientation='h', #'h',
-        yanchor='top',
-        y=-0.2,
-        xanchor='right',
-        x=0.9,
-        # itemwidth=50
-    ))
-
-    st.plotly_chart(fig)
-
+        utilities_descriptive.container_plots.plot_violins(
+            summary_stats_df,
+            feature,
+            year_options,
+            stroke_teams_selected_without_year,
+            all_years_str,
+            all_teams_str
+            )
 
     # ----- The end! -----
 
