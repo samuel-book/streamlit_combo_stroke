@@ -103,6 +103,9 @@ def input_stroke_teams_to_highlight(
         df_stroke_team['Stroke Team'][
             df_stroke_team.isin(regions_selected).any(axis=1)]
     )
+    # Add on the "all of this region" teams:
+    for region in regions_selected:
+        stroke_team_list = np.append(f'All {region}', stroke_team_list)
     # Add on the "all teams" team:
     stroke_team_list = np.append(all_teams_str, stroke_team_list)
 
@@ -117,7 +120,7 @@ def input_stroke_teams_to_highlight(
             stroke_teams_selected = st.multiselect(
                 f'{year}',
                 options=stroke_team_list,
-                default='all E+W' if year == all_years_str else None,
+                default=all_teams_str if year == all_years_str else None,
                 key=f'input_teams_{year}'
                 )
         # The select box displays just the name of the team.

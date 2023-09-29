@@ -14,5 +14,5 @@ def page_setup():
 
 
 # Labels in the descriptive stats dataframe:
-all_teams_str = 'all E+W'
+all_teams_str = 'All England & Wales'
 all_years_str = '2016 to 2021'
