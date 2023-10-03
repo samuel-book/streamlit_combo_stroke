@@ -4,8 +4,6 @@ import streamlit as st
 import base64
 
 
-
-
 def page_setup():
     # ----- Page setup -----
     # The following options set up the display in the tab in your browser.
@@ -31,7 +29,8 @@ def draw_sneaky_bar():
         # stroke_outcome_app.
         import sys
         sys.path.append('./streamlit_stroke_treatment_ml/')
-        file_ = open('./streamlit_stroke_treatment_ml/utilities_ml/sneaky_bar.png', "rb")
+        file_ = open('./streamlit_stroke_treatment_ml/' +
+                     'utilities_ml/sneaky_bar.png', "rb")
     # Add an invisible bar that's wider than the column:
     contents = file_.read()
     data_url = base64.b64encode(contents).decode("utf-8")
@@ -51,8 +50,27 @@ def write_markdown_in_colour(string, colour):
     st.markdown(write_str, unsafe_allow_html=True)
 
 
-# Starting probability in the model:
-# starting_probabilities = # 0.2995270168908044
+model_version = 'SAMueL-2: August 2023'
+
+stroke_teams_file = 'stroke_teams.csv'
+ml_model_file = 'model.p'
+explainer_file = 'shap_explainer_probability.p'
+
+# Stroke team column heading for the model
+stroke_team_col = 'stroke_team_id'
+
+# Benchmark teams:
+benchmark_filename = 'benchmark_codes.csv'
+benchmark_team_column = 'stroke_team_id'
+n_benchmark_teams = 25
+
+# Default highlighted team:
+default_highlighted_team = '42'
+display_name_of_default_highlighted_team = (
+    str(default_highlighted_team))
+
+# SHAP:
+starting_probabilities = 0.3481594278820853
 
 # How to label non-highlighted teams:
 plain_str = 'Non-benchmark team'
