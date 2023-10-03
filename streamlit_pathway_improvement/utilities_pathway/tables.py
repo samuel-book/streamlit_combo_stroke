@@ -89,11 +89,12 @@ def show_data_for_all(df):
     # columns_to_keep_display = columns_to_keep_display_sorted
     columns_to_keep_display = display_columns
     # User inputs for which scenarios to show:
-    scenarios_to_keep_display = st.multiselect(
-        'Scenarios to include in the table',
-        display_scenarios,
-        default=display_scenarios
-    )
+    # scenarios_to_keep_display = st.multiselect(
+    #     'Scenarios to include in the table',
+    #     display_scenarios,
+    #     default=display_scenarios
+    # )
+    scenarios_to_keep_display = display_scenarios
 
     # Rename the columns so they look nicer:
     df.rename(columns={
