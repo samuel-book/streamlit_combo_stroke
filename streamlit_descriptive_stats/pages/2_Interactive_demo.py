@@ -219,23 +219,23 @@ def main():
         'age': 'Average age',
         'male': 'Male',
         'infarction': 'Infarction',
-        'stroke severity': 'Stroke severity',
-        'use of AF anticoagulants': 'AF anticoagulants',
-        'prior disability': 'Average pre-stroke disability',
-        'prestroke mrs 0-2': 'Pre-stroke mRS 0-2',
-        'onset known': 'Onset known',
-        'precise onset known': 'Precise onset known',
-        'onset during sleep': 'Onset during sleep',
-        'onset-to-arrival time': 'Onset-to-arrival time (minutes)',
-        'arrive in 4  hours': 'Arrive within 4 hours',
-        'arrival-to-scan time': 'Arrival-to-scan time (minutes)',
+        'stroke_severity': 'Stroke severity',
+        'afib_anticoagulant': 'AF anticoagulants',
+        'prior_disability': 'Average pre-stroke disability',
+        'prestroke_mrs_0-2': 'Pre-stroke mRS 0-2',
+        'onset_known': 'Onset known',
+        'precise_onset_known': 'Precise onset known',
+        'onset_during_sleep': 'Onset during sleep',
+        'onset_to_arrival_time': 'Onset-to-arrival time (minutes)',
+        'arrive_in_4_hours': 'Arrive within 4 hours',
+        'arrival_to_scan_time': 'Arrival-to-scan time (minutes)',
         'thrombolysis': 'Thrombolysis',
-        'scan-to-thrombolysis time': 'Scan-to-thrombolysis time (minutes)',
+        'scan_to_thrombolysis_time': 'Scan-to-thrombolysis time (minutes)',
         'death': 'Death',
-        'discharge disability': 'Average discharge disability',
-        'increased disability due to stroke': 'Increased disability due to stroke',
-        'mrs 5-6': 'Discharge disability 5-6',
-        'mrs 0-2': 'Discharge disability 0-2'
+        'discharge_disability': 'Average discharge disability',
+        'increased_disability_due_to_stroke': 'Increased disability due to stroke',
+        'mrs_5-6': 'Discharge disability 5-6',
+        'mrs_0-2': 'Discharge disability 0-2'
     }
     # Reduce the dataframe to only these rows, in that order:
     df_to_show = df_to_show.loc[list(index_names.keys())]
@@ -246,10 +246,10 @@ def main():
 
     # Change format to percentage:
     rows_percentage = [
-        'male', 'infarction', 'use of AF anticoagulants',
-        'prestroke mrs 0-2', 'onset known', 'precise onset known',
-        'onset during sleep', 'arrive in 4  hours', 'thrombolysis',
-        'death', 'mrs 5-6', 'mrs 0-2'
+        'male', 'infarction', 'afib_anticoagulant',
+        'prestroke_mrs_0-2', 'onset_known', 'precise_onset_known',
+        'onset_during_sleep', 'arrive_in_4_hours', 'thrombolysis',
+        'death', 'mrs_5-6', 'mrs_0-2'
     ]
     for row in rows_percentage:
         df_to_show.loc[row] = df_to_show.loc[row].apply('{:.1%}'.format)
@@ -257,16 +257,16 @@ def main():
     df_to_show.loc['count'] = df_to_show.loc['count'].apply('{:.0f}'.format)
     # Change format of time rows:
     rows_time = [
-        "onset-to-arrival time",
-        "arrival-to-scan time",
-        "scan-to-thrombolysis time"
+        'onset_to_arrival_time',
+        'arrival_to_scan_time',
+        'scan_to_thrombolysis_time'
     ]
     for row in rows_time:
         df_to_show.loc[row] = df_to_show.loc[row].apply('{:.0f}'.format)
     # Change format of float rows:
     rows_float = [
-        'age', 'stroke severity', 'prior disability', 
-        'discharge disability', 'increased disability due to stroke'
+        'age', 'stroke_severity', 'prior_disability',
+        'discharge_disability', 'increased_disability_due_to_stroke'
     ]
     for row in rows_float:
         df_to_show.loc[row] = df_to_show.loc[row].apply('{:.2f}'.format)
@@ -331,7 +331,7 @@ When a specific team name is given, we use only patients who attended that team.
 One of these smaller groups will still contain many patients.
 We show the total number in the group with the "count" row in the table.
 For all of the other rows in the table, we wish to show an average value across all of these patients.
-For properties involving time ("onset-to-arrival time", "arrival-to-scan time", "scan-to-thrombolysis time") we take the median time.
+For properties involving time ('onset_to_arrival_time', 'arrival_to_scan_time', 'scan_to_thrombolysis_time') we take the median time.
 For all other properties, we take the mean value across all patients.
 '''
 )
