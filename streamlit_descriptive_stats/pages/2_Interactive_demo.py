@@ -86,7 +86,7 @@ def main():
     """
     cols_inputs_map = st.columns([0.6, 0.4])
     with cols_inputs_map[0]:
-        st.markdown('## Select stroke teams')
+        st.markdown('## Select stroke team data')
         container_input_regions = st.container()
     with cols_inputs_map[0]:
         container_input_teams = st.container()
@@ -102,11 +102,11 @@ def main():
     # Each team input box:
     with container_input_teams:
         # st.markdown('### Select stroke teams')
-        cols_t = st.columns(3)
+        cols_t = st.columns([0.4, 0.2, 0.2, 0.2])
         with cols_t[0]:
-            st.markdown('### All years:')
+            st.markdown('### Teams:')
         with cols_t[1]:
-            st.markdown('### Separate years:')
+            st.markdown('### Years:')
         for col in cols_t[2:]:
             with col:
                 # Unicode looks-like-a-space character
@@ -116,8 +116,9 @@ def main():
         containers_list_team_inputs = [
             cols_t[0],             # All years
             cols_t[1], cols_t[2],  # 2016, 2017
-            cols_t[1], cols_t[2],  # 2018, 2019
-            cols_t[1], cols_t[2]   # 2020, 2021
+            cols_t[3], cols_t[1],  # 2018, 2019
+            cols_t[2], cols_t[3],  # 2020, 2021
+            cols_t[1]
         ]
 
     with container_input_regions:
@@ -163,7 +164,8 @@ def main():
 
     with container_input_teams:
         # Select stroke teams:
-        stroke_teams_selected = utilities_descriptive.container_inputs.\
+        stroke_teams_selected, stroke_teams_selected_without_year = \
+            utilities_descriptive.container_inputs.\
             input_stroke_teams_to_highlight(
                 df_stroke_team,
                 regions_selected,
@@ -173,16 +175,12 @@ def main():
                 containers=containers_list_team_inputs
                 )
 
-    # Remove the (year) string from the selected teams:
-    stroke_teams_selected_without_year = [
-        team.split(' (')[0] for team in stroke_teams_selected]
-
     # Update the colours assigned to the selected teams.
     # These functions update the colours dict in the session state...
     utilities_descriptive.plot_utils.remove_old_colours_for_highlights(
-        set(stroke_teams_selected_without_year))
+        stroke_teams_selected_without_year)
     utilities_descriptive.plot_utils.choose_colours_for_highlights(
-        set(stroke_teams_selected_without_year))
+        stroke_teams_selected_without_year)
     # ... and this line pulls out the results of those functions:
     team_colours_dict = st.session_state['highlighted_teams_colours_ds']
     # List of the team colours in the same order as the teams list
@@ -196,7 +194,7 @@ def main():
         utilities_descriptive.container_plots.\
             plot_geography_pins(
                 df_stroke_team,
-                stroke_teams_selected_without_year,
+                set(stroke_teams_selected_without_year),
                 team_colours_dict
                 )
 
@@ -233,7 +231,8 @@ def main():
         'scan_to_thrombolysis_time': 'Scan-to-thrombolysis time (minutes)',
         'death': 'Death',
         'discharge_disability': 'Average discharge disability',
-        'increased_disability_due_to_stroke': 'Increased disability due to stroke',
+        'increased_disability_due_to_stroke':
+            'Increased disability due to stroke',
         'mrs_5-6': 'Discharge disability 5-6',
         'mrs_0-2': 'Discharge disability 0-2'
     }
@@ -334,7 +333,7 @@ For all of the other rows in the table, we wish to show an average value across 
 For properties involving time ('onset_to_arrival_time', 'arrival_to_scan_time', 'scan_to_thrombolysis_time') we take the median time.
 For all other properties, we take the mean value across all patients.
 '''
-)
+        )
 
     # ----- The end! -----
 

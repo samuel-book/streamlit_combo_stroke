@@ -109,26 +109,46 @@ def input_stroke_teams_to_highlight(
     # Add on the "all teams" team:
     stroke_team_list = np.append(all_teams_str, stroke_team_list)
 
-    # Store which teams are selected across all widgets in here:
-    all_stroke_teams_selected = []
+    # Input team names:
+    with containers[0]:
+        # Input widget:
+        stroke_teams_selected = st.multiselect(
+            'Pick some teams:',
+            options=stroke_team_list,
+            default=all_teams_str
+            )
+
+    # Move the "all years" option to the end of the list
+    # so that it gets its own row on the check boxes.
+    year_options = year_options[1:] + [year_options[0]]
+
+    years_selected = []
     # Create a separate input widget for each year in the data:
     for y, year in enumerate(year_options):
         # Select a container. If there are fewer containers than years,
         # then loop back round to the first container again.
-        with containers[y % len(containers)]:
+        with containers[1 + (y % len(containers))]:
             # Input widget:
-            stroke_teams_selected = st.multiselect(
+            year_chosen_bool = st.checkbox(
                 f'{year}',
-                options=stroke_team_list,
-                default=all_teams_str if year == all_years_str else None,
-                key=f'input_teams_{year}'
+                value=(year == all_years_str)
                 )
-        # The select box displays just the name of the team.
-        # Append the year to these names:
-        stroke_teams_selected = [
-            f'{t} ({year})' for t in stroke_teams_selected]
-        # Add the teams selected in this widget to the list of all
-        # teams selected in all widgets:
-        all_stroke_teams_selected += stroke_teams_selected
+        if year_chosen_bool is True:
+            if year == all_years_str:
+                # Put this string at the front of the list
+                # so it appears first in the big "Results" table.
+                years_selected = [year] + years_selected
+            else:
+                years_selected.append(year)
 
-    return all_stroke_teams_selected
+    # The select box displays just the name of the team.
+    # Append the year to these names:
+    all_stroke_teams_selected = [
+        f'{t} ({year})'
+        for year in years_selected
+        for t in stroke_teams_selected
+        ]
+    all_stroke_teams_selected_without_year = (
+        stroke_teams_selected * len(years_selected))
+
+    return all_stroke_teams_selected, all_stroke_teams_selected_without_year
