@@ -6,7 +6,7 @@ import streamlit as st
 import numpy as np
 
 
-def inputs_region_choice(df_stroke_team, containers=[]):
+def inputs_region_choice(df_stroke_team, containers=[], existing_regions=[]):
     """
     Take user inputs for which regions to consider.
 
@@ -47,7 +47,8 @@ def inputs_region_choice(df_stroke_team, containers=[]):
     for r, region in enumerate(region_list):
         # Select container from the input list:
         with containers[r % len(containers)]:
-            region_bool = st.checkbox(region, key=region)
+            b = True if region in existing_regions else False
+            region_bool = st.checkbox(region, key=region, value=b)
         # Store True/False choice in the list of all choices.
         regions_selected_bool.append(region_bool)
 
@@ -62,7 +63,8 @@ def input_stroke_teams_to_highlight(
         all_teams_str,
         year_options,
         all_years_str='',
-        containers=[]
+        containers=[],
+        existing_teams=[]
         ):
     """
     Create input widgets for stroke teams to highlight, split by year.
@@ -110,12 +112,22 @@ def input_stroke_teams_to_highlight(
     stroke_team_list = np.append(all_teams_str, stroke_team_list)
 
     # Input team names:
+    # Use this callback function to update the highlighted team names
+    # once the user selects something. This method prevents the problem
+    # where streamlit doesn't process every second click on the widget.
+    def update_teams():
+        st.session_state['highlighted_teams_with_click_ds'] = (
+            st.session_state['team_input_ds']
+        )
+
     with containers[0]:
         # Input widget:
         stroke_teams_selected = st.multiselect(
             'Pick some teams:',
             options=stroke_team_list,
-            default=all_teams_str
+            default=existing_teams,
+            key='team_input_ds',
+            on_change=update_teams
             )
 
     # Move the "all years" option to the end of the list
@@ -151,4 +163,8 @@ def input_stroke_teams_to_highlight(
     all_stroke_teams_selected_without_year = (
         stroke_teams_selected * len(years_selected))
 
-    return all_stroke_teams_selected, all_stroke_teams_selected_without_year
+    return (
+        all_stroke_teams_selected,
+        all_stroke_teams_selected_without_year,
+        stroke_teams_selected
+    )

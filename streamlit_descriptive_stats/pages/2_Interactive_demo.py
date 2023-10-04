@@ -81,6 +81,8 @@ def main():
     |                                                                 |
     |                        container_violins                        |
     |                                                                 |
+    |                        container_scatter                        |
+    |                                                                 |
     |                        container_details                        |
     +-----------------------------------------------------------------+
     """
@@ -155,17 +157,49 @@ def main():
     year_options.remove(all_years_str)
     year_options = [all_years_str] + year_options
 
+    # Pull in the list of stroke teams that have already been selected.
+    try:
+        # If we've already selected highlighted teams using the
+        # clickable plotly graphs, then load that list:
+        existing_teams = st.session_state['highlighted_teams_with_click_ds']
+    except KeyError:
+        # Make a dummy list so streamlit behaves as normal:
+        existing_teams = []
+    # Check which regions those existing teams belong in:
+    existing_regions = []
+    for team in existing_teams:
+        if team[:4] != 'All ':
+            region = df_stroke_team['RGN11NM'][df_stroke_team['Stroke Team'] == team].squeeze()
+            if region not in existing_regions:
+                existing_regions.append(region)
+
     with container_input_regions:
         # Select regions:
         regions_selected = utilities_descriptive.container_inputs.\
             inputs_region_choice(
                 df_stroke_team,
-                containers_list_region_inputs
+                containers_list_region_inputs,
+                existing_regions
                 )
+        # Remove teams that aren't in the selected regions:
+        existing_teams_selected_regions = []
+        for team in existing_teams:
+            if team[:4] != 'All ':
+                region = df_stroke_team['RGN11NM'][df_stroke_team['Stroke Team'] == team].squeeze()
+                if region in regions_selected:
+                    existing_teams_selected_regions.append(team)
+            else:
+                region = team.split('All ')[1]
+                if region in regions_selected:
+                    existing_teams_selected_regions.append(team)
+
+    st.session_state['highlighted_teams_with_click_ds'] = (
+        existing_teams_selected_regions
+    )
 
     with container_input_teams:
         # Select stroke teams:
-        stroke_teams_selected, stroke_teams_selected_without_year = \
+        stroke_teams_selected, stroke_teams_selected_without_year, short_stroke_teams_selected_without_year = \
             utilities_descriptive.container_inputs.\
             input_stroke_teams_to_highlight(
                 df_stroke_team,
@@ -173,7 +207,8 @@ def main():
                 all_teams_str,
                 year_options,
                 all_years_str=all_years_str,
-                containers=containers_list_team_inputs
+                containers=containers_list_team_inputs,
+                existing_teams=existing_teams_selected_regions
                 )
 
     # Update the colours assigned to the selected teams.
@@ -195,7 +230,7 @@ def main():
         utilities_descriptive.container_plots.\
             plot_geography_pins(
                 df_stroke_team,
-                set(stroke_teams_selected_without_year),
+                short_stroke_teams_selected_without_year,
                 team_colours_dict
                 )
 
