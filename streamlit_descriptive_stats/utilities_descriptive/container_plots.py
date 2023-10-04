@@ -328,3 +328,26 @@ def plot_violins(
         'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
     }
     st.plotly_chart(fig, config=plotly_config)
+
+
+def scatter_fields(x_feature_name, y_feature_name, year_restriction, df):
+    df = df.T
+    mask = df['year'] == year_restriction
+    # st.write(df[mask])
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df[x_feature_name][mask],
+        y=df[y_feature_name][mask],
+        mode='markers'
+    ))
+
+    fig.update_layout(
+        xaxis_title=x_feature_name,
+        yaxis_title=y_feature_name
+    )
+    plotly_config = {
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+    }
+    st.plotly_chart(fig, config=plotly_config)
