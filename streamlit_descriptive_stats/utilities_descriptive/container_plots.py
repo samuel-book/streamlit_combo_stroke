@@ -337,10 +337,18 @@ def scatter_fields(x_feature_name, y_feature_name, year_restriction, df):
 
     fig = go.Figure()
 
+    # Quick attempt to get near-equal aspect ratio:
+    fig.update_layout(
+        width=500,
+        height=500,
+        # margin_l=0, margin_r=0, margin_t=0, margin_b=0
+        )
+
     fig.add_trace(go.Scatter(
         x=df[x_feature_name][mask],
         y=df[y_feature_name][mask],
-        mode='markers'
+        mode='markers',
+        text=df['stroke_team'][mask]
     ))
 
     fig.update_layout(
