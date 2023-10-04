@@ -237,6 +237,7 @@ def main():
         'mrs_5-6': 'Discharge disability 5-6',
         'mrs_0-2': 'Discharge disability 0-2'
     }
+    inverse_index_names = dict(zip(index_names.values(), index_names.keys()))
     # Reduce the dataframe to only these rows, in that order:
     df_to_show = df_to_show.loc[list(index_names.keys())]
     # Convert all string values to numeric:
@@ -288,18 +289,22 @@ def main():
     # #########################
 
     with container_violins:
-        st.header('Feature comparison')
+        st.header('One feature over time')
+        st.markdown('Compare one feature across multiple years.')
 
         # User inputs for which feature to plot:
-        feature = st.selectbox(
+        feature_display = st.selectbox(
             'Pick a feature to plot',
-            options=index_names.keys(),
+            options=index_names.values(),
             # default='count'
         )
+        # Convert this to actual feature name:
+        feature = inverse_index_names[feature_display]
 
         utilities_descriptive.container_plots.plot_violins(
             summary_stats_df,
             feature,
+            feature_display,
             year_options,
             stroke_teams_selected_without_year,
             all_years_str,
@@ -308,19 +313,23 @@ def main():
             )
 
     with container_scatter:
+        st.header('Relation between two features')
+        st.markdown('Compare the variation of two features across hospitals.')
         cols_scatter_inputs = st.columns(3)
         # Pick two features to scatter:
         with cols_scatter_inputs[0]:
-            x_feature_name = st.selectbox(
+            x_feature_display_name = st.selectbox(
                 'Feature for x-axis',
-                options=index_names.keys()
+                options=index_names.values()
             )
+            x_feature_name = inverse_index_names[x_feature_display_name]
 
         with cols_scatter_inputs[1]:
-            y_feature_name = st.selectbox(
+            y_feature_display_name = st.selectbox(
                 'Feature for y-axis',
-                options=index_names.keys()
+                options=index_names.values()
             )
+            y_feature_name = inverse_index_names[y_feature_display_name]
 
         with cols_scatter_inputs[2]:
             year_restriction = st.selectbox(
@@ -332,7 +341,11 @@ def main():
             x_feature_name,
             y_feature_name,
             year_restriction,
-            summary_stats_df
+            summary_stats_df,
+            stroke_teams_selected_without_year,
+            team_colours_dict,
+            x_feature_display_name,
+            y_feature_display_name,
             )
 
     with container_details:

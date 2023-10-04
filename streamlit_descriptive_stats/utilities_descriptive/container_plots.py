@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 import geojson
 import numpy as np
 import pandas as pd
+from scipy.stats import linregress
 
 # Add an extra bit to the path if we need to.
 # Try importing something as though we're running this from the same
@@ -188,6 +189,7 @@ def plot_geography_pins(
 def plot_violins(
         summary_stats_df,
         feature,
+        feature_display_name,
         year_options,
         stroke_teams_selected,
         all_years_str,
@@ -205,6 +207,7 @@ def plot_violins(
     -------
     summary_stats_df      - pd.DataFrame. Descriptive stats dataframe.
     feature               - str. Name of the row of data to plot.
+    feature_display_name  - str. How to print the feature name.
     year_options          - list. One string per year in the dataframe.
     stroke_teams_selected - list. Stroke teams to highlight.
     all_years_str         - str. Label of all years in the dataframe,
@@ -307,7 +310,7 @@ def plot_violins(
                 hovertemplate='%{y}'
             ))
 
-    fig.update_layout(yaxis_title=feature)
+    fig.update_layout(yaxis_title=feature_display_name)
     fig.update_layout(
         xaxis=dict(
             tickmode='array',
@@ -330,30 +333,98 @@ def plot_violins(
     st.plotly_chart(fig, config=plotly_config)
 
 
-def scatter_fields(x_feature_name, y_feature_name, year_restriction, df):
+def scatter_fields(
+        x_feature_name,
+        y_feature_name,
+        year_restriction,
+        df,
+        stroke_teams_selected,
+        team_colours_dict,
+        x_feature_display_name,
+        y_feature_display_name,
+        ):
+    """
+
+    feature_display_name  - str. How to print the feature name.
+    """
     df = df.T
-    mask = df['year'] == year_restriction
-    # st.write(df[mask])
+
+    # Mask by selected year:
+    df = df[df['year'] == year_restriction]
+
+    # Remove "All teams" fields:
+    # Pull out any row of the dataframe that contains any of the
+    # selected stroke team names in any of its columns.
+    stroke_teams_named_all = [t for t in set(df['stroke_team'])
+                              if t[:4] == 'All ']
+    df = df[~df.isin(stroke_teams_named_all).any(axis=1)]
+
+    # Create the line of best fit:
+    lobf = linregress(
+        list(df[x_feature_name].astype(float).values),
+        list(df[y_feature_name].astype(float).values)
+        )
 
     fig = go.Figure()
 
-    # Quick attempt to get near-equal aspect ratio:
+    # Quick attempt to get near-square axis:
     fig.update_layout(
-        width=500,
+        width=800,
         height=500,
         # margin_l=0, margin_r=0, margin_t=0, margin_b=0
         )
 
+    # Plot the line of best fit:
+    lobf_name = (
+        f'{lobf.intercept:.3f} +' +
+        f'({x_feature_display_name}) × ({lobf.slope:.3f})'
+        )
     fig.add_trace(go.Scatter(
-        x=df[x_feature_name][mask],
-        y=df[y_feature_name][mask],
-        mode='markers',
-        text=df['stroke_team'][mask]
+        x=df[x_feature_name],
+        y=lobf.intercept + lobf.slope * df[x_feature_name].astype(float),
+        name=lobf_name,
+        hoverinfo='skip',
+        marker_color='silver'
     ))
 
+    # Pull out any row of the dataframe that contains any of the
+    # selected stroke team names in any of its columns.
+    mask_most_teams = ~df.isin(stroke_teams_selected).any(axis=1)
+    # Plot all teams that are not highlighted:
+    fig.add_trace(go.Scatter(
+        x=df[x_feature_name][mask_most_teams],
+        y=df[y_feature_name][mask_most_teams],
+        mode='markers',
+        text=df['stroke_team'][mask_most_teams],
+        name='Stroke teams',
+        marker_color='grey',
+        marker_line_color='black',
+        marker_line_width=1.0,
+        hovertemplate='(%{x}, %{y})<extra>%{text}</extra>'
+    ))
+
+    # Plot highlighted teams:
+    # Remove any of the "all teams" or "all region" data:
+    stroke_teams_selected = [t for t in stroke_teams_selected
+                             if t[:4] != 'All ']
+    for stroke_team in stroke_teams_selected:
+        mask_team = df['stroke_team'] == stroke_team
+        fig.add_trace(go.Scatter(
+            x=df[x_feature_name][mask_team],
+            y=df[y_feature_name][mask_team],
+            mode='markers',
+            name=df['stroke_team'][mask_team].squeeze(),
+            text=[df['stroke_team'][mask_team].squeeze()],
+            marker_color=team_colours_dict[stroke_team],
+            marker_line_color='black',
+            marker_line_width=1.0,
+            hovertemplate='(%{x}, %{y})<extra>%{text}</extra>'
+        ))
+
+    # Figure format:
     fig.update_layout(
-        xaxis_title=x_feature_name,
-        yaxis_title=y_feature_name
+        xaxis_title=x_feature_display_name,
+        yaxis_title=y_feature_display_name
     )
     plotly_config = {
         'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
