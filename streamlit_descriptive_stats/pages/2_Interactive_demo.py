@@ -97,6 +97,7 @@ def main():
     container_input_4hr_toggle = st.container()
     container_results_table = st.container()
     container_violins = st.container()
+    container_scatter = st.container()
     container_details = st.container()
 
     # Each team input box:
@@ -304,6 +305,34 @@ def main():
             all_years_str,
             all_teams_str,
             team_colours_dict
+            )
+
+    with container_scatter:
+        cols_scatter_inputs = st.columns(3)
+        # Pick two features to scatter:
+        with cols_scatter_inputs[0]:
+            x_feature_name = st.selectbox(
+                'Feature for x-axis',
+                options=index_names.keys()
+            )
+
+        with cols_scatter_inputs[1]:
+            y_feature_name = st.selectbox(
+                'Feature for y-axis',
+                options=index_names.keys()
+            )
+
+        with cols_scatter_inputs[2]:
+            year_restriction = st.selectbox(
+                'Years to show',
+                options=year_options
+            )
+
+        utilities_descriptive.container_plots.scatter_fields(
+            x_feature_name,
+            y_feature_name,
+            year_restriction,
+            summary_stats_df
             )
 
     with container_details:
