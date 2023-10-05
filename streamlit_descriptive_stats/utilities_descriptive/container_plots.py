@@ -435,12 +435,14 @@ def plot_violins(
 def scatter_fields(
         x_feature_name,
         y_feature_name,
+        c_feature_name,
         year_restriction,
         df,
         stroke_teams_selected,
         team_colours_dict,
         x_feature_display_name,
         y_feature_display_name,
+        c_feature_display_name,
         ):
     """
 
@@ -466,11 +468,19 @@ def scatter_fields(
 
     fig = go.Figure()
 
+
+
+    if c_feature_display_name != 'None':
+        # Fig with colourbar
+        fig_width = 700 + 5 * len(x_feature_display_name)
+    else:
+        # Fig without colourbar
+        fig_width = 600 + 5 * len(x_feature_display_name)
     # Quick attempt to get near-square axis:
     fig.update_layout(
-        width=800,
+        width=fig_width,
         height=500,
-        # margin_l=0, margin_r=0, margin_t=0, margin_b=0
+        margin_l=0, margin_r=0, margin_t=0, margin_b=0
         )
 
     # Plot the line of best fit:
@@ -486,22 +496,6 @@ def scatter_fields(
         marker_color='silver'
     ))
 
-    # Pull out any row of the dataframe that contains any of the
-    # selected stroke team names in any of its columns.
-    mask_most_teams = ~df.isin(stroke_teams_selected).any(axis=1)
-    # Plot all teams that are not highlighted:
-    fig.add_trace(go.Scatter(
-        x=df[x_feature_name][mask_most_teams],
-        y=df[y_feature_name][mask_most_teams],
-        mode='markers',
-        text=df['stroke_team'][mask_most_teams],
-        name='Stroke teams',
-        marker_color='grey',
-        marker_line_color='black',
-        marker_line_width=1.0,
-        hovertemplate='(%{x}, %{y})<extra>%{text}</extra>'
-    ))
-
     # Plot highlighted teams:
     # Remove any of the "all teams" or "all region" data:
     stroke_teams_selected = [t for t in stroke_teams_selected
@@ -514,7 +508,44 @@ def scatter_fields(
             mode='markers',
             name=df['stroke_team'][mask_team].squeeze(),
             text=[df['stroke_team'][mask_team].squeeze()],
-            marker_color=team_colours_dict[stroke_team],
+            marker_color='rgba(0, 0, 0, 0)',
+            marker_line_color=team_colours_dict[stroke_team],
+            marker_size=10,
+            marker_line_width=2.5,
+            marker_symbol='square',
+            # hovertemplate='(%{x}, %{y})<extra>%{text}</extra>'
+            hoverinfo='skip'
+        ))
+
+    # Plot all teams that are not highlighted:
+    if c_feature_display_name != 'None':
+        # Colour teams by third value
+        fig.add_trace(go.Scatter(
+            x=df[x_feature_name],
+            y=df[y_feature_name],
+            marker_color=df[c_feature_name].astype(float),
+            marker_showscale=True,
+            marker_colorbar_title_text=c_feature_display_name,
+            marker_colorbar_title_side='right',
+            mode='markers',
+            text=df['stroke_team'],
+            name='Stroke teams',
+            # marker_color='grey',
+            marker_line_color='black',
+            marker_line_width=1.0,
+            customdata=np.stack([df[c_feature_name].astype(float)], axis=-1),
+            hovertemplate='(%{x}, %{y})<br>' + c_feature_display_name + ': %{customdata[0]}<extra>%{text}</extra>'
+        ))
+        fig.update_coloraxes(colorbar_title_text=c_feature_display_name)
+    else:
+        # Show all teams in grey.
+        fig.add_trace(go.Scatter(
+            x=df[x_feature_name],
+            y=df[y_feature_name],
+            mode='markers',
+            text=df['stroke_team'],
+            name='Stroke teams',
+            marker_color='grey',
             marker_line_color='black',
             marker_line_width=1.0,
             hovertemplate='(%{x}, %{y})<extra>%{text}</extra>'
@@ -525,7 +556,18 @@ def scatter_fields(
         xaxis_title=x_feature_display_name,
         yaxis_title=y_feature_display_name
     )
+    if c_feature_display_name != 'None':
+        # Move the legend to make space for the colour bar.
+        fig.update_layout(legend=dict(
+            orientation='v',
+            yanchor='top',
+            y=1.0,
+            xanchor='left',
+            x=1.3,
+            # itemwidth=50
+        ))
     plotly_config = {
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+        'displayModeBar': False
+        # 'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
     }
     st.plotly_chart(fig, config=plotly_config)

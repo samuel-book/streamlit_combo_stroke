@@ -350,7 +350,7 @@ def main():
     with container_scatter:
         st.header('Relation between two features')
         st.markdown('Compare the variation of two features across hospitals.')
-        cols_scatter_inputs = st.columns(3)
+        cols_scatter_inputs = st.columns(4)
         # Pick two features to scatter:
         with cols_scatter_inputs[0]:
             x_feature_display_name = st.selectbox(
@@ -367,6 +367,15 @@ def main():
             y_feature_name = inverse_index_names[y_feature_display_name]
 
         with cols_scatter_inputs[2]:
+            c_feature_display_name = st.selectbox(
+                'Feature for colour',
+                options=['None'] + list(index_names.values())
+            )
+            c_feature_name = (inverse_index_names[c_feature_display_name]
+                              if c_feature_display_name != 'None'
+                              else c_feature_display_name)
+
+        with cols_scatter_inputs[3]:
             year_restriction = st.selectbox(
                 'Years to show',
                 options=year_options
@@ -375,12 +384,14 @@ def main():
         utilities_descriptive.container_plots.scatter_fields(
             x_feature_name,
             y_feature_name,
+            c_feature_name,
             year_restriction,
             summary_stats_df,
             stroke_teams_selected_without_year,
             team_colours_dict,
             x_feature_display_name,
             y_feature_display_name,
+            c_feature_display_name
             )
 
     with container_details:
