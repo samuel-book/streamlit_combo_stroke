@@ -88,7 +88,14 @@ def main():
     """
     cols_inputs_map = st.columns([0.6, 0.4])
     with cols_inputs_map[0]:
-        st.markdown('## Select stroke team data')
+        st.markdown(
+            '''
+            ## Select stroke team data
+
+            Select teams using the buttons
+            and the drop-down list or by clicking on markers on the map.
+            '''
+            )
         container_input_regions = st.container()
     with cols_inputs_map[0]:
         container_input_teams = st.container()
