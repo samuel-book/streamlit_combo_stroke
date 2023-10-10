@@ -164,12 +164,13 @@ def main():
         existing_teams = st.session_state['highlighted_teams_with_click_ds']
     except KeyError:
         # Make a dummy list so streamlit behaves as normal:
-        existing_teams = []
+        existing_teams = [f'{all_teams_str}']
     # Check which regions those existing teams belong in:
     existing_regions = []
     for team in existing_teams:
         if team[:4] != 'All ':
-            region = df_stroke_team['RGN11NM'][df_stroke_team['Stroke Team'] == team].squeeze()
+            region = df_stroke_team['RGN11NM'][
+                df_stroke_team['Stroke Team'] == team].squeeze()
             if region not in existing_regions:
                 existing_regions.append(region)
 
@@ -185,21 +186,26 @@ def main():
         existing_teams_selected_regions = []
         for team in existing_teams:
             if team[:4] != 'All ':
-                region = df_stroke_team['RGN11NM'][df_stroke_team['Stroke Team'] == team].squeeze()
+                region = df_stroke_team['RGN11NM'][
+                    df_stroke_team['Stroke Team'] == team].squeeze()
                 if region in regions_selected:
                     existing_teams_selected_regions.append(team)
             else:
+                if team[:len(all_teams_str)] == all_teams_str:
+                    existing_teams_selected_regions.append(team)
                 region = team.split('All ')[1]
                 if region in regions_selected:
                     existing_teams_selected_regions.append(team)
-
+    
     st.session_state['highlighted_teams_with_click_ds'] = (
         existing_teams_selected_regions
     )
 
     with container_input_teams:
         # Select stroke teams:
-        stroke_teams_selected, stroke_teams_selected_without_year, short_stroke_teams_selected_without_year = \
+        (stroke_teams_selected,
+         stroke_teams_selected_without_year,
+         short_stroke_teams_selected_without_year) = \
             utilities_descriptive.container_inputs.\
             input_stroke_teams_to_highlight(
                 df_stroke_team,
@@ -246,6 +252,13 @@ def main():
             stroke_teams_selected,
             container_warnings
         )
+
+    # Save a copy of the table for the download button.
+    # The button needs df.to_csv() and so does not work with a
+    # styled dataframe. We also should avoid the % formatting and
+    # prettier column names here because they're incompatible with
+    # the full data file.
+    df_to_download = df_to_show.copy()
 
     # Update the order of the rows to this:
     index_names = {
@@ -318,6 +331,22 @@ def main():
     with container_results_table:
         st.header('Results')
         st.table(df_to_show)
+
+        # Add an option to include this data:
+        st.download_button(
+            'Download this table as .csv',
+            # df_to_download,
+            df_to_download.to_csv(),
+            file_name='stroke_descriptive_stats.csv'
+        )
+        st.markdown(
+            '''
+            The full data for all teams is accessible on GitHub: [![][github-img]][github-data]
+            ['summary_stats.csv' and 'summary_stats_4hr.csv'](https://github.com/samuel-book/streamlit_descriptive_stats/tree/main/data_descriptive)
+
+            [github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+            [github-data]: https://github.com/samuel-book/streamlit_descriptive_stats/tree/main/data_descriptive
+            ''')
 
     # #########################
     # ######### PLOTS #########
