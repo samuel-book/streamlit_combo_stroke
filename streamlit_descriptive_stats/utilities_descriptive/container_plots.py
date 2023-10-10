@@ -480,8 +480,6 @@ def scatter_fields(
 
     fig = go.Figure()
 
-
-
     if c_feature_display_name != 'None':
         # Fig with colourbar
         fig_width = 700 + 5 * len(x_feature_display_name)
@@ -522,8 +520,13 @@ def scatter_fields(
 
     # Plot highlighted teams:
     # Remove any of the "all teams" or "all region" data:
-    stroke_teams_selected = [t for t in stroke_teams_selected
-                             if t[:4] != 'All ']
+    # (silly setup to remove teams appearing in the list multiple times
+    # while retaining the order in the list)
+    a = []
+    for t in stroke_teams_selected:
+        if (t[:4] != 'All ' and t not in a):
+            a.append(t)
+    stroke_teams_selected = a
     for stroke_team in stroke_teams_selected:
         mask_team = df['stroke_team'] == stroke_team
         fig.add_trace(go.Scatter(
