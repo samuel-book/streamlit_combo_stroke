@@ -29,12 +29,24 @@ def main(sorted_results, n_benchmark_teams):
     perc_thrombolyse_non_benchmark = (
         100.0 * n_thrombolyse_non_benchmark / n_non_benchmark)
 
-    cols = st.columns(4, gap='large')
-    with cols[0]:
-        st.metric(
-            f'All teams',
-            f'{perc_thrombolyse_all:.0f}%'
+    cols_markers = st.columns(3)
+    with cols_markers[0]:
+        st.markdown('Benchmark teams:')
+        st.markdown(make_marker_grid(
+            n_thrombolyse_benchmark,
+            n_benchmark - n_thrombolyse_benchmark)
             )
+
+    with cols_markers[1]:
+        st.markdown('Non-benchmark teams:')
+        st.markdown(make_marker_grid(
+            n_thrombolyse_non_benchmark,
+            n_non_benchmark - n_thrombolyse_non_benchmark)
+            )
+
+
+    # cols = st.columns(4, gap='large')
+    with cols_markers[2]:
         yes_str = (
             ':heavy_check_mark:' +
             f' {n_thrombolyse_all} team' +
@@ -46,14 +58,14 @@ def main(sorted_results, n_benchmark_teams):
             ('s' if n_all - n_thrombolyse_all != 1
              else '')
         )
-        st.write(yes_str)
-        st.write(no_str)
+        st.markdown(
+            f'''
+            All teams  
+            {yes_str}  
+            {no_str}
+            '''
+        )
 
-    with cols[2]:
-        st.metric(
-            f'Benchmark teams',
-            f'{perc_thrombolyse_benchmark:.0f}%'
-            )
         yes_str = (
             ':heavy_check_mark:' +
             f' {n_thrombolyse_benchmark} team' +
@@ -65,14 +77,14 @@ def main(sorted_results, n_benchmark_teams):
             ('s' if n_benchmark - n_thrombolyse_benchmark != 1
              else '')
             )
-        st.write(yes_str)
-        st.write(no_str)
+        st.markdown(
+            f'''
+            Benchmark teams  
+            {yes_str}  
+            {no_str}
+            '''
+        )
 
-    with cols[3]:
-        st.metric(
-            f'Other teams',
-            f'{perc_thrombolyse_non_benchmark:.0f}%'
-            )
         yes_str = (
             ':heavy_check_mark:' +
             f' {n_thrombolyse_non_benchmark} team' +
@@ -84,21 +96,50 @@ def main(sorted_results, n_benchmark_teams):
             ('s' if n_non_benchmark - n_thrombolyse_non_benchmark != 1
              else '')
         )
-        st.write(yes_str)
-        st.write(no_str)
+        st.markdown(
+            f'''
+            Non-benchmark teams  
+            {yes_str}  
+            {no_str}
+            '''
+        )
 
-    with cols[1]:
-        # Write benchmark decision:
-        extra_str = '' if perc_thrombolyse_benchmark >= 50.0 else ' do not'
-        decision_emoji = ':heavy_check_mark:' if perc_thrombolyse_benchmark >= 50.0 else ':x:'
-        st.error(''.join([
-            '''__Benchmark decision:__
+    # Write benchmark decision:
+    extra_str = (' would' if perc_thrombolyse_benchmark >= 50.0
+                 else ' would not')
+    decision_emoji = (':heavy_check_mark:'
+                        if perc_thrombolyse_benchmark >= 50.0 else ':x:')
+    st.error(
+        f'''
+        __Benchmark decision:__ {decision_emoji}{extra_str} thrombolyse
+        '''  # this patient.'
+    )
 
-''',
-            decision_emoji,
-            extra_str,
-            ' thrombolyse'  # this patient.'
-            ]))
-        # Don't move the quote marks!!!
-        # It looks stupid here but is required to get a new line
-        # in the markdown.
+
+def make_marker_grid(n_yes, n_no):
+    # Format the string so ten markers appear per row.
+    count = n_yes
+    full_str = ''
+    ticks = True
+    while ticks:
+        if count >= 10:
+            full_str += ':heavy_check_mark:' * 10
+            full_str += '''  
+                        '''
+            count -= 10
+        else:
+            full_str += ':heavy_check_mark:' * count
+            ticks = False
+    count_non = n_no
+    left_in_row = 10 - count
+    while count_non > 0:
+        if count_non >= left_in_row:
+            full_str += ':x:' * left_in_row
+            full_str += '''  
+                        '''
+            count_non -= left_in_row
+            left_in_row = 10
+        else:
+            full_str += ':x:' * count_non
+            count_non = 0
+    return full_str

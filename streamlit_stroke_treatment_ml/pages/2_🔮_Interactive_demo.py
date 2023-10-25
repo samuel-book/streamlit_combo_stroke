@@ -101,12 +101,10 @@ def main():
             '''
             __Thrombolysis: yes or no?__
 
-            If probability is at least 50%:
-
+            If probability is at least 50%:  
             ✔️ would thrombolyse
 
-            If probability is below 50%:
-
+            If probability is below 50%:  
             ❌ would not thrombolyse
             '''
             )
@@ -137,12 +135,10 @@ def main():
             '''
             __Benchmark decision__
 
-            If at least half of the benchmark teams would thrombolyse:
-
+            If at least half of the benchmark teams would thrombolyse:  
             ✔️ would thrombolyse
 
-            Otherwise:
-
+            Otherwise:  
             ❌ would not thrombolyse
             '''
             )
@@ -165,14 +161,18 @@ def main():
     with container_metrics:
         st.markdown('### How many teams would thrombolyse this patient?')
 
+    container_propensity = st.container()
+    with container_propensity:
+        st.markdown('### How treatable is this patient?')
+
     container_highlighted_summary = st.container()
     with container_highlighted_summary:
-        st.markdown('## ')  # Breathing room
+        # st.markdown('## ')  # Breathing room
         st.markdown('### What would your team do?')
         st.caption(
             '''
             To highlight stroke teams, select them in this box
-            or click on them in the interactive charts.
+            or click on them in the interactive bar chart.
             ''',
             help=''.join([
                 '🔍 - [Why are the team names numbers?]'
@@ -194,7 +194,7 @@ def main():
 
     container_bar_chart = st.container()
     with container_bar_chart:
-        st.markdown('### What would each of the teams do?')
+        st.markdown('### How likely is thrombolysis for each team?')
         st.caption('To see the team names, hover or click on a bar.')
 
     # ###########################
@@ -240,6 +240,16 @@ def main():
         # Print metrics for how many teams would thrombolyse:
         utilities_ml.container_metrics.main(sorted_results, n_benchmark_teams)
 
+    with container_propensity:
+        # How treatable is this patient:
+        st.markdown(
+            f'''
+            The mean probability of thrombolysis across all teams is
+            __{sorted_results["Probability_perc"].mean():.0f}%__.
+            '''
+            )
+
+    line_str = ''
     with container_highlighted_summary:
         highlighted_teams_colours = \
             st.session_state['highlighted_teams_colours']
@@ -254,6 +264,12 @@ def main():
                     # Start a new row:
                     i = 1
                     col = cols[i]
+                    line_str = (
+                        '''
+                        --------------
+
+                        '''
+                        )
                 i += 1
 
                 df_here = sorted_results[sorted_results['HB team'] == team]
@@ -263,6 +279,8 @@ def main():
                 # else:
                     # team = 'Team ' + team
                 with col:
+                    if len(line_str) > 0:
+                        st.markdown(line_str)
                     write_markdown_in_colour(
                         '<strong> Team ' + team + '</strong>',
                         colour=colour_here)
@@ -273,10 +291,13 @@ def main():
                         extra_str = ''
                     else:
                         emoji_here = '❌ '
-                        extra_str = 'do not '
-                    st.markdown(f'Probability: {prob_here:.2f}%')
-                    st.markdown(emoji_here + extra_str + 'thrombolyse')
-                    st.markdown('-' * 10)
+                        extra_str = 'would not '
+                    st.markdown(
+                        f'''
+                        Probability: {prob_here:.2f}%  
+                        {emoji_here}{extra_str}thrombolyse
+                        '''
+                    )
                     # HTML horizontal rule is <hr> but appears in grey.
 
     with container_bar_chart:
