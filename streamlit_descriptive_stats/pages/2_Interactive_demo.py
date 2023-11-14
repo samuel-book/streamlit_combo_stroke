@@ -60,7 +60,7 @@ def main():
         'Use this tool to compare multiple stroke teams\' ',
         'performances and the characteristics of their patients.'
         ]))
-
+    
     # Build up the page layout:
     _ = """
     +-----------------------------------------------------------------+
@@ -88,52 +88,33 @@ def main():
     """
     cols_inputs_map = st.columns([0.6, 0.4])
     with cols_inputs_map[0]:
+        container_dataset = st.container()
+        with container_dataset:
+            st.markdown('The results are calculated from this dataset:')
         st.markdown(
             '''
             ## Select stroke team data
 
-            Select teams using the buttons
-            and the drop-down list or by clicking on markers on the map.
+            Select teams using the drop-down lists
+            or by clicking on markers on the map.
             '''
             )
-        container_input_regions = st.container()
-    with cols_inputs_map[0]:
+        cols_filters = st.columns(2)
+        with cols_filters[0]:
+            container_input_regions = st.container()
+        with cols_filters[1]:
+            container_years = st.container()
         container_input_teams = st.container()
+        container_warnings = st.container()
+        container_input_4hr_toggle = st.container()
     with cols_inputs_map[1]:
         container_map = st.container()
 
-    container_warnings = st.container()
-    container_input_4hr_toggle = st.container()
     container_results_table = st.container()
     container_violins = st.container()
     container_scatter = st.container()
     container_details = st.container()
 
-    # Each team input box:
-    with container_input_teams:
-        # st.markdown('### Select stroke teams')
-        cols_t = st.columns([0.4, 0.2, 0.2, 0.2])
-        with cols_t[0]:
-            st.markdown('### Teams:')
-        with cols_t[1]:
-            st.markdown('### Years:')
-        for col in cols_t[2:]:
-            with col:
-                # Unicode looks-like-a-space character
-                # for vertical alignment with the other columns
-                # that have text in.
-                st.markdown('### \U0000200B')
-        containers_list_team_inputs = [
-            cols_t[0],             # All years
-            cols_t[1], cols_t[2],  # 2016, 2017
-            cols_t[3], cols_t[1],  # 2018, 2019
-            cols_t[2], cols_t[3],  # 2020, 2021
-            cols_t[1]
-        ]
-
-    with container_input_regions:
-        st.markdown('### Filter by region')
-        containers_list_region_inputs = st.columns(3)
 
     # ###########################
     # ########## SETUP ##########
@@ -144,8 +125,34 @@ def main():
         limit_to_4hr = st.toggle('Limit to arrival within 4hr')
     if limit_to_4hr:
         summary_stats_file = 'summary_stats_4hr.csv'
+        with container_dataset:
+            st.markdown(
+                '''  
+                + __SSNAP Subset 📊 DS2__ - 120,000 patients
+
+                | | |
+                | --- | --- |
+                | ✨ Cleaned | 🏥 Grouped by stroke team |
+                | 🚑 Ambulance arrivals | 📅 Grouped by calendar year |
+                | 👥 Teams with over 250 admissions | ⏰ Onset time known |
+                | 💉 Teams with at least 10 thrombolysis | ⏳🏥 Onset to arrival at hospital no more than 4 hours |
+                '''
+                )
     else:
         summary_stats_file = 'summary_stats.csv'
+        with container_dataset:
+            st.markdown(
+                '''        
+                + __SSNAP Subset 📊 DS1__ - 280,000 patients
+
+                | | |
+                | --- | --- |
+                | ✨ Cleaned | 🏥 Grouped by stroke team |
+                | 🚑 Ambulance arrivals | 📅 Grouped by calendar year |
+                | 👥 Teams with over 250 admissions |  |
+                | 💉 Teams with at least 10 thrombolysis |  |
+                '''
+                )
     # Read in the data:
     summary_stats_df = pd.read_csv(
         f'{dir}/data_descriptive/{summary_stats_file}',
@@ -163,6 +170,13 @@ def main():
     # Move the "all years" option to the front of the list:
     year_options.remove(all_years_str)
     year_options = [all_years_str] + year_options
+
+    with container_years:
+        years_selected = st.multiselect(
+            'Select year(s):',
+            year_options,
+            default=all_years_str
+        )
 
     # Pull in the list of stroke teams that have already been selected.
     try:
@@ -186,7 +200,6 @@ def main():
         regions_selected = utilities_descriptive.container_inputs.\
             inputs_region_choice(
                 df_stroke_team,
-                containers_list_region_inputs,
                 existing_regions
                 )
         # Remove teams that aren't in the selected regions:
@@ -203,7 +216,7 @@ def main():
                 region = team.split('All ')[1]
                 if region in regions_selected:
                     existing_teams_selected_regions.append(team)
-    
+
     st.session_state['highlighted_teams_with_click_ds'] = (
         existing_teams_selected_regions
     )
@@ -218,9 +231,7 @@ def main():
                 df_stroke_team,
                 regions_selected,
                 all_teams_str,
-                year_options,
-                all_years_str=all_years_str,
-                containers=containers_list_team_inputs,
+                years_selected,
                 existing_teams=existing_teams_selected_regions
                 )
 

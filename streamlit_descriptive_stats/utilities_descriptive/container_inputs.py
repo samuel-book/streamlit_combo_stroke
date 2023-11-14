@@ -6,7 +6,7 @@ import streamlit as st
 import numpy as np
 
 
-def inputs_region_choice(df_stroke_team, containers=[], existing_regions=[]):
+def inputs_region_choice(df_stroke_team, existing_regions=[]):
     """
     Take user inputs for which regions to consider.
 
@@ -32,28 +32,17 @@ def inputs_region_choice(df_stroke_team, containers=[], existing_regions=[]):
     regions_selected - list. Contains one string per region selected
                        by the user.
     """
-    # If no containers are given, invent some now:
-    if len(containers) < 1:
-        containers = st.columns(3)
-
-    # Lit of regions in the dataframe:
+    # List of regions in the dataframe:
     region_list = sorted(list(set(
         df_stroke_team['RGN11NM'].squeeze().values
         )))
 
-    # Create one select box for each region.
-    # Store the True/False choices in here:
-    regions_selected_bool = []
-    for r, region in enumerate(region_list):
-        # Select container from the input list:
-        with containers[r % len(containers)]:
-            b = True if region in existing_regions else False
-            region_bool = st.checkbox(region, key=region, value=b)
-        # Store True/False choice in the list of all choices.
-        regions_selected_bool.append(region_bool)
+    regions_selected = st.multiselect(
+        'Select region(s):',
+        options=region_list,
+        default=existing_regions
+    )
 
-    # Create a new list containing only the regions selected:
-    regions_selected = list(np.array(region_list)[regions_selected_bool])
     return regions_selected
 
 
@@ -61,9 +50,7 @@ def input_stroke_teams_to_highlight(
         df_stroke_team,
         regions_selected,
         all_teams_str,
-        year_options,
-        all_years_str='',
-        containers=[],
+        years_selected,
         existing_teams=[]
         ):
     """
@@ -94,10 +81,6 @@ def input_stroke_teams_to_highlight(
                                 year combination selected by the user.
                                 e.g. "All E+W (2016)".
     """
-    # If no containers are given, use some columns:
-    if len(containers) < 1:
-        containers = st.columns(3)
-
     # Create the list of stroke teams in the selected regions.
     # Pull out any row of the dataframe that contains any of the
     # selected region names in any of its columns.
@@ -120,38 +103,14 @@ def input_stroke_teams_to_highlight(
             st.session_state['team_input_ds']
         )
 
-    with containers[0]:
-        # Input widget:
-        stroke_teams_selected = st.multiselect(
-            'Pick some teams:',
-            options=stroke_team_list,
-            default=existing_teams,
-            key='team_input_ds',
-            on_change=update_teams
-            )
-
-    # Move the "all years" option to the end of the list
-    # so that it gets its own row on the check boxes.
-    year_options = year_options[1:] + [year_options[0]]
-
-    years_selected = []
-    # Create a separate input widget for each year in the data:
-    for y, year in enumerate(year_options):
-        # Select a container. If there are fewer containers than years,
-        # then loop back round to the first container again.
-        with containers[1 + (y % len(containers))]:
-            # Input widget:
-            year_chosen_bool = st.checkbox(
-                f'{year}',
-                value=(year == all_years_str)
-                )
-        if year_chosen_bool is True:
-            if year == all_years_str:
-                # Put this string at the front of the list
-                # so it appears first in the big "Results" table.
-                years_selected = [year] + years_selected
-            else:
-                years_selected.append(year)
+    # Input widget:
+    stroke_teams_selected = st.multiselect(
+        'Pick teams in selected region(s):',
+        options=stroke_team_list,
+        default=existing_teams,
+        key='team_input_ds',
+        on_change=update_teams
+        )
 
     # The select box displays just the name of the team.
     # Append the year to these names:
