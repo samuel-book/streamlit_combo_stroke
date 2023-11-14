@@ -151,3 +151,4 @@ def show_data_for_all(df):
 
     # Write to streamlit:
     st.dataframe(df.style.format(style_dict))
+

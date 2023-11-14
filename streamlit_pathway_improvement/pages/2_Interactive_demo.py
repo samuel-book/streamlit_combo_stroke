@@ -51,6 +51,20 @@ def main():
 
     # Title:
     st.markdown('# :stopwatch: Pathway improvement')
+    st.markdown('We use the data set __SSNAP Subset 📈 HP1__ (~119,000 patients) which has the following properties:')
+    st.markdown(
+        '''
+
+        | | |
+        | --- | --- |
+        | ✨ Cleaned | 📅 Calendar years 2019 and 2020 |
+        | 🚑 Ambulance arrivals | 🏥 Grouped by stroke team |
+        | 👥 Teams with over 250 admissions | 🧠 Grouped by stroke type |
+        | 💉 Teams with at least 10 thrombolysis |  |
+                
+        '''
+        )
+    st.markdown('')  # Breathing room
     st.markdown('''
         We can see the effect of making changes to the pathway by running the same patient information multiple times with minor tweaks.
         ''')
@@ -178,10 +192,11 @@ def main():
     # #######################################
 
     with container_scenario_input:
-        df = utilities_pathway.inputs.\
+        df_on_import = utilities_pathway.inputs.\
             import_stroke_data(
                 stroke_teams_list, scenarios, highlighted_teams_input
                 )
+        df = df_on_import.copy()
 
     # Sort the data according to this input:
     for col in ['Percent_Thrombolysis_(mean)', 'Additional_good_outcomes_per_1000_patients_(mean)']:
@@ -294,13 +309,20 @@ def main():
 
     # Table of results
     st.markdown('### Table of all results')
-    st.markdown('''
-        This table contains the data for all teams and all scenarios. 
-        It can be copied and pasted into other applications, 
-        for example Excel.
-        ''')
+    st.markdown(
+        '''
+        This table contains the data shown here for all teams
+        and all scenarios. The complete data is available
+        from the download button below.
+        '''
+        )
     show_data_for_all(df)
-    
+    st.download_button(
+        'Download complete data',
+        df_on_import.to_csv(index=False),
+        file_name='stroke_pathway_results.csv'
+    )
+
 
     # ----- The end! -----
 
