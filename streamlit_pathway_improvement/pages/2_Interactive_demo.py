@@ -51,6 +51,16 @@ def main():
 
     # Title:
     st.markdown('# :stopwatch: Pathway improvement')
+    st.markdown(
+        '''
+        We can simulate various pathways
+        to see the effect on thrombolysis rate and additional good outcomes.
+
+        A patient has an additional good outcome if they were thrombolysed and
+        had a post-stroke modified Rankin Scale (mRS) of 0 or 1,
+        and without thrombolysis their mRS would have been higher than 1.
+        ''')
+    # st.markdown('')  # Breathing room
     st.markdown('We use the data set __SSNAP Subset 📈 HP1__ (~119,000 patients) which has the following properties:')
     st.markdown(
         '''
@@ -60,64 +70,173 @@ def main():
         | ✨ Cleaned | 📅 Calendar years 2019 and 2020 |
         | 🚑 Ambulance arrivals | 🏥 Grouped by stroke team |
         | 👥 Teams with over 250 admissions | 🧠 Grouped by stroke type |
-        | 💉 Teams with at least 10 thrombolysis |  |
-                
+        | 💉 Teams with at least 10 thrombolysis | |
         '''
         )
-    st.markdown('')  # Breathing room
-    st.markdown('''
-        We can see the effect of making changes to the pathway by running the same patient information multiple times with minor tweaks.
-        ''')
 
-    # Method
-    col_ratio = [6, 7]
-    cols_base = st.columns(col_ratio)
-    cols_speed = st.columns(col_ratio)
-    cols_onset = st.columns(col_ratio)
-    cols_benchmark = st.columns(col_ratio)
+    tabs_method = st.tabs([
+        'Scenarios',
+        'Pathway method',
+        'Outcome measure',
+        'Simulating many patients'
+        ])
+    with tabs_method[0]:
+        # Method
+        cols_scenarios = st.columns(2)
 
-    image_files = [
-        'SAMueL2_model_base.png',
-        'SAMueL2_model_speed.png',
-        'SAMueL2_model_onset.png',
-        'SAMueL2_model_benchmark.png',
-    ]
-    for i, image_file in enumerate(image_files):
-        cols = [cols_base, cols_speed, cols_onset, cols_benchmark][i]
-        with cols[0]:
-            if i > 0:
-                st.markdown('###  ')  # Match the headers in other column.
-            # Draw the image with the basic model summary.
+        # Pathway descriptions from the SAMueL book:
+        # https://samuel-book.github.io/samuel-1/pathway_sim/scenario_analysis.html
+        with cols_scenarios[0]:
+            st.info('''
+                __Base__  
+                Use the recorded stroke team performance data.
+                ''')
+        with cols_scenarios[0]:
+            st.error('''
+                __Speed__  
+                Change the details of the arrival to scan times.
+
+                For the subgroup of patients who have arrived within 4 hours of onset,
+                set the _chance of having arrival to scan time under 4 hours_ to 95%.
+                For patients who are scanned within 4 hours of arrival,
+                set both _arrival to scan_ and _scan to needle_ times to 15 minutes exactly.
+                ''')
+        with cols_scenarios[1]:
+            st.error('''
+                __Onset__  
+                Change the chance of having a known onset time.
+
+                The target value is the upper quartile of the _proportions of patients with known onset time_ across all stroke teams.
+                The _chance of having a known onset time_ is set to either the target value or the original value, whichever is larger.
+                ''')
+        with cols_scenarios[1]:
+            st.info('''
+                __Benchmark__  
+                Change the chance of receiving thrombolysis.
+
+                🪝🐤🦆 For the subgroup of patients who have enough time left for thrombolysis,
+                update the _chance of receiving thrombolysis_ to the benchmark target for this stroke team.
+                The benchmark target is the thrombolysis rate of the stroke team's original patients according to the majority vote of the benchmark teams.
+                ''')
+
+    with tabs_method[1]:
+        st.markdown(
+            '''
+            Each patient goes through the following processes
+            to find their final onset-to-needle time.  
+            The actual numbers used in the checks
+            _"Is the number smaller than... ?"_ vary by stroke team.
+            '''
+            )
+        with st.expander('Is onset time known?'):
+            image_file = 'flowchart_onset-known.png'
             try:
                 st.image('./utilities_pathway/' + image_file)
+                path_to_images = './utilities_pathway/'
             except (FileNotFoundError, st.runtime.media_file_storage.MediaFileStorageError):
                 # Add an extra bit to the path for the combo app.
                 st.image('./streamlit_pathway_improvement/' +
                         'utilities_pathway/' + image_file)
+                path_to_images = './streamlit_pathway_improvement/utilities_pathway/'
+        with st.expander('Calculate onset-to-arrival time'):
+            image_file = 'flowchart_onset-to-arrival.png'
+            st.image(f'{path_to_images}/{image_file}')
+        with st.expander('Calculate arrival-to-scan time'):
+            image_file = 'flowchart_arrival-to-scan.png'
+            st.image(f'{path_to_images}/{image_file}')
+        with st.expander('Is there enough time for treatment?'):
+            image_file = 'flowchart_onset-to-scan.png'
+            st.image(f'{path_to_images}/{image_file}')
+        with st.expander('Is this patient treated?'):
+            st.markdown(
+                '''
+                This step is carried out only for patients who have
+                enough time left for treatment.
+                ''')
+            image_file = 'flowchart_treated.png'
+            st.image(f'{path_to_images}/{image_file}')
+        with st.expander('Calculate scan-to-needle time'):
+            st.markdown(
+                '''
+                This step is carried out only for patients who
+                receive treatment.
+                ''')
+            image_file = 'flowchart_scan-to-needle.png'
+            st.image(f'{path_to_images}/{image_file}')
+        st.markdown(
+            '''
+            The final treatment time is the sum of the onset-to-arrival,
+            arrival-to-scan, and scan-to-needle times.
+            ''')
 
+    with tabs_method[2]:
+        st.markdown(
+            '''
+            We calculate the mRS distribution at any treatment time
+            using the _"stroke-outcome"_ model.
+            ''',
+            help='''More details are available at [this link](
+            https://samuel-book.github.io/samuel-2/outcome_modelling/intro.html
+            ).'''
+        )
+        st.markdown(
+            '''
+            This image shows results for Patient "A" who
+            had an nLVO and was treated two hours after stroke onset.
+            '''
+        )
+        image_file = 'good_outcome_example.png'
+        st.image(f'{path_to_images}/{image_file}')
+        st.markdown(
+            '''
+            The patient was randomly assigned a fixed probability of 0.55.
+            The horizontal line at probability=0.55 marks which mRS bin
+            the patient falls into in any mRS distribution.
 
-    # Pathway descriptions from the SAMueL book:
-    # https://samuel-book.github.io/samuel-1/pathway_sim/scenario_analysis.html
-    with cols_base[1]:
-        st.markdown('### Base')
-        st.markdown('''
-            Uses the hospitals' recorded pathway statistics in SSNAP (same as validation notebook)
-            ''')
-    with cols_speed[1]:
-        st.markdown('### Speed')
-        st.markdown('''
-            Sets 95\% of patients having a scan within 4 hours of arrival, and all patients have 15 minutes arrival to scan and 15 minutes scan to needle.
-            ''')
-    with cols_onset[1]:
-        st.markdown('### Onset')
-        st.markdown('''
-            Sets the proportion of patients with a known onset time of stroke to the national upper quartile if currently less than the national upper quartile (leave any greater than the upper national quartile at their current level).
-            ''')
-    with cols_benchmark[1]:
-        st.markdown('### Benchmark')
-        st.markdown('''
-            The benchmark thrombolysis rate takes the likelihood to give thrombolysis for patients scanned within 4 hours of onset from the majority vote of the 30 hospitals with the highest predicted thrombolysis use in a standard 10k cohort set of patients. These are from Random Forests models.
-            ''')
+            + The treated mRS is 1.
+              + At time 2 hours the horizontal line is in the green bin.
+            + The no-treatment mRS is 2.
+              + In the "No treatment" distribution the horizontal line
+                is in the red bin.
+
+            The treatment has changed the expected outcome
+            from "bad" (mRS=2 or higher) to "good" (mRS=1 or lower),
+            so this patient counts towards "additional good outcomes".
+            '''
+        )
+
+    with tabs_method[3]:
+        st.markdown(
+            '''
+            Each stroke team has a different set of patient statistics.
+            These include proportions, for example how many patients
+            have known onset times, and distributions, for example
+            the expected values of arrival-to-scan times.
+
+            We calculate the results for a stroke team by
+            simulating many cohorts of patients attending the team.
+            We use one cohort per year and the number of patients in
+            a cohort is the same as the average number of admissions
+            to the stroke team in a year.
+            The proportions of patients who have LVOs and nLVOs are
+            also drawn from the average hospital data.
+
+            The random elements in the simulation include whether a patient
+            meets certain criteria, for example whether the onset time
+            is known, and the specific timings chosen for a patient,
+            which are usually drawn from a distribution of times.
+            This means that two cohorts will contain different data.
+
+            The pre-stroke mRS scores for the patients are generated by
+            randomly selecting a "fixed probability" for each patient.
+            The method from the "Outcome measure" tab shows how this is
+            converted to post-stroke mRS scores.
+
+            The simulations run for 100 years per team and the results
+            below are the average results across the 100 trials.
+            '''
+        )
+
     st.markdown('-' * 50)
 
 
@@ -312,8 +431,9 @@ def main():
     st.markdown(
         '''
         This table contains the data shown here for all teams
-        and all scenarios. The complete data is available
-        from the download button below.
+        and all scenarios. The complete data
+        including standard deviation and confidence intervals
+        is available from the download button below.
         '''
         )
     show_data_for_all(df)

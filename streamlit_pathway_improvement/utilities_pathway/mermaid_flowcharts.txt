@@ -1,0 +1,86 @@
+flowchart TD
+    A[Hook a duck 🪝🦆:\n Randomly pick a number from 0 to 100]
+    B{{Is this the ''onset'' scenario?}}
+    C{{Is the number on the duck 🦆\n smaller than 90?}}
+    D{{Is the number on the duck 🦆\n smaller than 70?}}
+    CY[Onset known]
+    CN[Onset not known]
+    DY[Onset known]
+    DN[Onset not known]
+
+    A --> B
+    B -->|Yes| C
+    B -->|No|D
+    C -->|Yes|CY
+    C -->|No|CN
+    D -->|Yes|DY
+    D -->|No|DN
+
+
+flowchart TD
+    A{{Is the onset time known?}}
+    B[Sample onset-to-arrival time\nfrom lognorm distribution]
+    C[Leave onset-to-arrival time blank]
+
+    A -->|Yes| B
+    A -->|No| C
+
+
+flowchart TD
+    A{{Is this the ''speed'' scenario?}}
+    B[Hook a duck 🪝🦆:\n Randomly pick a number from 0 to 100]
+    C{{Is the number on the duck 🦆\n smaller than 95?}}
+    CY[Arrival-to-scan time\nis 15 minutes]
+    CN[Arrival-to-scan-time\nis over 4 hours]
+    D[Sample arrival-to-scan time\nfrom lognorm distribution]
+
+    A -->|Yes| B
+    B --> C
+    A ---->|No|D
+    C -->|Yes|CY
+    C -->|No|CN
+
+
+flowchart TD
+    A["Calculate onset-to-scan time\n(onset-to-arrival plus arrival-to-scan)"]
+    B{{Is the onset-to-scan time below 4 hours?}}
+    C[Enough time to treat]
+    D[No treatment]
+
+    A --> B
+    B -->|Yes| C
+    B -->|No|D
+
+
+flowchart TD
+    A[Hook a duck 🪝🦆:\n Randomly pick a number from 0 to 100]
+    B{{Is this the ''benchmark'' scenario?}}
+    C{{Is the number on the duck 🦆\n smaller than 30?}}
+    D{{Is the number on the duck 🦆\n smaller than 15?}}
+    CY[Treated]
+    CN[No treatment]
+    DY[Treated]
+    DN[No treatment]
+
+    A --> B
+    B -->|Yes| C
+    B -->|No|D
+    C -->|Yes|CY
+    C -->|No|CN
+    D -->|Yes|DY
+    D -->|No|DN
+
+
+flowchart TD
+    Z{{Is the patient treated?}}
+    A{{Is this the ''speed'' scenario?}}
+    B[Scan-to-needle time\nis 15 minutes]
+    D[Sample scan-to-needle time\nfrom lognorm distribution]
+    E[Leave scan-to-needle\n time blank]
+
+    Z -- Yes -->A
+    Z -- No --->E
+    A -- Yes --> B
+    A -- No -->D
+
+
