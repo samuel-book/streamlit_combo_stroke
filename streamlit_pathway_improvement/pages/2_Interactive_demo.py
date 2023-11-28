@@ -6,6 +6,8 @@ try to keep this document to mostly direct calls to streamlit to write
 or display stuff. Use functions in other files to create and
 organise the stuff to be shown. In this example, most of the work is
 done in functions stored in files named container_(something).py
+
+🪝🐤🦆 
 """
 # ----- Imports -----
 import streamlit as st
@@ -114,7 +116,7 @@ def main():
                 __Benchmark__  
                 Change the chance of receiving thrombolysis.
 
-                🪝🐤🦆 For the subgroup of patients who have enough time left for thrombolysis,
+                For the subgroup of patients who have enough time left for thrombolysis,
                 update the _chance of receiving thrombolysis_ to the benchmark target for this stroke team.
                 The benchmark target is the thrombolysis rate of the stroke team's original patients according to the majority vote of the benchmark teams.
                 ''')
