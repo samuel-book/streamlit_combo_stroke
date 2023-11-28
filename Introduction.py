@@ -17,33 +17,45 @@ This app contains four demonstrations of modelling and analysis of stroke treatm
 ''')
 
 cols = st.columns(2)
+
 with cols[0]:
     st.info(
         '''
-**Thrombolysis decisions**
+**Descriptive statistics**
 
-Predict the probability of each hospital providing thrombolysis to a generated patient.
+Describes the characteristics of the patients attending each stroke team.
 
-+ __Inputs:__ Patient details
-+ __Outputs:__ Thrombolysis probability from each hospital.
-''', icon='🔮')
++ __Inputs:__ Stroke team name or selected features
++ __Outputs:__ Statistics for that stroke team and features.
+''', icon='📊')
 
 with cols[1]:
     st.error(
         '''
 **Pathway improvement**
 
-Predict the change in thrombolysis use in each hospital with different scenarios.
+Predict the change in thrombolysis use in each stroke team with different scenarios.
 
 + __Inputs:__ Scenario type:
   + faster speed to treatment
   + more onset times known
-  + match benchmark hospitals.
-+ __Outputs:__ Thrombolysis rate and additional good outcomes for each hospital
+  + match benchmark stroke teams.
++ __Outputs:__ Thrombolysis rate and additional good outcomes for each stroke team
 ''', icon='⏱️')
 
 with cols[0]:
     st.error(
+        '''
+**Thrombolysis decisions**
+
+Predict the probability of each stroke team providing thrombolysis to a generated patient.
+
++ __Inputs:__ Patient details
++ __Outputs:__ Thrombolysis probability from each stroke team.
+''', icon='🔮')
+
+with cols[1]:
+    st.info(
         '''
 **Population outcomes**
 
@@ -55,12 +67,12 @@ Estimate the change in disability levels for a patient population where some pat
 + __Outputs:__ Population mean mRS and utility.
 ''', icon='📋')
 
-with cols[1]:
+with cols[0]:
     st.info(
         '''
 **Lifetime mortality**
 
-A lifetime economic stroke outcome model for predicting mortality and lifetime secondary care use by patients who have been discharged from hospital following a stroke.
+A lifetime economic stroke outcome model for predicting mortality and lifetime secondary care use by patients who have been discharged from stroke team following a stroke.
 
 + __Inputs:__ Patient age, sex, and mRS
 + __Outputs:__ Mortality with time, QALYs, resource use and costs
