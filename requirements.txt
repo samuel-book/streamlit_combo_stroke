@@ -10,7 +10,7 @@ importlib-metadata
 importlib_resources
 pickleshare
 scikit-learn
-xgboost==1.7.5
+xgboost
 numba>=0.57
 streamlit-plotly-events
 geojson
