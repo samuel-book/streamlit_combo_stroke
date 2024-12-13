@@ -84,15 +84,10 @@ def input_stroke_teams_to_highlight(
     # Create the list of stroke teams in the selected regions.
     # Pull out any row of the dataframe that contains any of the
     # selected region names in any of its columns.
-    if len(regions_selected) == 0:
-        # Allow all teams to be picked.
-        stroke_team_list = df_stroke_team['Stroke Team']
-    else:
-        # Limit to teams in the selected regions.
-        stroke_team_list = (
-            df_stroke_team['Stroke Team'][
-                df_stroke_team.isin(regions_selected).any(axis=1)]
-        )
+    stroke_team_list = (
+        df_stroke_team['Stroke Team'][
+            df_stroke_team.isin(regions_selected).any(axis=1)]
+    )
     # Add on the "all of this region" teams:
     for region in regions_selected:
         stroke_team_list = np.append(f'All {region}', stroke_team_list)

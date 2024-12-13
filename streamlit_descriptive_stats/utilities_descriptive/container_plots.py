@@ -278,7 +278,7 @@ def callback_geography(
 
             # Re-run the script to get immediate feedback in the
             # multiselect input widget and the graph colours:
-            st.experimental_rerun()
+            st.rerun()
 
         except IndexError:
             # Nothing has been clicked yet, so don't change anything.
