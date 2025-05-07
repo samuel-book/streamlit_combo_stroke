@@ -22,7 +22,8 @@ tables will throw a wobbly if you edit the spacing in these functions
 much. Leave the markdown alone!
 
 Terms used in this script:
-"vd"      - is short for variables_dict from main_calculations.py.
+"vd"      - is short for variables_dict from main_calculations.py
+            in the stroke-lifetime package.
 "generic" - means an equation with only symbols and constants,
             i.e. no calculated variables.
 "display" - means we're just showing the current value of some

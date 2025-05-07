@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from utilities_lifetime.fixed_params import colours_excel
 # from utilities_lifetime.inputs import write_text_from_file
 # Import this function for use with user input probability:
-from utilities_lifetime.models import find_survival_time_for_pDeath
+from stroke_lifetime.models import find_survival_time_for_pDeath
 # For writing formulae in the "Details" sections:
 import utilities_lifetime.latex_equations as eqn
 

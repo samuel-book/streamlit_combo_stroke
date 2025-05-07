@@ -6,9 +6,9 @@ for age, sex, and mRS, to calculating all the quantities we need
 for tables and charts of mortality, QALYs, resource use, and
 cost effectiveness.
 
-Most of the proper calculation functions are in main_calculations.py,
-and most of the calls to write to streamlit are in the scripts
-named container_(something).py.
+Most of the proper calculation functions are in the
+stroke-lifetime package, and most of the calls to write to streamlit
+are in the scripts named container_(something).py.
 """
 # ----- Imports -----
 import streamlit as st
@@ -36,9 +36,9 @@ import utilities_lifetime.container_qalys
 import utilities_lifetime.container_resources
 import utilities_lifetime.container_costeffectiveness
 # The home of the main calculation functions:
-import utilities_lifetime.main_calculations as calc
+import stroke_lifetime.main_calculations as calc
 # Function to import fixed params for either mRS or dicho model:
-from utilities_lifetime.fixed_params import get_fixed_params
+from stroke_lifetime.fixed_params import get_fixed_params
 
 
 def main():

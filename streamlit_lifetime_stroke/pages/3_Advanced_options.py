@@ -38,9 +38,9 @@ except ModuleNotFoundError:
 # Container scripts (which will be called after the calculations):
 import utilities_lifetime.container_inputs
 # The home of the main calculation functions:
-import utilities_lifetime.main_calculations as calc
+import stroke_lifetime.main_calculations as calc
 # Function to import fixed params for either mRS or dicho model:
-from utilities_lifetime.fixed_params import get_fixed_params
+from stroke_lifetime.fixed_params import get_fixed_params
 
 
 def main():
