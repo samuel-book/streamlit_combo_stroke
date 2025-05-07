@@ -12,8 +12,8 @@ pickleshare
 scikit-learn
 xgboost
 numba>=0.57
-streamlit-plotly-events2
+streamlit-plotly-events
 geojson
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
-streamlit
+streamlit==1.42.0  # temporary - for plotly events to work.
