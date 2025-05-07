@@ -1,5 +1,5 @@
 matplotlib
-numpy==1.24.4
+numpy<2.2.0
 pandas
 scipy
 markdown
@@ -12,7 +12,7 @@ pickleshare
 scikit-learn
 xgboost
 numba>=0.57
-streamlit-plotly-events
+streamlit-plotly-events2
 geojson
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
