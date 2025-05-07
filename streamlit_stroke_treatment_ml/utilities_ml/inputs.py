@@ -262,12 +262,12 @@ def load_pretrained_model(model_file='model.p'):
 
 
 # @st.cache_resource()  #hash_funcs={'builtins.dict': lambda _: None})
-# def load_explainer():
-#     # Load SHAP explainers
-#     filename = (dir + 'data_ml/shap_explainer.p')
-#     with open(filename, 'rb') as filehandler:
-#         explainer = pickle.load(filehandler)
-#     return explainer
+def load_explainer():
+    # Load SHAP explainers
+    filename = (dir + 'data_ml/shap_explainer.p')
+    with open(filename, 'rb') as filehandler:
+        explainer = pickle.load(filehandler)
+    return explainer
 
 
 # @st.cache_resource()  #hash_funcs={'builtins.dict': lambda _: None})
@@ -428,7 +428,8 @@ def setup_for_app(
         inds_benchmark,
         highlighted_teams_list,
         hb_teams_list,
-        hb_teams_input
+        hb_teams_input,
+        user_inputs_dict
     )
 
 
@@ -449,15 +450,16 @@ def set_up_sidebar(path_to_details):
     # Add an option for removing plotly_events()
     # which doesn't play well on skinny screens / touch devices.
 
-    st.markdown('-'*50)
-    st.markdown('## Advanced options')
-    if st.checkbox('Disable interactive plots'):
-        use_plotly_events = False
-    else:
-        use_plotly_events = True
-    st.caption(''.join([
-        'The clickable plots sometimes appear strange ',
-        'on small screens and touch devices, ',
-        'so select this option to convert them to normal plots.'
-    ]))
-    return use_plotly_events, container_input_patient_details
+    # st.markdown('-'*50)
+    # st.markdown('## Advanced options')
+    # if st.checkbox('Disable interactive plots'):
+    #     use_plotly_events = False
+    # else:
+    #     use_plotly_events = True
+    # st.caption(''.join([
+    #     'The clickable plots sometimes appear strange ',
+    #     'on small screens and touch devices, ',
+    #     'so select this option to convert them to normal plots.'
+    # ]))
+    return container_input_patient_details
+    # return use_plotly_events, container_input_patient_details
