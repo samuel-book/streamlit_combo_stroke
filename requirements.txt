@@ -16,4 +16,4 @@ streamlit-plotly-events
 geojson
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
-streamlit==1.30.0  # temporary - for plotly events to work
+streamlit==1.29.0  # temporary - for plotly events to work
