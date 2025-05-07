@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import linregress
 # For clickable plotly events:
-from streamlit_plotly_events import plotly_events
+from streamlit_plotly_events2 import plotly_events
 
 # Add an extra bit to the path if we need to.
 # Try importing something as though we're running this from the same
