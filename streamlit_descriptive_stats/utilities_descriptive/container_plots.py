@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import linregress
 # For clickable plotly events:
-from streamlit_plotly_events import plotly_events
+# from streamlit_plotly_events import plotly_events
 
 # Add an extra bit to the path if we need to.
 # Try importing something as though we're running this from the same
@@ -183,23 +183,23 @@ def plot_geography_pins(
     # Add transparent background:
     fig.update_layout(geo=dict(bgcolor='rgba(0,0,0,0)'))
 
-    # # Remove some buttons from the mode bar (top corner on hover).
-    # plotly_config = {
-    #     'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
-    # }
-    # st.plotly_chart(fig, config=plotly_config)
+    # Remove some buttons from the mode bar (top corner on hover).
+    plotly_config = {
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+    }
+    st.plotly_chart(fig, config=plotly_config)
     # Write the plot to streamlit, and store the details of the last
     # marker that was clicked:
-    selected_marker = plotly_events(
-        fig, click_event=True, #key='waterfall_combo',
-        override_height=fig_height, override_width='100%')
-    callback_geography(
-        selected_marker,
-        stroke_teams_selected,
-        stroke_teams_highlighted,
-        df_stroke_team['Stroke Team'].squeeze()
-        )
-    st.caption('Locations of the stroke teams.')
+    # selected_marker = plotly_events(
+    #     fig, click_event=True, #key='waterfall_combo',
+    #     override_height=fig_height, override_width='100%')
+    # callback_geography(
+    #     selected_marker,
+    #     stroke_teams_selected,
+    #     stroke_teams_highlighted,
+    #     df_stroke_team['Stroke Team'].squeeze()
+    #     )
+    # st.caption('Locations of the stroke teams.')
 
 
 def callback_geography(
