@@ -1,0 +1,14 @@
+# Folders to ignore
+/admin
+_build/
+temp/
+
+# Ignore PyCharm files
+.idea
+
+# Ignore all temp folders
+**/.ipynb_checkpoints/
+**/__pycache__
+
+
+
