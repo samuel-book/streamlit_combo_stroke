@@ -275,6 +275,7 @@ def main():
         st.subheader('Prototype patients')
         # st.caption('.')
 
+
     # ###########################
     # ########## SETUP ##########
     # ###########################
@@ -319,13 +320,15 @@ def main():
         predict_treatment_proto(df_proto, X_proto, model, allow_maybe,
                                 prob_maybe_min, prob_maybe_max)
 
+
     # ###########################
     # ######### RESULTS #########
     # ###########################
 
     with container_metrics:
         # Print metrics for how many teams would thrombolyse:
-        utilities_ml.container_metrics.main(sorted_results, n_benchmark_teams, allow_maybe)
+        utilities_ml.container_metrics.main(
+            sorted_results, n_benchmark_teams, allow_maybe)
 
     with container_highlighted_summary:
         highlighted_teams_colours = \
@@ -423,11 +426,12 @@ def main():
         mask_highlighted = proto_results['Stroke team'].isin(teams_highlighted)
         df_proto_results = pd.concat((df_bench,
                                       proto_results.loc[mask_highlighted]))
-
         utilities_ml.container_proto.main(
             df_proto_results,
             proto_names,
-            ['Benchmark average'] + list(teams_highlighted),
+            # NOTE - following line changed for bug fix for highlighted
+            # teams colour selection - comment just for this commit:
+            ['Benchmark average'] + hb_teams_input,  # list(teams_highlighted),
             default_highlighted_team,
             display_name_of_default_highlighted_team,
             # use_plotly_events,
@@ -435,7 +439,6 @@ def main():
             prob_maybe_min,
             prob_maybe_max
             )
-
 
 
     # ############################
