@@ -271,16 +271,83 @@ def main():
         st.subheader('How likely is thrombolysis for each team?')
         st.caption('To see the team names, hover or click on a bar.')
 
+    st.markdown('#')  # Breathing room
+    st.markdown('#')  # Breathing room
+    st.header(':dolls: Results for patient prototypes', divider='green')
+    st.markdown(
+        '''
+        Patient prototypes are variations on the ideal candidate
+        for thrombolysis. The ideal patient:
+        '''
+    )
+    cols_ideal = st.columns(3)
+    with cols_ideal[0]:
+        st.markdown('''
+        + arrives at the hospital quickly
+        + has a moderately severe stroke
+        '''
+        )
+    with cols_ideal[1]:
+        st.markdown('''
+        + has no prior disability
+        + has a precisely-known onset time
+        '''
+        )
+    with cols_ideal[2]:
+        st.markdown('''
+        + is aged under 80
+        '''
+        )
     container_proto = st.container()
     with container_proto:
-        st.subheader('Prototype patients')
-        # st.caption('.')
+        st.subheader('How likely is thrombolysis for patient prototypes?')
+        st.markdown(
+            '''
+            We find the probability of each team giving thrombolysis
+            to each of the patient prototypes.
+            '''
+            )
 
     container_outcomes = st.container()
     with container_outcomes:
-        st.subheader('Outcomes')
-        # st.write('XGBoost model(s).')
-        # st.caption('.')
+        st.subheader('What would the patient outcomes be?')
+        st.markdown(
+            '''
+            Most patients in the real data have data on their
+            discharge disability. This is a modified
+            Rankin scale (mRS) score between 0 (no disability) and 6
+            (dead).
+            '''
+        )
+        cols_outcomes = st.columns([0.35, 0.65])
+        with cols_outcomes[1]:
+            st.markdown(
+                '''
+                We train a second model to predict discharge disability.
+                This model uses a subset of the patient data from the
+                thrombolysis prediction model. The subset contains only
+                patients who did not receive thrombectomy
+                and whose discharge disability levels are known.
+
+                We assume that the time to thrombolysis is the same as
+                the time from stroke onset to scan.
+                '''
+            )
+            # # The results show the expected distribution of discharge
+            # # disability levels for 100 similar patients who receive
+            # # no treatment (left graph) or thrombolysis only (right graph).
+            # '''
+            # )
+        with cols_outcomes[0]:
+            st.markdown(
+                '''
+                | Disability | mRS scores |
+                | --- | --- |
+                | Independent | 0, 1, 2 |
+                | Dependent | 3, 4, 5 |
+                | Dead | 6 |
+                '''
+            )
 
 
     # ###########################
@@ -304,6 +371,7 @@ def main():
         df_proto,
         X_proto,
         proto_names,
+        proto_display_names,
         X_outcomes,
     ) = setup_for_app(
         container_input_highlighted_teams,
@@ -429,7 +497,8 @@ def main():
                 thromb_here = thromb_here[0]
                 thromb_str_here = thromb_str_here[0]
             rows_bench.append([
-                proto_patient, 'Benchmark average', 'Benchmark average',
+                proto_patient, df_here['proto_display'].values[0],
+                'Benchmark average', 'Benchmark average',
                 prob_here, prob_perc_here, thromb_here, thromb_str_here,
             ])
         df_bench = pd.DataFrame(rows_bench, columns=proto_results.columns)
@@ -440,7 +509,7 @@ def main():
                                       proto_results.loc[mask_highlighted]))
         utilities_ml.container_proto.main(
             df_proto_results,
-            proto_names,
+            proto_display_names,
             ['Benchmark average'] + hb_teams_input,
             default_highlighted_team,
             display_name_of_default_highlighted_team,
@@ -461,7 +530,8 @@ def main():
             )]
             vals = [df_here[c].mean() for c in cols]
             rows_bench.append([
-                proto_patient, 'Benchmark average', 'Benchmark average',
+                proto_patient, df_here['proto_display'].values[0],
+                'Benchmark average', 'Benchmark average',
                 *vals
             ])
         df_bench = pd.DataFrame(rows_bench, columns=outcome_results.columns)
@@ -470,17 +540,32 @@ def main():
         df_outcome_results = pd.concat(
             (df_bench, outcome_results.loc[mask_highlighted]))
         # Plot bars:
-        proto_name = st.selectbox(
-            'Prototype patient for outcome bar chart', proto_names)
+        with cols_outcomes[1]:
+            proto_display_name = st.selectbox(
+                'Prototype patient for outcome bar chart',
+                proto_display_names
+                )
+        proto_name = df_outcome_results.loc[
+            df_outcome_results['proto_display'] == proto_display_name,
+            'Patient prototype'
+            ].values[0]
 
-        utilities_ml.container_outcomes.main(
-            df_outcome_results,
-            ['Benchmark average'] + hb_teams_input,
-            proto_name,
-            default_highlighted_team,
-            display_name_of_default_highlighted_team,
-            # use_plotly_events,
-            )
+        st.write('Discharge disability probability distribution')
+        cols_plots = st.columns(2)
+        teams_to_plot = ['Benchmark average'] + hb_teams_input
+        # Remove benchmark entries:
+        teams_to_plot = [t for t in teams_to_plot if
+                         (('ench' not in t) | ('average' in t))]
+        for t, team in enumerate(teams_to_plot):
+            with cols_plots[t % 2]:
+                utilities_ml.container_outcomes.main2(
+                    df_outcome_results,
+                    team,
+                    proto_name,
+                    default_highlighted_team,
+                    display_name_of_default_highlighted_team,
+                    # use_plotly_events,
+                    )
 
 
     # ############################
@@ -492,8 +577,8 @@ def main():
     st.header('❓ Accuracy', divider='red')
     st.markdown(
         '''
-        We can measure the accuracy of the model using the real-life
-        🔮 __Testing data__.  
+        We can measure the accuracy of the thrombolysis prediction model
+        using the real-life 🔮 __Testing data__.  
         We check whether the real-life treatment decision for each
         patient matches the model decision.
         '''
