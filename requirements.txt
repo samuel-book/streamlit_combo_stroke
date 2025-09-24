@@ -1,17 +1,17 @@
-matplotlib
-numpy<2.2.0
+matplotlib==3.9.4
+numpy<2.0.0
 pandas
 scipy
 markdown
 pip
 plotly
-shap
+shap==0.43.0
 importlib-metadata
 importlib_resources
 pickleshare
 scikit-learn
-xgboost
-numba>=0.57
+xgboost==2.0.2
+#numba>=0.57
 geojson
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
