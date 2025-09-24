@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:samuel-book/streamlit_stroke_treatment_ml.git
 	branch = main
-	commit = f58b5a3a23ed73a69a133de421b575533df3369e
-	parent = 5e3b6d93d259d456bca7292174e6707cc88d94ed
+	commit = 9ab1386daaf5177ee7aa658c5bcaf9bb37180fb1
+	parent = 5b5b5579e9b4dc8b92bb991e0cb10ed74296bd14
 	method = merge
 	cmdver = 0.4.5
