@@ -17,4 +17,3 @@ geojson
 # to ensure the app has the latest security updates. 
 streamlit
 stroke-lifetime
-# Useless comment to delete
