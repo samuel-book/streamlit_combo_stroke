@@ -17,23 +17,10 @@ cols = st.columns(2)
 with cols[0]:
     st.info(
         '''
-**Thrombolysis decisions**
+**Descriptive statistics**
 
-[Summary of the machine learning model and SHAP waterfall plots](https://samuel-book.github.io/samuel-2/samuel_shap_paper_1/introduction/intro.html).
-
-[![][github-img]][predict-github]
-
-[![][streamlit-img]][predict-streamlit] 
-
-
-[streamlit-img]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
-[github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
-
-[predict-github]: https://github.com/samuel-book/streamlit_stroke_treatment_ml
-[predict-streamlit]: https://samuel2-stroke-predict.streamlit.app/
-
-
-''', icon='🔮')
+(info will be added here in the future)
+''', icon='📊')
 
 with cols[1]:
     st.error(
@@ -56,6 +43,27 @@ with cols[1]:
 with cols[0]:
     st.error(
         '''
+**Thrombolysis decisions**
+
+[Summary of the machine learning model and SHAP waterfall plots](https://samuel-book.github.io/samuel-2/samuel_shap_paper_1/introduction/intro.html).
+
+[![][github-img]][predict-github]
+
+[![][streamlit-img]][predict-streamlit] 
+
+
+[streamlit-img]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
+[github-img]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+
+[predict-github]: https://github.com/samuel-book/streamlit_stroke_treatment_ml
+[predict-streamlit]: https://samuel2-stroke-predict.streamlit.app/
+
+
+''', icon='🔮')
+
+with cols[1]:
+    st.info(
+        '''
 **Population outcomes**
 
 [Summary of the data sources and methodology](https://samuel-book.github.io/stroke_outcome/intro.html).
@@ -72,14 +80,12 @@ with cols[0]:
 [outcome-streamlit]: https://samuel2-stroke-outcome.streamlit.app/
 ''', icon='📋')
 
-with cols[1]:
+with cols[0]:
     st.info(
         '''
 **Lifetime mortality**
 
-Academic paper in prep.: _"A lifetime economic stroke outcome model: A model for predicting mortality and lifetime secondary care use by patients who have been discharged from hospital following a stroke"_, Peter McMeekin, Stephen McCarthy, Andrew McCarthy, Jennifer Porteous, Michael Allen, Anna Laws, Phil White, Martin James, Gary Ford, Christopher Price.
-
-A link will be added here when available.
+[Academic paper](https://journals.sagepub.com/doi/10.1177/17474930241284447): _"A lifetime economic stroke outcome model: A model for predicting mortality and lifetime secondary care use by patients who have been discharged from hospital following a stroke"_, Peter McMeekin, Stephen McCarthy, Andrew McCarthy, Jennifer Porteous, Michael Allen, Anna Laws, Phil White, Martin James, Gary Ford, Christopher Price.
 
 [![][github-img]][economics-github]
 
@@ -135,8 +141,10 @@ with cols_use_code[0]:
 with cols_use_code[1]:
     st.markdown('''
     __:whale: Docker users__
-    
+
     [![][docker-img]][combo-dockerhub]
+
+    Warning: this docker image is now a few years out of date as of Feb 2026.
 
     [docker-img]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
     [combo-dockerhub]: https://hub.docker.com/r/aselaws/streamlit_combo_stroke
