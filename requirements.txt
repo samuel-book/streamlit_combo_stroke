@@ -10,7 +10,7 @@ shap==0.43.0
 importlib-metadata
 importlib_resources
 pickleshare
-scikit-learn
+scikit-learn<1.8
 xgboost==2.0.2
 #numba>=0.57
 geojson
