@@ -2,7 +2,7 @@ matplotlib
 #==3.9.4
 numpy
 #<2.0.0
-pandas<=3.0
+pandas
 scipy
 markdown
 pip
@@ -17,5 +17,5 @@ xgboost==2.0.2
 geojson
 # Don't give a version for streamlit 
 # to ensure the app has the latest security updates. 
-streamlit
+streamlit >= 1.53
 stroke-lifetime
