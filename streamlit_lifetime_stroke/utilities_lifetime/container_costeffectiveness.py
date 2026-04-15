@@ -134,7 +134,7 @@ def write_table_cost_effectiveness(table_cost_effectiveness):
     df_table = pd.DataFrame(table)
 
     # Write to streamlit:
-    st.table(df_table.style.applymap(color_negative_red))
+    st.table(df_table.style.map(color_negative_red))
     st.caption(''.join([
         'Changes in outcome from column value to row value. ',
         'Numbers in red are increased costs to the NHS, ',

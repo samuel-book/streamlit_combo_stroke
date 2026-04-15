@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:stroke-optimist/streamlit_lifetime_stroke.git
 	branch = main
-	commit = e8a3767d188307a1163fe8b57e6397b369a54aad
-	parent = f1464732dc56f2b34b662f14f5d18bb69a0c41fe
+	commit = 1033eb3289ac1354690f56e9f4f64867a649b9fc
+	parent = 3ed75ab4c4f93308336b9d0baf57ee4a55bb251e
 	method = merge
 	cmdver = 0.4.5
