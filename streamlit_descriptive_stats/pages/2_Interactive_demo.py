@@ -310,6 +310,8 @@ def main():
     # (when imported, the dataframe contained strings in the stroke_team
     # column. Now that's gone, it's all numeric data.)
     df_to_show = df_to_show.apply(pd.to_numeric)
+    # Convert back to mixed dtypes for applying formatting:
+    df_to_show = df_to_show.astype(object)
 
     # Change format to percentage:
     rows_percentage = [

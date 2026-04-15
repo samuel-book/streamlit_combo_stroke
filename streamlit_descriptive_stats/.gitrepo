@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/samuel-book/streamlit_descriptive_stats
 	branch = main
-	commit = 47507165a49eb1cbfd24215bf570aec0a05dd56a
-	parent = 80717f5a96922337295a626731223fad22aaeb49
+	commit = 95690334fe3d7d1e49190bec30da8b5506193a68
+	parent = 73436d03226dd598e2dff1d9282d4ae5fecfadd0
 	method = merge
 	cmdver = 0.4.5
