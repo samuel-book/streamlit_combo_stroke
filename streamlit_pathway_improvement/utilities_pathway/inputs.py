@@ -199,7 +199,10 @@ def import_stroke_data(stroke_teams_list, scenarios, highlighted_teams_input):
     return df
 
 
-def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios, col_to_sort='Percent_Thrombolysis_(mean)'):
+def add_sorted_rank_column_to_df(
+        df, scenario_for_rank, n_teams, n_scenarios,
+        col_to_sort='Percent_Thrombolysis_(mean)'
+        ):
     if col_to_sort == 'Percent_Thrombolysis_(mean)':
         col_short = '!perc_thromb'
     else:
@@ -215,6 +218,7 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios, co
     # across all of these different scenarios.
     index_original_col = np.tile(np.arange(n_teams), n_scenarios)
     df['Index'] = index_original_col
+
     # Sort the values by the mean percent of thrombolysis column
     # in the "base" scenario.
     # Extract the values for just this scenario:
@@ -222,16 +226,12 @@ def add_sorted_rank_column_to_df(df, scenario_for_rank, n_teams, n_scenarios, co
     # Sort with largest value at the top:
     df_sorted_rank = df_base.sort_values(col_to_sort, ascending=False)
     # Add rank, largest value = 1, smallest = 132 (or number of teams).
-    df_sorted_rank['Rank'] = np.arange(1, n_teams + 1)
-    # Now re-sort back to the starting order...
-    df_sorted_rank = df_sorted_rank.sort_values('Index')
-    # ... and these are the ranks for all of the teams:
-    df_sorted_rank_index = df_sorted_rank['Rank'].values
-    # Copy this multiple times, one set for each scenario:
-    sorted_rank_col = np.tile(df_sorted_rank_index, n_scenarios)
-    # Add this column to the main data frame:
-
-    df['Sorted_rank!' + scenario_for_name] = sorted_rank_col
+    # df_sorted_rank['Rank'] = np.arange(1, n_teams + 1)
+    c = 'Sorted_rank!' + scenario_for_name
+    df_sorted_rank[c] = np.arange(1, n_teams + 1)
+    # Merge this column in by "stroke team":
+    df = pd.merge(df, df_sorted_rank[['stroke_team', c]],
+                  on='stroke_team', how='left')
     return df
 
 
