@@ -84,10 +84,15 @@ def input_stroke_teams_to_highlight(
     # Create the list of stroke teams in the selected regions.
     # Pull out any row of the dataframe that contains any of the
     # selected region names in any of its columns.
+    # Drop the "None" team names.
     stroke_team_list = (
-        df_stroke_team['Stroke Team'][
-            df_stroke_team.isin(regions_selected).any(axis=1)]
+        # df_stroke_team['Stroke Team'][
+        df_stroke_team['SSNAP name'][
+            df_stroke_team.isin(regions_selected).any(axis=1) &
+            (df_stroke_team['SSNAP name'] != 'None (for 72h care)')
+            ]
     )
+
     # Add on the "all of this region" teams:
     for region in regions_selected:
         stroke_team_list = np.append(f'All {region}', stroke_team_list)

@@ -29,8 +29,8 @@ except ModuleNotFoundError:
     from utilities_descriptive.fixed_params import page_setup
 try:
     test_file = pd.read_csv(
-        './data_descriptive/stroke_teams.csv',
-        index_col='stroke_team'
+        './data_descriptive/summary_stats.csv',
+        # index_col='stroke_team'
         )
     dir = './'
 except FileNotFoundError:
@@ -163,7 +163,7 @@ def main():
     df_stroke_team = pd.read_csv(
         f'{dir}/data_descriptive/hospitals_and_lsoas_descriptive_stats.csv',
         index_col=False
-        ).sort_values('Stroke Team')
+        ).sort_values('SSNAP name')#'Stroke Team')
 
     # List of years in the data:
     year_options = sorted(set(summary_stats_df.loc['year']))
@@ -191,7 +191,8 @@ def main():
     for team in existing_teams:
         if team[:4] != 'All ':
             region = df_stroke_team['RGN11NM'][
-                df_stroke_team['Stroke Team'] == team].squeeze()
+                df_stroke_team['SSNAP name'] == team].squeeze()
+                # df_stroke_team['Stroke Team'] == team].squeeze()
             if region not in existing_regions:
                 existing_regions.append(region)
 
@@ -207,7 +208,8 @@ def main():
         for team in existing_teams:
             if team[:4] != 'All ':
                 region = df_stroke_team['RGN11NM'][
-                    df_stroke_team['Stroke Team'] == team].squeeze()
+                    df_stroke_team['SSNAP name'] == team].squeeze()
+                    # df_stroke_team['Stroke Team'] == team].squeeze()
                 if region in regions_selected:
                     existing_teams_selected_regions.append(team)
             else:
@@ -250,13 +252,17 @@ def main():
 
     # Now use these colours in drawing the map:
     with container_map:
-        # Plot the team locations
-        utilities_descriptive.container_plots.\
-            plot_geography_pins(
-                df_stroke_team,
-                short_stroke_teams_selected_without_year,
-                team_colours_dict
-                )
+        skip_map = True
+        if skip_map:
+            pass
+        else:
+            # Plot the team locations
+            utilities_descriptive.container_plots.\
+                plot_geography_pins(
+                    df_stroke_team,
+                    short_stroke_teams_selected_without_year,
+                    team_colours_dict
+                    )
 
     # ###########################
     # ######### RESULTS #########

@@ -26,8 +26,8 @@ except ModuleNotFoundError:
     from utilities_descriptive.fixed_params import page_setup
 try:
     test_file = pd.read_csv(
-        './data_descriptive/stroke_teams.csv',
-        index_col='stroke_team'
+        './data_descriptive/summary_stats.csv',
+        # index_col='stroke_team'
         )
     dir = './'
 except FileNotFoundError:
@@ -63,7 +63,7 @@ def plot_geography_pins(
     """
     # Import geojson data:
     geojson_file = 'regions_EW.geojson'
-    with open(dir + './data_descriptive/region_geojson/' + geojson_file) as f:
+    with open(dir + 'data_descriptive/region_geojson/' + geojson_file) as f:
         geojson_ew = geojson.load(f)
 
     # Find extent of this geojson data.
